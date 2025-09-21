@@ -7,7 +7,7 @@ spring:
     enabled: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:50553/petmatch
+    url: jdbc:postgresql://localhost:6543/petmatch
     username: myuser
     password: secret
   jpa:
