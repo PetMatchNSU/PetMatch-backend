@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Таблица t_regions -->
+    <changeSet id="1" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_regions"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_regions" remarks="Таблица регионов и городов">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="region" type="VARCHAR(255)" remarks="Регион">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="VARCHAR(255)" remarks="Населённый пункт">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_regions_city" tableName="t_regions"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_regions_city" tableName="t_regions">
+            <column name="city"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="3" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="id_regions_region_city" tableName="t_regions"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="id_regions_region_city" tableName="t_regions" unique="true">
+            <column name="region"/>
+            <column name="city"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Таблица t_statuses -->
+    <changeSet id="4" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_statuses"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_statuses" remarks="Таблица со статусами для пользователей/карточек питомцев">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(32)" remarks="Наименование статуса">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица t_contacts_types -->
+    <changeSet id="5" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_contacts_types"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_contacts_types" remarks="Типы контактов">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(32)" remarks="Название типа контакта">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица t_users -->
+    <changeSet id="6" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_users"/>
+            </not>
+            <tableExists tableName="t_regions"/>
+            <tableExists tableName="t_statuses"/>
+        </preConditions>
+        <createTable tableName="t_users" remarks="Таблица пользователей">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="email" type="VARCHAR(320)" remarks="Электронная почта для входа">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)" remarks="Пароль">
+                <constraints nullable="false"/>
+            </column>
+            <column name="full_name" type="VARCHAR(100)" remarks="ФИО">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_status" type="BIGINT" remarks="Текущий статус аккаунта">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gender" type="VARCHAR(1)" remarks="Пол (M/F)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_region" type="BIGINT" remarks="Регион проживания">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="second_name" type="VARCHAR(30)"/>
+            <column name="last_name" type="VARCHAR(30)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Check constraint для gender -->
+    <changeSet id="7" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.table_constraints
+                    WHERE table_name = 't_users' AND constraint_name = 'ck_t_users_gender'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <sql>ALTER TABLE t_users ADD CONSTRAINT ck_t_users_gender CHECK (gender IN ('W', 'F'))</sql>
+    </changeSet>
+
+    <changeSet id="8" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_users_email" tableName="t_users"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_users_email" tableName="t_users">
+            <column name="email"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="9" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_users_full_name" tableName="t_users"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_users_full_name" tableName="t_users">
+            <column name="full_name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="10" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_users" foreignKeyName="fk_t_users_id_region"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_users"
+                                 baseColumnNames="id_region"
+                                 constraintName="fk_t_users_id_region"
+                                 referencedTableName="t_regions"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="11" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_users" foreignKeyName="fk_t_users_id_status"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_users"
+                                 baseColumnNames="id_status"
+                                 constraintName="fk_t_users_id_status"
+                                 referencedTableName="t_statuses"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Таблица t_contacts -->
+    <changeSet id="12" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_contacts"/>
+            </not>
+            <tableExists tableName="t_users"/>
+            <tableExists tableName="t_contacts_types"/>
+        </preConditions>
+        <createTable tableName="t_contacts" remarks="Таблица контактов пользователя">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="id_type" type="BIGINT" remarks="Тип контакта">
+                <constraints nullable="false"/>
+            </column>
+            <column name="link" type="VARCHAR(320)" remarks="Контакт">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_user" type="BIGINT" remarks="Пользователь">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_visible" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="13" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_contacts_id_type" tableName="t_contacts"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_contacts_id_type" tableName="t_contacts">
+            <column name="id_type"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_t_contacts_id_user" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_contacts" foreignKeyName="fk_t_contacts_id_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_contacts"
+                                 baseColumnNames="id_user"
+                                 constraintName="fk_t_contacts_id_user"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="14" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_contacts" foreignKeyName="fk_t_contacts_id_type"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_contacts"
+                                 baseColumnNames="id_type"
+                                 constraintName="fk_t_contacts_id_type"
+                                 referencedTableName="t_contacts_types"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
