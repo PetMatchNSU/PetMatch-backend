@@ -107,7 +107,7 @@
             <column name="id_status" type="BIGINT" remarks="Текущий статус аккаунта">
                 <constraints nullable="false"/>
             </column>
-            <column name="gender" type="VARCHAR(1)" remarks="Пол (M/W)">
+            <column name="gender" type="VARCHAR(1)" remarks="Пол (M/F)">
                 <constraints nullable="false"/>
             </column>
             <column name="id_region" type="BIGINT" remarks="Регион проживания">
