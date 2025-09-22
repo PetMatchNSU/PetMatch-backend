@@ -131,7 +131,7 @@
                 </sqlCheck>
             </not>
         </preConditions>
-        <sql>ALTER TABLE t_users ADD CONSTRAINT ck_t_users_gender CHECK (gender IN ('W', 'M'))</sql>
+        <sql>ALTER TABLE t_users ADD CONSTRAINT ck_t_users_gender CHECK (gender IN ('W', 'F'))</sql>
     </changeSet>
 
     <changeSet id="8" author="kurdyukovda">
