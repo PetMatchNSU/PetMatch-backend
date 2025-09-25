@@ -247,4 +247,261 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <!-- Таблица t_animals -->
+    <changeSet id="15" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_animals"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_animals" remarks="Виды животных">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(64)" remarks="Название вида">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="16" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_index_0" tableName="t_animals"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_index_0" tableName="t_animals">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Таблица t_placement_goals -->
+    <changeSet id="17" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_placement_goals"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_placement_goals" remarks="Цели размещения на площадке">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="goal" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица t_animals_cards_status -->
+    <changeSet id="18" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_animals_cards_status"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_animals_cards_status" remarks="Статус карточки животного">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(32)" remarks="Наименование статуса">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица t_animals_cards -->
+    <changeSet id="19" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_animals_cards"/>
+            </not>
+            <tableExists tableName="t_users"/>
+            <tableExists tableName="t_animals"/>
+            <tableExists tableName="t_placement_goals"/>
+            <tableExists tableName="t_animals_cards_status"/>
+        </preConditions>
+        <createTable tableName="t_animals_cards" remarks="Карточка животного">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="id_user" type="BIGINT" remarks="Пользователь">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(64)" remarks="Кличка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_animal" type="BIGINT" remarks="Вид животного">
+                <constraints nullable="false"/>
+            </column>
+            <column name="breed" type="VARCHAR(64)" remarks="Порода"/>
+            <column name="gender" type="VARCHAR(1)" remarks="Пол">
+                <constraints nullable="false"/>
+            </column>
+            <column name="birthdate" type="DATE" remarks="Дата рождения">
+                <constraints nullable="false"/>
+            </column>
+            <column name="weight" type="DECIMAL(6,1)" remarks="Вес в кг"/>
+            <column name="color" type="VARCHAR(200)" remarks="Окрас">
+                <constraints nullable="false"/>
+            </column>
+            <column name="genetic_diseases" type="VARCHAR(2000)" remarks="Наследственные заболевания">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(2000)" remarks="Описание"/>
+            <column name="id_goal" type="BIGINT" remarks="Цель размещения">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cost" type="DECIMAL(10,2)"/>
+            <column name="created" type="TIMESTAMPTZ" remarks="Дата создания объявления">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMPTZ" remarks="Дата редактирования объявления">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_status" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Check constraint для gender -->
+    <changeSet id="20" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.table_constraints
+                    WHERE table_name = 't_animals_cards' AND constraint_name = 'ck_t_animals_cards_gender'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <sql>ALTER TABLE t_animals_cards ADD CONSTRAINT ck_t_animals_cards_gender CHECK (gender IN ('W', 'M'))</sql>
+    </changeSet>
+
+    <changeSet id="21" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_index_0" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_index_0" tableName="t_animals_cards">
+            <column name="id_user"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="22" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_index_1" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_index_1" tableName="t_animals_cards">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="23" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_index_2" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_index_2" tableName="t_animals_cards">
+            <column name="id_animal"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="24" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_index_3" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_index_3" tableName="t_animals_cards">
+            <column name="breed"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="25" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_index_4" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_index_4" tableName="t_animals_cards">
+            <column name="id_goal"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="26" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_index_5" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_index_5" tableName="t_animals_cards">
+            <column name="created"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="27" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_index_6" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_index_6" tableName="t_animals_cards">
+            <column name="birthdate"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="28" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_cards" foreignKeyName="fk_t_animals_cards_id_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_cards"
+                                 baseColumnNames="id_user"
+                                 constraintName="fk_t_animals_cards_id_user"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="29" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_cards" foreignKeyName="fk_t_animals_cards_id_animal"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_cards"
+                                 baseColumnNames="id_animal"
+                                 constraintName="fk_t_animals_cards_id_animal"
+                                 referencedTableName="t_animals"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="30" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_cards" foreignKeyName="fk_t_animals_cards_id_goal"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_cards"
+                                 baseColumnNames="id_goal"
+                                 constraintName="fk_t_animals_cards_id_goal"
+                                 referencedTableName="t_placement_goals"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="31" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_cards" foreignKeyName="fk_t_animals_cards_id_status"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_cards"
+                                 baseColumnNames="id_status"
+                                 constraintName="fk_t_animals_cards_id_status"
+                                 referencedTableName="t_animals_cards_status"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>
