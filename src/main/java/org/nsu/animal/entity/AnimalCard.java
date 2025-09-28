@@ -38,7 +38,7 @@ public class AnimalCard {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", nullable = false)
     @ToString.Exclude
-    private User user;
+    private User cardAuthor;
 
     @Column(name = "name", nullable = false, length = 64)
     private String name;
