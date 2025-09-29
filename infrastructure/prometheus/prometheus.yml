@@ -1,0 +1,61 @@
+global:
+  scrape_interval: 15s      # Как часто собирать метрики со всех targets
+  scrape_timeout: 10s       # Максимальное время ожидания ответа от target
+  evaluation_interval: 15s  # Как часто проверять правила alerting
+
+# От кого нужно собирать метрики
+# Имена сервисов в targets указаны в Docker-сети, будут резолвиться через Docker DNS
+scrape_configs:
+  # Сбор метрик самого Prometheus
+  - job_name: prometheus
+    static_configs:
+      - targets: [ "prometheus:9090" ]  # Эндпоинт самого Prometheus
+
+  # Spring Boot приложение PetMatch (метрики из Actuator)
+  - job_name: petmatch-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'petmatch-service:8091' ]
+
+  # Redis (метрики кеша Redis)
+  - job_name: redis
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'redis-exporter:9121' ]
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # MinIO metrics (using built-in endpoint)
+  - job_name: minio
+    metrics_path: /minio/v2/metrics/cluster
+    static_configs:
+      - targets: [ 'petmatch-minio:9000' ]
+
+  # Grafana (метрики самой Grafana)
+  - job_name: grafana
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'grafana:3000' ]
+
+  # Grafana Alloy (агент-сборщик)
+  - job_name: alloy
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'alloy:9080' ]
+
+  # Loki (система логов)
+  - job_name: loki
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'loki:3100' ]
+
+  # Tempo (система трассировки)
+  - job_name: tempo
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'tempo:3200' ]
+
+  # Экспортер метрик для PostgreSQL с данными пользователей
+  - job_name: petmatch-postgres
+    static_configs:
+      - targets: [ 'petmatch-postgres-metrics-exporter:9187' ]  # postgres_exporter для БД приложения

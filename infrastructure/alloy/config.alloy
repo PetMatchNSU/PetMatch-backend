@@ -1,0 +1,105 @@
+/*
+Отправка логов в Loki
+Логи отправляются по Loki API по указанному url
+*/
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+/*
+Сканирование каждые 5 секунд списка Docker-контейнеров
+По встроенному сокету docker.sock
+*/
+discovery.docker "containers" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
+}
+
+/*
+Обогащение лейблов для метрик, логов и трассировок
+*/
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  // Имя контейнера
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  // Статическая метка job = docker
+  rule {
+    target_label = "job"
+    replacement  = "docker"
+  }
+
+  // Имя хоста
+  rule {
+    target_label = "host"
+    replacement  = constants.hostname
+  }
+
+  // Имя сервиса в виде имени контейнера
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "service"
+  }
+
+  // Метка потока данных (stdout или stderr)
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label  = "stream"
+  }
+}
+
+/*
+Автоматический поиск всех запущенных контейнеров и пересылка логов (stdout/stderr) в систему хранения Loki
+Для чтения используется подключение к Docker демону, также делается перелейблирование перед отправкой в Loki
+*/
+loki.source.docker "containers" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.containers.targets
+  relabel_rules = discovery.relabel.containers.rules
+  forward_to    = [loki.write.local.receiver]
+}
+
+/*
+OpenTelemetry (OTLP) слушатель трассировок от SDK
+Слушает HTTP и gRPC по указанным адресам и перенаправляет трассировки в Tempo, метрики в Prometheus
+*/
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+    metrics = [otelcol.exporter.prometheus.default.input]
+  }
+}
+
+/*
+OpenTelemetry (OTLP) отправитель трассировок в Tempo
+Работает без TLS
+*/
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
+
+/*
+Приемка метрик Prometheus
+*/
+otelcol.exporter.prometheus "default" {
+  forward_to = []
+}
