@@ -5,7 +5,7 @@ import lombok.*;
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
 
-import java.util.Date;
+import java.sql.Date;
 
 @Entity
 @Table(name = "t_status_comments")
