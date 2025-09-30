@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Таблица t_animals_requests_status -->
+    <changeSet id="1" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_animals_requests_status"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_animals_requests_status" remarks="Статус запроса">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="status" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица t_animals_requests -->
+    <changeSet id="2" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_animals_requests" remarks="Запросы между пользователями">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="id_initiator" type="BIGINT" remarks="Инициатор запроса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_recipient" type="BIGINT" remarks="Получатель запроса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_initiator_animal_card" type="BIGINT" remarks="Питомец инициатора запроса"/>
+            <column name="id_recipient_animal_card" type="BIGINT" remarks="Питомец получателя запроса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_date" type="DATE" remarks="Дата создания запроса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_goals" type="BIGINT" remarks="Тип запроса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_status" type="BIGINT" remarks="Статус запроса">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_requests"
+                                            foreignKeyName="fk_t_animals_requests_id_initiator"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_requests"
+                                 baseColumnNames="id_initiator"
+                                 constraintName="fk_t_animals_requests_id_initiator"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="4" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_requests"
+                                            foreignKeyName="fk_t_animals_requests_id_recipient"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_requests"
+                                 baseColumnNames="id_recipient"
+                                 constraintName="fk_t_animals_requests_id_recipient"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="5" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_requests"
+                                            foreignKeyName="fk_t_animals_requests_id_initiator_animal_card"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_requests"
+                                 baseColumnNames="id_initiator_animal_card"
+                                 constraintName="fk_t_animals_requests_id_initiator_animal_card"
+                                 referencedTableName="t_animals_cards"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="6" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_requests"
+                                            foreignKeyName="fk_t_animals_requests_id_recipient_animal_card"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_requests"
+                                 baseColumnNames="id_recipient_animal_card"
+                                 constraintName="fk_t_animals_requests_id_recipient_animal_card"
+                                 referencedTableName="t_animals_cards"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="7" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_requests"
+                                            foreignKeyName="fk_t_animals_requests_id_goals"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_requests"
+                                 baseColumnNames="id_goals"
+                                 constraintName="fk_t_animals_requests_id_goals"
+                                 referencedTableName="t_placement_goals"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="8" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_requests"
+                                            foreignKeyName="fk_t_animals_requests_id_status"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_requests"
+                                 baseColumnNames="id_status"
+                                 constraintName="fk_t_animals_requests_id_status"
+                                 referencedTableName="t_animals_requests_status"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="9" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_t_animals_requests_id_initiator" tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_t_animals_requests_id_initiator" tableName="t_animals_requests">
+            <column name="id_initiator"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="10" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_t_animals_requests_id_recipient" tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_t_animals_requests_id_recipient" tableName="t_animals_requests">
+            <column name="id_recipient"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="11" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_t_animals_requests_id_initiator_animal_card"
+                             tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_t_animals_requests_id_initiator_animal_card" tableName="t_animals_requests">
+            <column name="id_initiator_animal_card"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="12" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_t_animals_requests_id_recipient_animal_card"
+                             tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_t_animals_requests_id_recipient_animal_card" tableName="t_animals_requests">
+            <column name="id_recipient_animal_card"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="13" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_t_animals_requests_id_goals"
+                             tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_t_animals_requests_id_goals" tableName="t_animals_requests">
+            <column name="id_goals"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="14" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_t_animals_requests_id_status"
+                             tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_t_animals_requests_id_status" tableName="t_animals_requests">
+            <column name="id_status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="15" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_t_animals_requests_request_date"
+                             tableName="t_animals_requests"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_t_animals_requests_request_date" tableName="t_animals_requests">
+            <column name="request_date"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
