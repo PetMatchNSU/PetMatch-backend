@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Таблица t_status_comments -->
+    <changeSet id="1" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_status_comments"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_status_comments" remarks="Таблица статусов комментариев">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="id_status" type="BIGINT" remarks="Идентификатор статуса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_user" type="BIGINT" remarks="Идентификатор пользователя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="VARCHAR(1024)" remarks="Комментарий"/>
+            <column name="date" type="TIMESTAMP" remarks="Дата изменения статуса">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_status_comments"
+                                            foreignKeyName="fk_t_status_comments_id_status"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_status_comments"
+                                 baseColumnNames="id_status"
+                                 constraintName="fk_t_status_comments_id_status"
+                                 referencedTableName="t_statuses"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="3" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_status_comments"
+                                            foreignKeyName="fk_t_status_comments_id_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_status_comments"
+                                 baseColumnNames="id_user"
+                                 constraintName="fk_t_status_comments_id_user"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="4" author="helttek">
+        <preConditions>
+            <not>
+                <indexExists indexName="idx_status_comments_comment" tableName="t_status_comments"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="t_status_comments" indexName="idx_status_comments_comment">
+            <column name="comment"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="5" author="helttek">
+        <preConditions>
+            <not>
+                <indexExists indexName="idx_status_comments_date" tableName="t_status_comments"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="t_status_comments" indexName="idx_status_comments_date">
+            <column name="date"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
