@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Таблица t_files_types -->
+    <changeSet id="1" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_files_types"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_files_types" remarks="Типы файлов">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(32)" remarks="Название типа файла">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_files_types_name_idx" tableName="t_files_types"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_files_types_name_idx" tableName="t_files_types">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Таблица t_files -->
+    <changeSet id="3" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_files"/>
+            </not>
+            <tableExists tableName="t_files_types"/>
+        </preConditions>
+        <createTable tableName="t_files" remarks="Файлы">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)" remarks="Имя файла">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_type" type="BIGINT" remarks="Тип файла">
+                <constraints nullable="false"/>
+            </column>
+            <column name="link" type="VARCHAR(36)" remarks="Ссылка на файл">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_files_name_idx" tableName="t_files"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_files_name_idx" tableName="t_files">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="5" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_files_id_type_idx" tableName="t_files"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_files_id_type_idx" tableName="t_files">
+            <column name="id_type"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="6" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_files_link_idx" tableName="t_files"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_files_link_idx" tableName="t_files" unique="true">
+            <column name="link"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Таблица t_animals_cards_files_types -->
+    <changeSet id="7" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_animals_cards_files_types"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_animals_cards_files_types" remarks="Типы файлов карточек животных">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(64)" remarks="Название типа файла карточки">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="8" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_files_types_name_idx" tableName="t_animals_cards_files_types"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_files_types_name_idx" tableName="t_animals_cards_files_types">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Таблица t_animals_cards_files -->
+    <changeSet id="9" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_animals_cards_files"/>
+            </not>
+            <tableExists tableName="t_animals_cards"/>
+            <tableExists tableName="t_files"/>
+            <tableExists tableName="t_animals_cards_files_types"/>
+        </preConditions>
+        <createTable tableName="t_animals_cards_files" remarks="Файлы карточек животных">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="id_animal_card" type="BIGINT" remarks="Карточка животного">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_file" type="BIGINT" remarks="Файл">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_type" type="BIGINT" remarks="Тип файла карточки">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="10" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_files_id_animal_card_idx" tableName="t_animals_cards_files"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_files_id_animal_card_idx" tableName="t_animals_cards_files">
+            <column name="id_animal_card"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="11" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_files_id_file_idx" tableName="t_animals_cards_files"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_files_id_file_idx" tableName="t_animals_cards_files">
+            <column name="id_file"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="12" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_files_id_type_idx" tableName="t_animals_cards_files"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_files_id_type_idx" tableName="t_animals_cards_files">
+            <column name="id_type"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="13" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_files" foreignKeyName="fk_t_files_id_type_t_files_types_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_files"
+                                 baseColumnNames="id_type"
+                                 constraintName="fk_t_files_id_type_t_files_types_id"
+                                 referencedTableName="t_files_types"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="14" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_cards_files" foreignKeyName="fk_t_animals_cards_files_id_animal_card_t_animals_cards_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_cards_files"
+                                 baseColumnNames="id_animal_card"
+                                 constraintName="fk_t_animals_cards_files_id_animal_card_t_animals_cards_id"
+                                 referencedTableName="t_animals_cards"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="15" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_cards_files" foreignKeyName="fk_t_animals_cards_files_id_file_t_files_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_cards_files"
+                                 baseColumnNames="id_file"
+                                 constraintName="fk_t_animals_cards_files_id_file_t_files_id"
+                                 referencedTableName="t_files"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="16" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_animals_cards_files" foreignKeyName="fk_t_animals_cards_files_id_type_t_animals_cards_files_types_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_animals_cards_files"
+                                 baseColumnNames="id_type"
+                                 constraintName="fk_t_animals_cards_files_id_type_t_animals_cards_files_types_id"
+                                 referencedTableName="t_animals_cards_files_types"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
