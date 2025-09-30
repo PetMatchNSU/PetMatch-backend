@@ -9,7 +9,7 @@ import org.nsu.users.entity.User;
 import java.sql.Date;
 
 @Entity
-@Table(name = "t_users")
+@Table(name = "t_animals_requests")
 @Getter
 @Setter
 @NoArgsConstructor
