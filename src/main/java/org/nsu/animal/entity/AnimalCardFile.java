@@ -31,16 +31,13 @@ public class AnimalCardFile {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_animal_card", nullable = false)
-    @ToString.Exclude
     private AnimalCard animalCard;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_file", nullable = false)
-    @ToString.Exclude
     private File file;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_type", nullable = false)
-    @ToString.Exclude
-    private AnimalCardFileType type;
+    private AnimalCardFileType fileType;
 }
