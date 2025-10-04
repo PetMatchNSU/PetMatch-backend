@@ -5,7 +5,7 @@ import lombok.*;
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "t_status_comments")
@@ -34,6 +34,6 @@ public class StatusComment {
     private String comment;
 
     @Column(name = "date", nullable = false)
-    private Date date;
+    private Timestamp date;
 
 }
