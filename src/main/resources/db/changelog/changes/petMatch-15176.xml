@@ -60,10 +60,10 @@
     <changeSet id="4" author="helttek">
         <preConditions>
             <not>
-                <indexExists indexName="idx_t_status_comments_comment" tableName="t_status_comments"/>
+                <indexExists indexName="t_status_comments_comment_idx" tableName="t_status_comments"/>
             </not>
         </preConditions>
-        <createIndex tableName="t_status_comments" indexName="idx_t_status_comments_comment">
+        <createIndex tableName="t_status_comments" indexName="t_status_comments_comment_idx">
             <column name="comment"/>
         </createIndex>
     </changeSet>
@@ -71,10 +71,10 @@
     <changeSet id="5" author="helttek">
         <preConditions>
             <not>
-                <indexExists indexName="idx_t_status_comments_date" tableName="t_status_comments"/>
+                <indexExists indexName="t_status_comments_date_idx" tableName="t_status_comments"/>
             </not>
         </preConditions>
-        <createIndex tableName="t_status_comments" indexName="idx_t_status_comments_date">
+        <createIndex tableName="t_status_comments" indexName="t_status_comments_date_idx">
             <column name="date"/>
         </createIndex>
     </changeSet>
@@ -82,10 +82,10 @@
     <changeSet id="6" author="helttek">
         <preConditions>
             <not>
-                <indexExists indexName="idx_t_status_comments_id_status" tableName="t_status_comments"/>
+                <indexExists indexName="t_status_comments_id_status_idx" tableName="t_status_comments"/>
             </not>
         </preConditions>
-        <createIndex tableName="t_status_comments" indexName="idx_t_status_comments_id_status">
+        <createIndex tableName="t_status_comments" indexName="t_status_comments_id_status_idx">
             <column name="id_status"/>
         </createIndex>
     </changeSet>
@@ -93,10 +93,10 @@
     <changeSet id="7" author="helttek">
         <preConditions>
             <not>
-                <indexExists indexName="idx_t_status_comments_id_user" tableName="t_status_comments"/>
+                <indexExists indexName="t_status_comments_id_user_idx" tableName="t_status_comments"/>
             </not>
         </preConditions>
-        <createIndex tableName="t_status_comments" indexName="idx_t_status_comments_id_user">
+        <createIndex tableName="t_status_comments" indexName="t_status_comments_id_user_idx">
             <column name="id_user"/>
         </createIndex>
     </changeSet>
