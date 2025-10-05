@@ -142,10 +142,10 @@
     <changeSet id="9" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_t_animals_requests_id_initiator" tableName="t_animals_requests"/>
+                <indexExists indexName="t_animals_requests_id_initiator_idx" tableName="t_animals_requests"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_t_animals_requests_id_initiator" tableName="t_animals_requests">
+        <createIndex indexName="t_animals_requests_id_initiator_idx" tableName="t_animals_requests">
             <column name="id_initiator"/>
         </createIndex>
     </changeSet>
@@ -153,10 +153,10 @@
     <changeSet id="10" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_t_animals_requests_id_recipient" tableName="t_animals_requests"/>
+                <indexExists indexName="t_animals_requests_id_recipient_idx" tableName="t_animals_requests"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_t_animals_requests_id_recipient" tableName="t_animals_requests">
+        <createIndex indexName="t_animals_requests_id_recipient_idx" tableName="t_animals_requests">
             <column name="id_recipient"/>
         </createIndex>
     </changeSet>
@@ -164,11 +164,11 @@
     <changeSet id="11" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_t_animals_requests_id_initiator_animal_card"
+                <indexExists indexName="t_animals_requests_id_initiator_animal_card_idx"
                              tableName="t_animals_requests"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_t_animals_requests_id_initiator_animal_card" tableName="t_animals_requests">
+        <createIndex indexName="t_animals_requests_id_initiator_animal_card_idx" tableName="t_animals_requests">
             <column name="id_initiator_animal_card"/>
         </createIndex>
     </changeSet>
@@ -176,11 +176,11 @@
     <changeSet id="12" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_t_animals_requests_id_recipient_animal_card"
+                <indexExists indexName="t_animals_requests_id_recipient_animal_card_idx"
                              tableName="t_animals_requests"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_t_animals_requests_id_recipient_animal_card" tableName="t_animals_requests">
+        <createIndex indexName="t_animals_requests_id_recipient_animal_card_idx" tableName="t_animals_requests">
             <column name="id_recipient_animal_card"/>
         </createIndex>
     </changeSet>
@@ -188,11 +188,11 @@
     <changeSet id="13" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_t_animals_requests_id_goals"
+                <indexExists indexName="t_animals_requests_id_goals_idx"
                              tableName="t_animals_requests"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_t_animals_requests_id_goals" tableName="t_animals_requests">
+        <createIndex indexName="t_animals_requests_id_goals_idx" tableName="t_animals_requests">
             <column name="id_goals"/>
         </createIndex>
     </changeSet>
@@ -200,11 +200,11 @@
     <changeSet id="14" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_t_animals_requests_id_status"
+                <indexExists indexName="t_animals_requests_id_status_idx"
                              tableName="t_animals_requests"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_t_animals_requests_id_status" tableName="t_animals_requests">
+        <createIndex indexName="t_animals_requests_id_status_idx" tableName="t_animals_requests">
             <column name="id_status"/>
         </createIndex>
     </changeSet>
@@ -212,11 +212,11 @@
     <changeSet id="15" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_t_animals_requests_request_date"
+                <indexExists indexName="t_animals_requests_request_date_idx"
                              tableName="t_animals_requests"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_t_animals_requests_request_date" tableName="t_animals_requests">
+        <createIndex indexName="t_animals_requests_request_date_idx" tableName="t_animals_requests">
             <column name="request_date"/>
         </createIndex>
     </changeSet>

@@ -24,22 +24,22 @@ public class AnimalRequest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_initiator", nullable = false)
     @ToString.Exclude
-    private User idInitiator;
+    private User initiator;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_recipient", nullable = false)
     @ToString.Exclude
-    private User idRecipient;
+    private User recipient;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_initiator_animal_card")
     @ToString.Exclude
-    private AnimalCard idInitiatorAnimalCard;
+    private AnimalCard initiatorAnimalCard;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_recipient_animal_card", nullable = false)
     @ToString.Exclude
-    private AnimalCard idRecipientAnimalCard;
+    private AnimalCard recipientAnimalCard;
 
     @Column(name = "request_date", nullable = false)
     private Date requestDate;
@@ -47,11 +47,11 @@ public class AnimalRequest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_goals", nullable = false)
     @ToString.Exclude
-    private PlacementGoal idGoals;
+    private PlacementGoal goals;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_status", nullable = false)
     @ToString.Exclude
-    private AnimalRequestStatus idStatus;
+    private AnimalRequestStatus status;
 
 }
