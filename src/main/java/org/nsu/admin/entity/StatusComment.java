@@ -23,12 +23,12 @@ public class StatusComment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_status", nullable = false)
     @ToString.Exclude
-    private Status idStatus;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", nullable = false)
     @ToString.Exclude
-    private User idUser;
+    private User user;
 
     @Column(name = "comment", length = 1024)
     private String comment;
