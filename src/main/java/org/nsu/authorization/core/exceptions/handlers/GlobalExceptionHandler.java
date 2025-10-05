@@ -10,15 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.Map;
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     private ResponseEntity<AbstractNegativeResponse> simplePersonResponse(HttpStatus httpStatus, String message) {
         return ResponseEntity
                 .status(httpStatus)
-                .body(new PersonErrorResponse(Map.of("error", message), System.currentTimeMillis()));
+                .body(new PersonErrorResponse(message, System.currentTimeMillis()));
     }
 
     @ExceptionHandler(PersonNotFoundException.class)

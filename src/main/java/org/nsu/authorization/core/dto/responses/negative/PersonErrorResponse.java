@@ -1,14 +1,19 @@
 package org.nsu.authorization.core.dto.responses.negative;
 
 
+import lombok.Getter;
+import lombok.ToString;
 import org.nsu.authorization.core.dto.responses.AbstractNegativeResponse;
 
-import java.util.Map;
-
+@ToString
+@Getter
 public class PersonErrorResponse extends AbstractNegativeResponse {
 
-    public PersonErrorResponse(Map<String, Object> errors, long timestamp) {
-        super(errors, timestamp);
+    private final String error;
+
+    public PersonErrorResponse(String error, long timestamp) {
+        super(timestamp);
+        this.error = error;
     }
 
 }

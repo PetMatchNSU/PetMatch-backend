@@ -15,7 +15,3 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
-
-
-jwt_secret_access: access_secret
-jwt_secret_refresh: refresh_secret
