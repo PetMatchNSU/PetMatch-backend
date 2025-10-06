@@ -1,7 +1,18 @@
 package org.nsu.animalRequest.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.PlacementGoal;
 import org.nsu.users.entity.User;
@@ -23,22 +34,18 @@ public class AnimalRequest {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_initiator", nullable = false)
-    @ToString.Exclude
     private User initiator;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_recipient", nullable = false)
-    @ToString.Exclude
     private User recipient;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_initiator_animal_card")
-    @ToString.Exclude
     private AnimalCard initiatorAnimalCard;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_recipient_animal_card", nullable = false)
-    @ToString.Exclude
     private AnimalCard recipientAnimalCard;
 
     @Column(name = "request_date", nullable = false)
@@ -46,12 +53,10 @@ public class AnimalRequest {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_goals", nullable = false)
-    @ToString.Exclude
     private PlacementGoal goals;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_status", nullable = false)
-    @ToString.Exclude
     private AnimalRequestStatus status;
 
 }
