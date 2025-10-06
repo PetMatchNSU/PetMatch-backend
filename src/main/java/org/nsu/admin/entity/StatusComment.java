@@ -1,7 +1,20 @@
 package org.nsu.admin.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
 
@@ -22,12 +35,10 @@ public class StatusComment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_status", nullable = false)
-    @ToString.Exclude
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", nullable = false)
-    @ToString.Exclude
     private User user;
 
     @Column(name = "comment", length = 1024)
