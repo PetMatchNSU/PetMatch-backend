@@ -33,7 +33,6 @@ public class File {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_type", nullable = false)
-    @ToString.Exclude
     private FileType type;
 
     @Column(name = "link", nullable = false, length = 36)
