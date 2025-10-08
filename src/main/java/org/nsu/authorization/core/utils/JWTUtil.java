@@ -141,8 +141,8 @@ public class JWTUtil {
     public DecodedJWT verifyJWT(String token, JWTTypes jwtType) {
 
         Algorithm algorithm = switch (jwtType) {
-            case JWTTypes.accessToken -> accessAlgorithm;
-            case JWTTypes.refreshToken -> refreshAlgorithm;
+            case JWTTypes.ACCESS_TOKEN -> accessAlgorithm;
+            case JWTTypes.REFRESH_TOKEN -> refreshAlgorithm;
         };
 
         JWTVerifier verifier = JWT.require(algorithm)

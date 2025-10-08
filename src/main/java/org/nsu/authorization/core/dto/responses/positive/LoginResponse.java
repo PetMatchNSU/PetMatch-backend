@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import java.util.Map;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -23,5 +21,5 @@ public class LoginResponse {
     private String refreshToken;
 
     @NonNull
-    private Map<String, Object> user;
+    private boolean isEmailVerified;
 }

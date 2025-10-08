@@ -1,6 +1,6 @@
 package org.nsu.authorization.core.utils;
 
 public enum JWTTypes {
-    accessToken,
-    refreshToken,
+    ACCESS_TOKEN,
+    REFRESH_TOKEN,
 }

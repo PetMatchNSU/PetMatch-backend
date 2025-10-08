@@ -45,7 +45,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         try {
-            long id = Long.parseLong(jwtUtil.extractClaim(JWTToken, JWTTypes.accessToken, "userID"));
+            long id = Long.parseLong(jwtUtil.extractClaim(JWTToken, JWTTypes.ACCESS_TOKEN, "userID"));
             UserDetails userDetails = personDetailsService.loadUserById(id);
 
             UsernamePasswordAuthenticationToken  authentication =

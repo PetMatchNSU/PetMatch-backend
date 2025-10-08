@@ -20,9 +20,9 @@ public class RefreshService {
         long id;
 
         try {
-            id = Long.parseLong(jwtUtil.extractClaim(refreshToken, JWTTypes.refreshToken, "id"));
+            id = Long.parseLong(jwtUtil.extractClaim(refreshToken, JWTTypes.REFRESH_TOKEN, "id"));
         } catch (JWTVerificationException e) {
-            throw new JWTIsExpiredException(JWTTypes.refreshToken);
+            throw new JWTIsExpiredException(JWTTypes.REFRESH_TOKEN);
         }
 
         UsernamePasswordAuthenticationToken authenticationToken =

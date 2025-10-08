@@ -13,8 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 public class LoginService {
@@ -44,7 +42,8 @@ public class LoginService {
         return new LoginResponse(
                 accessToken,
                 refreshToken,
-                Map.of("isEmailVerified", personDetails.getIsVerifiedEmail()));
+                personDetails.getIsVerifiedEmail()
+        );
 
     }
 }
