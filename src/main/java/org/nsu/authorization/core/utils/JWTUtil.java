@@ -124,8 +124,7 @@ public class JWTUtil {
     public String generateAccessToken(Authentication authentication) {
         Date expirationDate = Date.from(ZonedDateTime.now().plusHours(1).toInstant());
 
-        // тк в аутентификации поменять поле нельзя, то в поле Name будет лежать Id. Всё равно это нужно будет только в сервисе аутентификации
-        User user = userRepository.findById(Long.parseLong(authentication.getName())).orElseThrow(() -> new PersonNotFoundException(String.format("Person with id %s not found", authentication.getName())));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(String.format("Person with email %s not found", authentication.getName())));
 
         return generateJWT(user, expirationDate, accessAlgorithm);
     }
@@ -133,7 +132,7 @@ public class JWTUtil {
     public String generateRefreshToken(Authentication authentication) {
         Date expirationDate = Date.from(ZonedDateTime.now().plusDays(7).toInstant());
 
-        User user = userRepository.findById(Long.parseLong(authentication.getName())).orElseThrow(() -> new PersonNotFoundException(String.format("Person with id %s not found", authentication.getName())));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(String.format("Person with email %s not found", authentication.getName())));
 
         return generateJWT(user, expirationDate, refreshAlgorithm);
     }

@@ -53,7 +53,7 @@ public class User {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_status", nullable = false)
     @ToString.Exclude
     private Status status;
@@ -62,7 +62,7 @@ public class User {
     @Column(name = "gender", nullable = false, length = 1, columnDefinition = "VARCHAR(1)")
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_region", nullable = false)
     @ToString.Exclude
     private Region region;

@@ -27,8 +27,10 @@ public class LoginService {
 
         if (!personDetails.getIsVerifiedEmail()) throw new PersonHasNotVerifiedEmailException("Email is not verified");
 
+        // Аутентификация прошла успешно
+        
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(personDetails.getUsername(), personDetails.getPassword());
+                new UsernamePasswordAuthenticationToken(personDetails.getUsername(), dto.getPassword());
 
         try {
             authenticationManager.authenticate(authenticationToken);
@@ -42,8 +44,7 @@ public class LoginService {
         return new LoginResponse(
                 accessToken,
                 refreshToken,
-                personDetails.getIsVerifiedEmail()
+                new LoginResponse.User(personDetails.getIsVerifiedEmail())
         );
-
     }
 }
