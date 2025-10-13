@@ -13,8 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import org.nsu.users.entity.File;
+import org.nsu.files.entity.File;
 
 @Entity
 @Table(name = "t_animals_cards_files")
