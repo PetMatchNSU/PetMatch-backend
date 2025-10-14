@@ -1,5 +1,6 @@
 package org.nsu.users.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,12 +11,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "t_users")
@@ -36,10 +41,19 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "first_name", nullable = false, length = 30)
+    private String firstName;
+
+    @Column(name = "second_name", nullable = false, length = 30)
+    private String secondName;
+
+    @Column(name = "last_name", length = 30)
+    private String lastName;
+
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_status", nullable = false)
     @ToString.Exclude
     private Status status;
@@ -48,17 +62,16 @@ public class User {
     @Column(name = "gender", nullable = false, length = 1, columnDefinition = "VARCHAR(1)")
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_region", nullable = false)
     @ToString.Exclude
     private Region region;
 
-    @Column(name = "first_name", nullable = false, length = 30)
-    private String firstName;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_authority", nullable = false)
+    @ToString.Exclude
+    private Set<Authority> authorities = new HashSet<>();
 
-    @Column(name = "second_name", length = 30)
-    private String secondName;
+    private boolean isEmailVerified = false;
 
-    @Column(name = "last_name", length = 30)
-    private String lastName;
 }
