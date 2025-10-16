@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Удаление индекса idx_users_full_name -->
+    <changeSet id="1" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <indexExists indexName="idx_users_full_name" tableName="t_users"/>
+        </preConditions>
+        <dropIndex indexName="idx_users_full_name" tableName="t_users"/>
+    </changeSet>
+
+    <!-- Удаление поля full_name из таблицы t_users -->
+    <changeSet id="2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="t_users" columnName="full_name"/>
+        </preConditions>
+        <dropColumn tableName="t_users" columnName="full_name"/>
+    </changeSet>
+
+</databaseChangeLog>

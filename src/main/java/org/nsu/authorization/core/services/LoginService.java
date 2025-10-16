@@ -44,7 +44,7 @@ public class LoginService {
         return new LoginResponse(
                 accessToken,
                 refreshToken,
-                new LoginResponse.User(personDetails.getIsVerifiedEmail())
+                new LoginResponse.UserDto(personDetails.getIsVerifiedEmail())
         );
     }
 }
