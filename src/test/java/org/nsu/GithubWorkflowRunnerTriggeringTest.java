@@ -8,6 +8,6 @@ class GithubWorkflowRunnerTriggeringTest {
 
     @Test
     void givenGithubWorkflowSelfRunner_whenPushCodeOnPullRequest_thenShouldTriggerTests() {
-        assertEquals(5, 5);
+        assertEquals(1, 1);
     }
 }
