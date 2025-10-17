@@ -19,7 +19,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Run tests
-        run: mvn test
+        run: ./mvnw test
 
   build-and-deploy:
     if: github.event_name == 'push'
@@ -36,7 +36,7 @@ jobs:
           cache: 'maven'
 
       - name: Run tests
-        run: mvn test
+        run: ./mvnw test
 
       - name: Build Docker image
         run: |
