@@ -50,9 +50,6 @@ public class User {
     @Column(name = "last_name", length = 30)
     private String lastName;
 
-    @Column(name = "full_name", nullable = false, length = 100)
-    private String fullName;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_status", nullable = false)
     @ToString.Exclude

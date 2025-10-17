@@ -22,13 +22,13 @@ public class LoginResponse {
     private String refreshToken;
 
     @NonNull
-    private User user;
+    private UserDto user;
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class User {
+    public static class UserDto {
         private boolean isEmailVerified;
     }
 }
