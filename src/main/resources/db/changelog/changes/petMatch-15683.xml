@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Таблица t_bond_times -->
+    <changeSet id="1" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_bond_times"/>
+            </not>
+            <tableExists tableName="t_users"/>
+        </preConditions>
+        <createTable tableName="t_bond_times" remarks="Таблица времени доступности пользователя">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="start" type="TIME" remarks="Время начала (локальное время)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end" type="TIME" remarks="Время окончания (локальное время)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_user" type="BIGINT" remarks="Пользователь">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_bond_times" foreignKeyName="fk_t_bond_times_id_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_bond_times"
+                                 baseColumnNames="id_user"
+                                 constraintName="fk_t_bond_times_id_user"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
