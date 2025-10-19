@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -35,11 +36,12 @@ public class SecurityConfig {
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
         http
-                // Разрешаем доступ к странице логина, разлогирования и регистрации всем
+                // Разрешаем доступ к странице логина, разлогирования и регистрации всем, доступ к городу
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() //openAPI
                         .requestMatchers("/api/v1/user/login").permitAll()
                         .requestMatchers("/api/v1/user/refresh").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/city", "/api/v1/city/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)

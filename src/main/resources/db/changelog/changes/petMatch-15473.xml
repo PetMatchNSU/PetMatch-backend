@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="15473" author="wiseConst">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_bond_times"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="t_bond_times">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_t_bond_times"/>
+            </column>
+            <column name="start" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_user" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="t_bond_times"
+                baseColumnNames="id_user"
+                referencedTableName="t_users"
+                referencedColumnNames="id"
+                constraintName="fk_bond_times_user"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="t_bond_times" indexName="idx_bond_times_user">
+            <column name="id_user"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="t_bond_times" constraintName="fk_bond_times_user"/>
+            <dropTable tableName="t_bond_times"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
