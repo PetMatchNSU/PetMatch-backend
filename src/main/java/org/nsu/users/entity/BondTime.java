@@ -21,10 +21,10 @@ public class BondTime {
     private Long id;
 
     @Column(name = "start", nullable = false)
-    private LocalTime start;
+    private LocalTime startContactTime;
 
     @Column(name = "end", nullable = false)
-    private LocalTime end;
+    private LocalTime endContactTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", insertable = false, updatable = false)
