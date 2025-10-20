@@ -1,7 +1,7 @@
 package org.nsu.authorization.core.exceptions.handlers;
 
-import org.nsu.authorization.core.dto.responses.AbstractNegativeResponse;
-import org.nsu.authorization.core.dto.responses.negative.PersonErrorResponse;
+import org.nsu.authorization.core.dto.responses.AbstractAuthorizationNegativeResponse;
+import org.nsu.authorization.core.dto.responses.negative.PersonErrorResponseAuthorization;
 import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
 import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
@@ -11,26 +11,26 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class AuthorizationExceptionHandler {
 
-    private ResponseEntity<AbstractNegativeResponse> simplePersonResponse(HttpStatus httpStatus, String message) {
+    private ResponseEntity<AbstractAuthorizationNegativeResponse> simplePersonResponse(HttpStatus httpStatus, String message) {
         return ResponseEntity
                 .status(httpStatus)
-                .body(new PersonErrorResponse(message, System.currentTimeMillis()));
+                .body(new PersonErrorResponseAuthorization(message, System.currentTimeMillis()));
     }
 
     @ExceptionHandler(PersonNotFoundException.class)
-    public ResponseEntity<AbstractNegativeResponse> handlePersonNotFoundException(PersonNotFoundException e) {
+    public ResponseEntity<AbstractAuthorizationNegativeResponse> handlePersonNotFoundException(PersonNotFoundException e) {
         return simplePersonResponse(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(PersonHasNotVerifiedEmailException.class)
-    public ResponseEntity<AbstractNegativeResponse> handlePersonNotFoundException(PersonHasNotVerifiedEmailException e) {
+    public ResponseEntity<AbstractAuthorizationNegativeResponse> handlePersonNotFoundException(PersonHasNotVerifiedEmailException e) {
         return  simplePersonResponse(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
     @ExceptionHandler(JWTIsExpiredException.class)
-    public ResponseEntity<AbstractNegativeResponse> handlePersonNotFoundException(JWTIsExpiredException e) {
+    public ResponseEntity<AbstractAuthorizationNegativeResponse> handlePersonNotFoundException(JWTIsExpiredException e) {
         return simplePersonResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 

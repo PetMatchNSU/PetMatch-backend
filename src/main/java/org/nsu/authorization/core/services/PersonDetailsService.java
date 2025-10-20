@@ -2,7 +2,7 @@ package org.nsu.authorization.core.services;
 
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
