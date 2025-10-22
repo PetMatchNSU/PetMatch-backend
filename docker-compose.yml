@@ -142,7 +142,6 @@ services:
     ports:
       - "8091:8091"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       POSTGRES_HOST: petmatch-postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER}
