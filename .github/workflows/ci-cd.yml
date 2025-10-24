@@ -61,37 +61,14 @@ jobs:
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Validate and fix tag
-        id: fix-tag
-        run: |
-          TAG="${{ steps.meta.outputs.tags }}"
-          echo "Original tags: $TAG"
-          # Убираем пустые строки, пробелы и берем первый валидный тег
-          VALID_TAG=$(echo "$TAG" | grep -v '^$' | head -n1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
-          # Если тег начинается с двоеточия, убираем его
-          if [[ "$VALID_TAG" == *":"* ]]; then
-            VALID_TAG=$(echo "$VALID_TAG" | sed 's/^://')
-          fi
-          # Если тег пустой, используем fallback
-          if [[ -z "$VALID_TAG" ]]; then
-            if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-              VALID_TAG="develop-${{ github.sha }}"
-            elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-              VALID_TAG="master-${{ github.sha }}"
-            else
-              VALID_TAG="latest"
-            fi
-          fi
-          echo "Fixed tag: $VALID_TAG"
-          echo "tag=$VALID_TAG" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: petmatch-backend:${{ steps.fix-tag.outputs.tag }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -104,6 +81,5 @@ jobs:
           port: 22
           script: |
             cd /opt/petmatch
-            export BACKEND_IMAGE_TAG=${{ steps.fix-tag.outputs.tag }}
-            echo "Deploying with tag: ${{ steps.fix-tag.outputs.tag }}"
-            ./deploy.sh ${{ steps.fix-tag.outputs.tag }} production
+            export BACKEND_IMAGE_TAG=${{ steps.meta.outputs.tags }}
+            ./deploy.sh ${{ steps.meta.outputs.tags }} production
