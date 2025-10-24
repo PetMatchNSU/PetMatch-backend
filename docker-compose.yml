@@ -80,7 +80,6 @@ services:
     image: grafana/alloy:v1.10.2
     container_name: alloy
     restart: always
-    user: ${ALLOY_USER}
     ports:
       - "9080:9080" # HTTP Interface
       - "4317:4317" # OTLP gRPC
