@@ -46,5 +46,5 @@ chmod 600 ~/.ssh/authorized_keys
 Проверьте подключение с вашей локальной машины:
 
 ```bash
-ssh -i ~/.ssh/github_actions_petmatch root@158.160.173.155
+ssh -i ~/.ssh/github_actions_petmatch rallentando@158.160.173.155
 ```
