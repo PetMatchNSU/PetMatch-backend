@@ -3,7 +3,7 @@
 ## Конфигурация
 
 Для локального запуска использовать зависимые сервисы из [Docker Compose](./docker-compose.yml), а также указывать
-активный Spring профиль "local" (_SPRING_PROFILES_ACTIVE_ или в IDE через _Edit configurations..._). Для локального
+активный Spring профиль "dev" (_SPRING_PROFILES_ACTIVE_ или в IDE через _Edit configurations..._). Для локального
 запуска всех контейнеров использовать значения из [.env](./.env). Docker
 Compose сам увидит файл и прочитает значения из него.
 
@@ -11,7 +11,7 @@ Compose сам увидит файл и прочитает значения из
 
 1. [default](./src/main/resources/application.yaml) для запуска на сервере, в котором конфигурационные значения задаются
    из переменных окружения
-2. [local](./src/main/resources/application-local.yaml) для запуска на локальном машине, в котором значения уже
+2. [dev](./src/main/resources/application-dev.yaml) для запуска на локальном машине, в котором значения уже
    настроены на локальное использование сервисов из [Docker Compose](./docker-compose.yml).
 
 ## Инфраструктура
