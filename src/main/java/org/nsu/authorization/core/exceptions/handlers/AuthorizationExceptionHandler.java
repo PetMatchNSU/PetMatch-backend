@@ -25,15 +25,13 @@ public class AuthorizationExceptionHandler {
     }
 
     @ExceptionHandler(PersonHasNotVerifiedEmailException.class)
-    public ResponseEntity<AbstractAuthorizationNegativeResponse> handlePersonNotFoundException(PersonHasNotVerifiedEmailException e) {
+    public ResponseEntity<AbstractAuthorizationNegativeResponse> handlePersonHasNotVerifiedEmailException(PersonHasNotVerifiedEmailException e) {
         return  simplePersonResponse(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
     @ExceptionHandler(JWTIsExpiredException.class)
-    public ResponseEntity<AbstractAuthorizationNegativeResponse> handlePersonNotFoundException(JWTIsExpiredException e) {
+    public ResponseEntity<AbstractAuthorizationNegativeResponse> handlePersonNotAuthorized(JWTIsExpiredException e) {
         return simplePersonResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
-
-
 
 }

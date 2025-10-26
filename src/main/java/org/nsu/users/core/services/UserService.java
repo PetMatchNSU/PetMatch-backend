@@ -2,7 +2,9 @@ package org.nsu.users.core.services;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +30,7 @@ public class UserService {
 
     public UserResponse getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new PersonNotFoundException("Пользователь не найден"));
+            .orElseThrow(() -> new PersonNotFoundException("User not found"));
 
         Set<Contact> contacts = contactService.getContactsByUser(user);
         List<UserResponse.ContactInfoDto> contactInfoList = contacts.stream()
@@ -65,10 +67,8 @@ public class UserService {
     }
 
     private OffsetDateTime convertLocalTimeToOffsetDateTime(LocalTime localTime) {
-        return OffsetDateTime.of(
-            java.time.LocalDate.now(),
-            localTime,
-            ZoneOffset.systemDefault().getRules().getOffset(java.time.Instant.now())
-        );
+        ZoneId moscowZone = ZoneId.of("Europe/Moscow");
+        ZonedDateTime zdt = ZonedDateTime.now(moscowZone).with(localTime);
+        return zdt.toOffsetDateTime();
     }
 }

@@ -15,6 +15,6 @@ public class StatusCommentService {
     private final StatusCommentRepository statusCommentRepository;
 
     public Optional<StatusComment> getLatestCommentByUser(User user) {
-        return statusCommentRepository.findLatestByUser(user);
+        return statusCommentRepository.findTopByUserOrderByDateDesc(user);
     }
 }

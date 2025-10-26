@@ -12,6 +12,5 @@ import java.util.Optional;
 @Repository
 public interface StatusCommentRepository extends JpaRepository<StatusComment, Long> {
     
-    @Query("SELECT sc FROM StatusComment sc WHERE sc.user = :user ORDER BY sc.date DESC LIMIT 1")
-    Optional<StatusComment> findLatestByUser(@Param("user") User user);
+    Optional<StatusComment> findTopByUserOrderByDateDesc(User user);
 }
