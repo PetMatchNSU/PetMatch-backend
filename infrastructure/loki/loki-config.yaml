@@ -1,0 +1,59 @@
+# Выключение авторизации
+auth_enabled: false
+
+server:
+  http_listen_port: 3100  # Порт для API приема логов и веб-интерфейса
+
+# Конфигурация ingester - приемщика логов, отвечающего за буферизацию и запись логов
+ingester:
+  lifecycler:
+    address: 0.0.0.0  # Слушать на всех интерфейсах
+    ring:
+      kvstore:
+        store: inmemory  # Хранить информацию о нодах в памяти (для single-node)
+      replication_factor: 1  # Количество реплик данных (1 для standalone)
+    final_sleep: 0s  # Не спать при завершении
+  chunk_idle_period: 5m  # Через сколько времени записывать блок на диск если нет новых логов
+  chunk_retain_period: 30s  # Сколько держать блок в памяти после записи
+  max_transfer_retries: 0  # Не пытаться передавать блоки при shutdown (для single-node)
+
+schema_config:
+  configs:
+    - from: 2018-04-15  # Дата начала использования этой схемы, то есть когда начинается история логов
+      store: boltdb  # БД для индекса
+      object_store: filesystem  # Хранилище для самих логов (чанков)
+      schema: v11  # Версия схемы
+      index:
+        prefix: index_  # Префикс для файлов индекса
+        period: 168h  # Период ротации индекса (7 дней)
+
+storage_config:
+  boltdb:
+    directory: /loki/index  # Директория для файлов индекса
+  filesystem:
+    directory: /loki/chunks  # Директория для чанков (самих логов)
+
+limits_config:
+  enforce_metric_name: false  # Не требовать имена метрик (для совместимости)
+  reject_old_samples: true  # Отклонять старые логи
+  reject_old_samples_max_age: 168h  # Максимальный возраст логов (7 дней)
+  ingestion_rate_mb: 8  # Лимит скорости приема: 8 МБ/сек
+  ingestion_burst_size_mb: 10  # Лимит burst: 10 МБ
+
+chunk_storage_config:
+  max_look_back_period: 0s  # Период поиска логов (0 = бесконечно, то есть нет ограничений на поиск)
+
+table_manager:
+  # Отключение автоматического provisioning для таблиц (т.к. используется filesystem)
+  chunk_tables_provisioning:
+    inactive_read_throughput: 0
+    inactive_write_throughput: 0
+    provisioned_read_throughput: 0
+    provisioned_write_throughput: 0
+  index_tables_provisioning:
+    inactive_read_throughput: 0
+    inactive_write_throughput: 0
+    provisioned_read_throughput: 0
+    provisioned_write_throughput: 0
+  retention_deletes_enabled: true  # Включить удаление старых данных
+  retention_period: 168h  # Хранить логи 7 дней
