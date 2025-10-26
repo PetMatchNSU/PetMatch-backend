@@ -1,6 +1,16 @@
 package org.nsu.users.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,21 +22,28 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class BondTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Время начала доступности
     @Column(name = "start", nullable = false)
-    private LocalTime start;
+    private LocalTime startContactTime;
 
-    // Время конца доступности
     @Column(name = "end", nullable = false)
-    private LocalTime end;
+    private LocalTime endContactTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_user", nullable = false)
+    @JoinColumn(name = "id_user", insertable = false, updatable = false)
     private User user;
+
+    public void setStart(@NotNull LocalTime bondTimeStart) {
+        startContactTime = bondTimeStart;
+    }
+
+    public void setEnd(@NotNull LocalTime bondTimeEnd) {
+        endContactTime = bondTimeEnd;
+    }
 }

@@ -11,8 +11,6 @@ import org.nsu.users.repositories.ContactTypeRepository;
 import org.nsu.users.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,23 +24,15 @@ public class UserProfileService {
     private final ContactTypeRepository contactTypeRepository;
     private final BondTimeRepository bondTimeRepository;
 
-    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
-
     @Transactional
     public void updateProfile(String email, UpdateUserRequest dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Update core fields
         user.setFirstName(dto.getFirstName());
         user.setSecondName(dto.getSecondName());
         user.setLastName(dto.getLastName());
-
-        try {
-            user.setGender(Gender.valueOf(dto.getGender().toUpperCase()));
-        } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("Gender must be 'M' or 'F'");
-        }
+        user.setGender(Gender.valueOf(dto.getGender().name()));
 
         Region region = regionRepository.findById(dto.getLocationId())
                 .orElseThrow(() -> new IllegalArgumentException("Region not found: " + dto.getLocationId()));
@@ -50,15 +40,14 @@ public class UserProfileService {
 
         userRepository.save(user);
 
-        // Replace BondTime set
         bondTimeRepository.deleteByUserId(user.getId());
         List<BondTime> toSaveBond = new ArrayList<>();
         if (dto.getBondTime() != null) {
             for (UpdateUserRequest.BondTimeDto b : dto.getBondTime()) {
                 BondTime bt = new BondTime();
                 bt.setUser(user);
-                bt.setStart(LocalTime.parse(b.getBondTimeStart(), TIME_FMT));
-                bt.setEnd(LocalTime.parse(b.getBondTimeEnd(), TIME_FMT));
+                bt.setStart(b.getBondTimeStart());
+                bt.setEnd(b.getBondTimeEnd());
                 toSaveBond.add(bt);
             }
         }
@@ -66,7 +55,6 @@ public class UserProfileService {
             bondTimeRepository.saveAll(toSaveBond);
         }
 
-        // Replace Contacts set
         contactRepository.deleteByUserId(user.getId());
         List<Contact> toSaveContacts = new ArrayList<>();
         if (dto.getContactInfo() != null) {

@@ -1,54 +1,74 @@
 package org.nsu.users.dto.requests;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
 @Setter
+@Schema(description = "Запрос на обновление профиля пользователя")
 public class UpdateUserRequest {
 
     @NotBlank
+    @Schema(description = "Имя пользователя", example = "Иван")
     private String firstName;
 
     @NotBlank
+    @Schema(description = "Фамилия пользователя", example = "Иванов")
     private String secondName;
 
+    @Schema(description = "Отчество пользователя", example = "Иванович")
     private String lastName;
 
-    @NotBlank // "M"/"F"
-    private String gender;
+    @NotNull
+    @Schema(description = "Пол (M/F)", example = "M")
+    private GenderRequest gender;
 
     @NotNull
+    @Schema(description = "ID региона", example = "12345")
     private Long locationId;
 
     @Valid
+    @Schema(description = "Время доступности для связи")
     private List<BondTimeDto> bondTime;
 
     @Valid
+    @Schema(description = "Контактная информация")
     private List<ContactInfoDto> contactInfo;
 
     @Getter
     @Setter
+    @Schema(description = "Время доступности")
     public static class BondTimeDto {
-        @NotBlank
-        private String bondTimeStart; // "HH:mm"
-        @NotBlank
-        private String bondTimeEnd;   // "HH:mm"
+        @NotNull
+        @Schema(description = "Время начала доступности", example = "10:00", type = "string", pattern = "HH:mm")
+        private LocalTime bondTimeStart;
+        
+        @NotNull
+        @Schema(description = "Время конца доступности", example = "12:00", type = "string", pattern = "HH:mm")
+        private LocalTime bondTimeEnd;
     }
 
     @Getter
     @Setter
+    @Schema(description = "Контактная информация")
     public static class ContactInfoDto {
         @NotBlank
-        private String type;   // ContactType.name
+        @Schema(description = "Тип контакта", example = "VK")
+        private String type;
+        
         @NotBlank
-        private String contact; // Contact.link
+        @Schema(description = "Ссылка, номер или email", example = "https://vk.com/user")
+        private String contact;
+        
         @NotNull
-        private Boolean visible; // Contact.isVisible
+        @Schema(description = "Флаг отображения контакта", example = "true")
+        private Boolean visible;
     }
 }

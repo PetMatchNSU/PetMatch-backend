@@ -1,31 +1,27 @@
 package org.nsu.users.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.nsu.users.dto.responses.CitySearchResponse;
-import org.nsu.users.entity.Region;
-import org.nsu.users.repositories.RegionRepository;
-import org.springframework.http.ResponseEntity;
+import org.nsu.users.services.CityService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@Tag(name = "City", description = "API для работы с городами и регионами")
 public class CityController {
 
-    private final RegionRepository regionRepository;
+    private final CityService cityService;
 
     @GetMapping("/city")
-    public ResponseEntity<CitySearchResponse> search(@RequestParam("name") String name) {
-        if (name == null || name.isBlank()) {
-            return ResponseEntity.ok(new CitySearchResponse(List.of()));
-        }
-        List<Region> regions = regionRepository.searchByRegionOrCity(name.trim());
-        List<CitySearchResponse.LocationDto> items = regions.stream()
-                .map(r -> new CitySearchResponse.LocationDto(r.getId(), r.getRegion(), r.getCity()))
-                .toList();
-
-        return ResponseEntity.ok(new CitySearchResponse(items));
+    @Operation(summary = "Поиск городов и регионов", description = "Поиск городов и регионов по названию")
+    public CitySearchResponse search(
+            @Parameter(description = "Название города или региона для поиска", example = "Новосибирск")
+            @RequestParam("name") String name
+    ) {
+        return cityService.searchCities(name);
     }
 }
