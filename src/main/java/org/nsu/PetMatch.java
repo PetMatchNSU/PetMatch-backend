@@ -3,9 +3,11 @@ package org.nsu;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication(scanBasePackages = "org.nsu")
 @EnableJpaRepositories(basePackages = "org.nsu")
+@EnableCaching
 public class PetMatch {
 
     public static void main(String[] args) {

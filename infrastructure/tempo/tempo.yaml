@@ -1,0 +1,22 @@
+server:
+  http_listen_port: 3200  # Порт для HTTP API Tempo, нужен для проверки состояния работы и метрик
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}        # Включить прием трассировок по OTLP/gRPC (порт 4317)
+        http: {}        # Включить прием трассировок по OTLP/HTTP (порт 4318)
+
+ingester:
+  trace_idle_period: 10s  # Через сколько неактивную трассировку (которая уже не дополняется никем) записывать на диск
+
+compactor:
+  compaction:
+    compacted_block_retention: 24h  # Хранить сжатые блоки трассировок 1 день
+
+storage:
+  trace:
+    backend: local      # Использовать локальную файловую систему
+    local:
+      path: /var/tempo/traces  # Директория для хранения трассировок

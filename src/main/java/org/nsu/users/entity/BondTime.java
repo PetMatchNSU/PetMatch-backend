@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,12 +37,4 @@ public class BondTime {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", insertable = false, updatable = false)
     private User user;
-
-    public void setStart(@NotNull LocalTime bondTimeStart) {
-        startContactTime = bondTimeStart;
-    }
-
-    public void setEnd(@NotNull LocalTime bondTimeEnd) {
-        endContactTime = bondTimeEnd;
-    }
 }
