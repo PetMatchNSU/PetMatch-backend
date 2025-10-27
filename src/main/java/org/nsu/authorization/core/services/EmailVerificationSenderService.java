@@ -15,11 +15,15 @@ public class EmailVerificationSenderService {
     @Value("${spring.mail.username}")
     private String from;
 
-    public void Send(String to, String subject, String text) {
+    private final String subject = "Email Verification";
+    private final String textFirstPart = "Регистрация на платформе Pet Match почти закончена! Пожалуйста, подтвердите свою электронную почту, введя следующий временный код на последнем шаге регистрации: ";
+    private final String textSecondPart = ". Спасибо, что Вы с нами! Ваш Pet Match.";
+
+    public void Send(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
-        message.setText(text);
+        message.setText(textFirstPart + code + textSecondPart);
         message.setFrom(from);
 
         mailSender.send(message);

@@ -1,9 +1,11 @@
 package org.nsu.authorization.core.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.nsu.authorization.core.dto.requests.EmailVerifierRequest;
+import org.nsu.authorization.core.exceptions.authorization.EmailVerificationFailException;
 import org.nsu.authorization.core.repositories.UserRepository;
 import org.nsu.authorization.core.utils.JWTTypes;
 import org.nsu.authorization.core.utils.JWTUtil;
@@ -24,6 +26,8 @@ public class EmailVerifierService {
     private VerificationCodeGenerator verificationCodeGenerator;
     private final UserRepository userRepository;
     private final EmailVerificationSenderService emailVerificationSenderService;
+    private final String tempCodeKeyFirstPart = "registrationService:user:";
+    private final String tempCodeKeySecondPart = ":email:code";
 
     public void verifyEmail(@Valid @RequestBody EmailVerifierRequest dto, String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -36,29 +40,44 @@ public class EmailVerifierService {
             userId = jwtUtil.extractClaim(accessToken, JWTTypes.ACCESS_TOKEN, "userID");
 
         } catch (JWTVerificationException e) {
-            throw new SecurityException("Invalid token: " + e.getMessage(), e);
+            throw new EmailVerificationFailException("Failed to verify email: " + e.getMessage());
         }
 
-        String tempCodeKey = "registrationService:user:" + userId + ":email:code";
+        String tempCodeKey = tempCodeKeyFirstPart + userId + tempCodeKeySecondPart;
         String cachedCode = verificationCodeCacheRetrieverService.getCode(tempCodeKey);
-        if (cachedCode.isEmpty()) {
+
+        if (cachedCode.isEmpty()) {// if the code is expired, generate a new one and send it
             cachedCode = verificationCodeGenerator.generateVerificationCodeAndCacheIt(tempCodeKey);
-            emailVerificationSenderService.Send(accessToken, tempCodeKey, cachedCode);
+            String emailDst;
+            try {
+                emailDst = jwtUtil.extractClaim(accessToken, JWTTypes.ACCESS_TOKEN, "email");
+            } catch (JWTVerificationException e) {
+                throw new EmailVerificationFailException("Failed to verify email: " + e.getMessage());
+            }
+            emailVerificationSenderService.Send(emailDst, cachedCode);
+            return;
         }
 
         Long id;
         try {
             id = Long.parseLong(userId);
         } catch (NumberFormatException e) {
-            throw new SecurityException("Verification code must contain only digits.");
+            throw new EmailVerificationFailException("Failed to verify email: userid must only contain digits.");
         }
+
+        // check if the code matches the one from the cache
         if (cachedCode.equals(dto.getCode())) {
-            User user = userRepository.getReferenceById(id);
+            User user;
+            try {
+                user = userRepository.getReferenceById(id);
+            } catch (EntityNotFoundException e) {
+                throw new EmailVerificationFailException("Failed to verify email: " + e.getMessage());
+            }
             user.setEmailVerified(true);
             userRepository.save(user);
             return;
         }
-        throw new SecurityException("Invalid verification code.");
+        throw new EmailVerificationFailException("Failed to verify email: invalid verification code.");
     }
 
 }

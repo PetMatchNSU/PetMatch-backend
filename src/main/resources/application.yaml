@@ -15,3 +15,27 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:petmatch@gmail.com}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  data:
+    redis:
+      host: localhost 
+      port: 6379 
+      password: your_redis_password 
+      database: 0 
+      timeout: 60000
+  app:
+    cache:
+      verification-code:
+        ttl-minutes: 5
+      default-ttl-minutes: 60
