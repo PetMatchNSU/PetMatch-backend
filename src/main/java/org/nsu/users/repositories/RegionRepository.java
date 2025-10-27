@@ -10,7 +10,7 @@ import java.util.List;
 public interface RegionRepository extends JpaRepository<Region, Long> {
 
     @Query("select r from Region r " +
-           "where lower(r.region) like lower(concat('%', :q, '%')) " +
-           "   or lower(r.city) like lower(concat('%', :q, '%'))")
-    List<Region> searchByRegionOrCity(@Param("q") String q);
+           "where lower(r.region) like lower(concat('%', :query, '%')) " +
+           "   or lower(r.city) like lower(concat('%', :query, '%'))")
+    List<Region> searchByRegionOrCity(@Param("query") String query);
 }

@@ -1,7 +1,6 @@
 package org.nsu.users.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ public class UserProfileController {
 
     @PutMapping
     @Operation(summary = "Обновление профиля пользователя", description = "Обновление данных пользователя")
-    @SecurityRequirement(name = "Bearer Authentication")
     public void update(
             @AuthenticationPrincipal PersonDetails principal,
             @Valid @RequestBody UpdateUserRequest dto
@@ -34,7 +32,6 @@ public class UserProfileController {
 
     @GetMapping("/contacts")
     @Operation(summary = "Получение списка типов контактов", description = "Получение списка доступных типов контактов")
-    @SecurityRequirement(name = "Bearer Authentication")
     public ContactTypeResponse contactTypes() {
         return contactTypeService.getAllContactTypes();
     }

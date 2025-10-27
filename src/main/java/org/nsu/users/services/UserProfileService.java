@@ -1,6 +1,5 @@
 package org.nsu.users.services;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.repositories.UserRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
@@ -10,6 +9,7 @@ import org.nsu.users.repositories.ContactRepository;
 import org.nsu.users.repositories.ContactTypeRepository;
 import org.nsu.users.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +24,14 @@ public class UserProfileService {
     private final ContactTypeRepository contactTypeRepository;
     private final BondTimeRepository bondTimeRepository;
 
-    @Transactional
     public void updateProfile(String email, UpdateUserRequest dto) {
+        updateUserBasicInfo(email, dto);
+        updateBondTimes(email, dto.getBondTime());
+        updateContacts(email, dto.getContactInfo());
+    }
+
+    @Transactional
+    protected void updateUserBasicInfo(String email, UpdateUserRequest dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -39,38 +45,52 @@ public class UserProfileService {
         user.setRegion(region);
 
         userRepository.save(user);
+    }
+
+    @Transactional
+    protected void updateBondTimes(String email, List<UpdateUserRequest.BondTimeDto> bondTimeDtos) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         bondTimeRepository.deleteByUserId(user.getId());
-        List<BondTime> toSaveBond = new ArrayList<>();
-        if (dto.getBondTime() != null) {
-            for (UpdateUserRequest.BondTimeDto b : dto.getBondTime()) {
-                BondTime bt = new BondTime();
-                bt.setUser(user);
-                bt.setStart(b.getBondTimeStart());
-                bt.setEnd(b.getBondTimeEnd());
-                toSaveBond.add(bt);
-            }
-        }
-        if (!toSaveBond.isEmpty()) {
-            bondTimeRepository.saveAll(toSaveBond);
+        
+        if (bondTimeDtos == null || bondTimeDtos.isEmpty()) {
+            return;
         }
 
+        List<BondTime> toSave = new ArrayList<>();
+        for (UpdateUserRequest.BondTimeDto b : bondTimeDtos) {
+            BondTime bt = new BondTime();
+            bt.setUser(user);
+            bt.setStart(b.getBondTimeStart());
+            bt.setEnd(b.getBondTimeEnd());
+            toSave.add(bt);
+        }
+        bondTimeRepository.saveAll(toSave);
+    }
+
+    @Transactional
+    protected void updateContacts(String email, List<UpdateUserRequest.ContactInfoDto> contactDtos) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         contactRepository.deleteByUserId(user.getId());
-        List<Contact> toSaveContacts = new ArrayList<>();
-        if (dto.getContactInfo() != null) {
-            for (UpdateUserRequest.ContactInfoDto c : dto.getContactInfo()) {
-                ContactType type = contactTypeRepository.findByName(c.getType())
-                        .orElseThrow(() -> new IllegalArgumentException("Unknown contact type: " + c.getType()));
-                Contact contact = new Contact();
-                contact.setType(type);
-                contact.setLink(c.getContact());
-                contact.setUser(user);
-                contact.setIsVisible(c.getVisible());
-                toSaveContacts.add(contact);
-            }
+        
+        if (contactDtos == null || contactDtos.isEmpty()) {
+            return;
         }
-        if (!toSaveContacts.isEmpty()) {
-            contactRepository.saveAll(toSaveContacts);
+
+        List<Contact> toSave = new ArrayList<>();
+        for (UpdateUserRequest.ContactInfoDto c : contactDtos) {
+            ContactType type = contactTypeRepository.findByName(c.getType())
+                .orElseThrow(() -> new IllegalArgumentException("Unknown contact type: " + c.getType()));
+            Contact contact = new Contact();
+            contact.setType(type);
+            contact.setLink(c.getContact());
+            contact.setUser(user);
+            contact.setIsVisible(c.getVisible());
+            toSave.add(contact);
         }
+        contactRepository.saveAll(toSave);
     }
 }
