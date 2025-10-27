@@ -1,6 +1,5 @@
 package org.nsu.users.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,9 +14,9 @@ public class Authority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false,  length = 64)
+    @Column(unique = true, nullable = false, length = 64)
     private String name;
 
-    @Column(unique = true, nullable = false,  length = 256)
+    @Column(unique = true, nullable = false, length = 256)
     private String description;
 }
