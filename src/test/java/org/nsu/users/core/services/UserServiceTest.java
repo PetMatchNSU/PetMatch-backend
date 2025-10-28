@@ -82,7 +82,7 @@ class UserServiceTest {
         );
 
         // When
-        UserResponse result = userService.getUserProfile(userId);
+        UserResponse result = userService.getUserProfile();
 
         // Then
         assertThat(result)
@@ -103,7 +103,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThatThrownBy(() -> userService.getUserProfile(userId))
+        assertThatThrownBy(() -> userService.getUserProfile())
                 .isInstanceOf(PersonNotFoundException.class)
                 .hasMessage("User not found");
     }

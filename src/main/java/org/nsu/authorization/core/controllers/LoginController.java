@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.dto.requests.LoginRequest;
-import org.nsu.authorization.core.dto.responses.negative.PersonErrorResponseAuthorization;
+import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
 import org.nsu.authorization.core.dto.responses.positive.LoginResponse;
 import org.nsu.authorization.core.services.LoginService;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class LoginController {
     private final LoginService service;
 
     @PostMapping("/login")
-    @Operation(summary = "Вход в систему", description = "Авторизация пользователя по email и паролю")
+    @Operation(summary = "Авторизация через email", description = "Авторизация пользователя по email и паролю")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -42,7 +42,7 @@ public class LoginController {
                     description = "Email не подтвержден",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = PersonErrorResponseAuthorization.class)
+                            schema = @Schema(implementation = PersonErrorResponse.class)
                     )
             ),
             @ApiResponse(
@@ -50,7 +50,7 @@ public class LoginController {
                     description = "Неверный email или пароль",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = PersonErrorResponseAuthorization.class)
+                            schema = @Schema(implementation = PersonErrorResponse.class)
                     )
             )
     })

@@ -14,10 +14,13 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.services.StatusCommentService;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
+import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.entity.Contact;
 import org.nsu.users.entity.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,7 +31,13 @@ public class UserService {
     private final ContactService contactService;
     private final StatusCommentService statusCommentService;
 
-    public UserResponse getUserProfile(Long userId) {
+    public UserResponse getUserProfile() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
+
+        Long userId = personDetails.getUserId();
+
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new PersonNotFoundException("User not found"));
 

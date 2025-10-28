@@ -1,4 +1,4 @@
-package org.nsu.authorization.core.dto.responses;
+package common.dto.responses.negative;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public abstract class AbstractAuthorizationNegativeResponse {
+public abstract class AbstractNegativeResponse {
 
     private long timestamp;
 

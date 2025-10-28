@@ -1,8 +1,5 @@
 package org.nsu.users.core.exceptions.user;
 
-import org.nsu.authorization.core.dto.responses.AbstractAuthorizationNegativeResponse;
-import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
-import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.users.core.dto.AbstractUserNegativeResponse;
 import org.nsu.users.core.dto.responses.negative.UserErrorResponseLogin;
