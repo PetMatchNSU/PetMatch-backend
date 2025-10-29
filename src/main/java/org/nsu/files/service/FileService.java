@@ -9,16 +9,27 @@ import org.nsu.files.event.FileUploadEvent;
 import org.nsu.files.repository.FileRepository;
 import org.nsu.animal.repository.AnimalCardFileRepository;
 import org.nsu.files.storage.StorageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.nsu.files.util.FileUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.nsu.authorization.core.security.PersonDetails;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Base64;
 import java.util.stream.Collectors;
 import java.io.InputStream;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import org.nsu.animal.entity.AnimalCardFile;
 
+@RequiredArgsConstructor
 @Service
 public class FileService {
 
@@ -27,24 +38,19 @@ public class FileService {
     private final FileRepository fileRepository;
     private final AnimalCardFileRepository animalCardFileRepository;
     private final StorageService storageService;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    public FileService(FileValidationProperties validationProperties, ApplicationEventPublisher eventPublisher,
-                       FileRepository fileRepository, AnimalCardFileRepository animalCardFileRepository,
-                       StorageService storageService) {
-        this.validationProperties = validationProperties;
-        this.eventPublisher = eventPublisher;
-        this.fileRepository = fileRepository;
-        this.animalCardFileRepository = animalCardFileRepository;
-        this.storageService = storageService;
-    }
-
-    public List<FileDescriptor> validateAndPublishUpload(List<MultipartFile> files, MetadataDTO metadata, Long userId, Long adId) {
-        List<FileDescriptor> descriptors = validateFiles(files, metadata.descriptors());
-
-        eventPublisher.publishEvent(new FileUploadEvent(this, files, metadata, userId, adId));
-
-        return descriptors;
+    public MetadataDTO uploadFiles(MultipartFile[] files, String metadataJson, Long adId) throws JsonProcessingException {
+        MetadataDTO metadata = objectMapper.readValue(metadataJson, MetadataDTO.class);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
+        Long userId = personDetails.getUserId();
+        if (files.length != metadata.descriptors().size()) {
+            throw new IllegalArgumentException("Number of files does not match number of descriptors");
+        }
+        List<FileDescriptor> descriptors = validateFiles(List.of(files), metadata.descriptors());
+        eventPublisher.publishEvent(new FileUploadEvent(this, List.of(files), metadata, userId, adId));
+        return new MetadataDTO(descriptors);
     }
 
     private List<FileDescriptor> validateFiles(List<MultipartFile> files, List<FileDescriptor> descriptors) {
@@ -52,14 +58,20 @@ public class FileService {
             MultipartFile file = files.get(i);
             FileDescriptor descriptor = descriptors.get(i);
 
-            if (file.getSize() > validationProperties.maxSizeMb() * 1024 * 1024) {
+            if (file.getSize() > validationProperties.maxSizeBytes()) {
                 descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
                 continue;
             }
 
-            String extension = getFileExtension(file.getOriginalFilename());
-            List<String> allowedFormats = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? validationProperties.photoFormats() : validationProperties.docFormats();
-            if (!allowedFormats.contains(extension.toUpperCase())) {
+            try {
+                String mimeType = FileUtils.detectMimeType(file.getBytes());
+                String extension = FileUtils.getFileExtensionFromMimeType(mimeType);
+                List<String> allowedFormats = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? validationProperties.photoFormats() : validationProperties.docFormats();
+                if (!allowedFormats.contains(extension.toUpperCase())) {
+                    descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
+                    continue;
+                }
+            } catch (Exception e) {
                 descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
                 continue;
             }
@@ -69,8 +81,18 @@ public class FileService {
         return descriptors;
     }
 
-    public MetadataDTO getFiles(FilterDTO filter) {
-        java.util.Set<org.nsu.animal.entity.AnimalCardFile> animalCardFilesSet = new java.util.HashSet<>();
+    public MetadataDTO getFiles(String query) {
+        try {
+            String decodedQuery = new String(Base64.getDecoder().decode(query));
+            FilterDTO filter = objectMapper.readValue(decodedQuery, FilterDTO.class);
+            return getFiles(filter);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse query", e);
+        }
+    }
+
+    private MetadataDTO getFiles(FilterDTO filter) {
+        Set<AnimalCardFile> animalCardFilesSet = new HashSet<>();
 
         if (filter.fileIds() != null && !filter.fileIds().isEmpty()) {
             animalCardFilesSet.addAll(animalCardFileRepository.findByFileIdIn(filter.fileIds()));
@@ -82,7 +104,7 @@ public class FileService {
             animalCardFilesSet.addAll(animalCardFileRepository.findAll());
         }
 
-        List<org.nsu.animal.entity.AnimalCardFile> animalCardFiles = new java.util.ArrayList<>(animalCardFilesSet);
+        List<AnimalCardFile> animalCardFiles = new ArrayList<>(animalCardFilesSet);
 
         if (filter.isMain() != null && !"all".equals(filter.isMain())) {
             boolean isMain = "true".equals(filter.isMain());
@@ -100,27 +122,22 @@ public class FileService {
             try {
                 InputStream inputStream = storageService.get(null, acf.getFile().getLink());
                 String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
-                return new FileDescriptor(
-                    acf.getFile().getName(),
-                    acf.getFileType().getName().equals("photo"),
-                    FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()),
-                    null,
-                    null,
-                    acf.getFile().getId(),
-                    acf.getAnimalCard().getId(),
-                    content
-                );
+                return FileDescriptor.builder()
+                    .originalFilename(acf.getFile().getName())
+                    .isMain(acf.getFileType().getName().equals("photo"))
+                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
+                    .fileId(acf.getFile().getId())
+                    .cardId(acf.getAnimalCard().getId())
+                    .content(content)
+                    .build();
             } catch (Exception e) {
-                return new FileDescriptor(
-                    acf.getFile().getName(),
-                    acf.getFileType().getName().equals("photo"),
-                    FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()),
-                    null,
-                    null,
-                    acf.getFile().getId(),
-                    acf.getAnimalCard().getId(),
-                    null
-                );
+                return FileDescriptor.builder()
+                    .originalFilename(acf.getFile().getName())
+                    .isMain(acf.getFileType().getName().equals("photo"))
+                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
+                    .fileId(acf.getFile().getId())
+                    .cardId(acf.getAnimalCard().getId())
+                    .build();
             }
         }).collect(Collectors.toList());
 
@@ -131,7 +148,7 @@ public class FileService {
         List<Long> fileIds = deleteRequest.fileIds() != null ? deleteRequest.fileIds() : List.of();
         List<Long> cardIds = deleteRequest.cardIds() != null ? deleteRequest.cardIds() : List.of();
 
-        List<org.nsu.animal.entity.AnimalCardFile> animalCardFiles = animalCardFileRepository.findByFileIdIn(fileIds);
+        List<AnimalCardFile> animalCardFiles = animalCardFileRepository.findByFileIdIn(fileIds);
         for (Long cardId : cardIds) {
             animalCardFiles.addAll(animalCardFileRepository.findByAnimalCardId(cardId));
         }
@@ -141,37 +158,28 @@ public class FileService {
                 storageService.delete(null, acf.getFile().getLink());
                 animalCardFileRepository.delete(acf);
                 fileRepository.delete(acf.getFile());
-                return new FileDescriptor(
-                    acf.getFile().getName(),
-                    acf.getFileType().getName().equals("photo"),
-                    FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()),
-                    null,
-                    FileDescriptor.DeletingStatus.DELETED,
-                    acf.getFile().getId(),
-                    acf.getAnimalCard().getId(),
-                    null
-                );
+                return FileDescriptor.builder()
+                    .originalFilename(acf.getFile().getName())
+                    .isMain(acf.getFileType().getName().equals("photo"))
+                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
+                    .deletingStatus(FileDescriptor.DeletingStatus.DELETED)
+                    .fileId(acf.getFile().getId())
+                    .cardId(acf.getAnimalCard().getId())
+                    .build();
             } catch (Exception e) {
-                return new FileDescriptor(
-                    acf.getFile().getName(),
-                    acf.getFileType().getName().equals("photo"),
-                    FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()),
-                    null,
-                    FileDescriptor.DeletingStatus.INTERNAL_ERROR,
-                    acf.getFile().getId(),
-                    acf.getAnimalCard().getId(),
-                    null
-                );
+                return FileDescriptor.builder()
+                    .originalFilename(acf.getFile().getName())
+                    .isMain(acf.getFileType().getName().equals("photo"))
+                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
+                    .deletingStatus(FileDescriptor.DeletingStatus.INTERNAL_ERROR)
+                    .fileId(acf.getFile().getId())
+                    .cardId(acf.getAnimalCard().getId())
+                    .build();
             }
         }).collect(Collectors.toList());
 
         return new MetadataDTO(descriptors);
     }
 
-    private String getFileExtension(String filename) {
-        if (filename == null || filename.lastIndexOf('.') == -1) {
-            return "";
-        }
-        return filename.substring(filename.lastIndexOf('.') + 1);
-    }
+
 }

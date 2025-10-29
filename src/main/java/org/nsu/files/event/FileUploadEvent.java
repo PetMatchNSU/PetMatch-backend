@@ -1,11 +1,13 @@
 package org.nsu.files.event;
 
+import lombok.Getter;
 import org.nsu.files.dto.MetadataDTO;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Getter
 public class FileUploadEvent extends ApplicationEvent {
 
     private final List<MultipartFile> files;
@@ -19,21 +21,5 @@ public class FileUploadEvent extends ApplicationEvent {
         this.metadata = metadata;
         this.userId = userId;
         this.adId = adId;
-    }
-
-    public List<MultipartFile> getFiles() {
-        return files;
-    }
-
-    public MetadataDTO getMetadata() {
-        return metadata;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public Long getAdId() {
-        return adId;
     }
 }

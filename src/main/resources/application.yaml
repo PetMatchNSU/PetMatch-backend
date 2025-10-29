@@ -39,7 +39,7 @@ minio:
 file-validation:
   photo-formats: [JPEG, PNG]
   doc-formats: [PDF]
-  max-size-mb: 5
+  max-size-bytes: 5242880
 management:
   endpoints:
     web:

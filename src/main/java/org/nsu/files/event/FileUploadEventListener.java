@@ -1,5 +1,6 @@
 package org.nsu.files.event;
 
+import lombok.RequiredArgsConstructor;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardFile;
 import org.nsu.animal.entity.AnimalCardFileType;
@@ -14,7 +15,7 @@ import org.nsu.files.entity.FileType;
 import org.nsu.files.repository.FileRepository;
 import org.nsu.files.repository.FileTypeRepository;
 import org.nsu.files.storage.StorageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.nsu.files.util.FileUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,10 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Component
+@RequiredArgsConstructor
 public class FileUploadEventListener {
+
+    private static final String UPLOAD_PATH_TEMPLATE = "uploads/users/%d/ads/%d/%s/%s.%s";
 
     private final StorageService storageService;
     private final MinIOConfigProperties minioProperties;
@@ -36,34 +40,16 @@ public class FileUploadEventListener {
     private final AnimalCardFileRepository animalCardFileRepository;
     private final AnimalCardFileTypeRepository animalCardFileTypeRepository;
 
-    @Autowired
-    public FileUploadEventListener(StorageService storageService, MinIOConfigProperties minioProperties,
-                                   FileRepository fileRepository, FileTypeRepository fileTypeRepository,
-                                   AnimalCardRepository animalCardRepository, AnimalCardFileRepository animalCardFileRepository,
-                                   AnimalCardFileTypeRepository animalCardFileTypeRepository) {
-        this.storageService = storageService;
-        this.minioProperties = minioProperties;
-        this.fileRepository = fileRepository;
-        this.fileTypeRepository = fileTypeRepository;
-        this.animalCardRepository = animalCardRepository;
-        this.animalCardFileRepository = animalCardFileRepository;
-        this.animalCardFileTypeRepository = animalCardFileTypeRepository;
-    }
-
     @EventListener
-    @Transactional
     public void handleFileUpload(FileUploadEvent event) {
         List<MultipartFile> files = event.getFiles();
         MetadataDTO metadata = event.getMetadata();
         Long userId = event.getUserId();
         Long adId = event.getAdId();
 
-        AnimalCard animalCard = animalCardRepository.findById(adId).orElseThrow(() -> new RuntimeException("AnimalCard not found"));
-
         List<CompletableFuture<Void>> uploadFutures = new ArrayList<>();
         List<String> uploadedObjectNames = new ArrayList<>();
-        List<File> savedFiles = new ArrayList<>();
-        List<AnimalCardFile> savedCardFiles = new ArrayList<>();
+        List<FileMetadata> fileMetadataList = new ArrayList<>();
 
         try {
             for (int i = 0; i < files.size(); i++) {
@@ -74,9 +60,9 @@ public class FileUploadEventListener {
                     continue;
                 }
 
-                String extension = getFileExtension(file.getOriginalFilename());
+                String extension = FileUtils.getFileExtension(file.getOriginalFilename());
                 String typeFolder = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? "photos" : "documents";
-                String objectName = String.format("uploads/users/%d/ads/%d/%s/%s.%s", userId, adId, typeFolder, UUID.randomUUID(), extension);
+                String objectName = String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, UUID.randomUUID(), extension);
 
                 CompletableFuture<Void> uploadFuture = CompletableFuture.runAsync(() -> {
                     try {
@@ -87,42 +73,13 @@ public class FileUploadEventListener {
                 });
                 uploadFutures.add(uploadFuture);
                 uploadedObjectNames.add(objectName);
+                fileMetadataList.add(new FileMetadata(descriptor, objectName));
             }
 
             CompletableFuture.allOf(uploadFutures.toArray(new CompletableFuture[0])).join();
 
-            for (int i = 0; i < files.size(); i++) {
-                MultipartFile file = files.get(i);
-                FileDescriptor descriptor = metadata.descriptors().get(i);
-
-                if (descriptor.uploadingStatus() != FileDescriptor.UploadingStatus.OK) {
-                    continue;
-                }
-
-                String objectName = uploadedObjectNames.get(i);
-
-                FileType fileType = fileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
-                if (fileType == null) {
-                    throw new RuntimeException("FileType not found: " + descriptor.fileType().name().toLowerCase());
-                }
-                File fileEntity = new File();
-                fileEntity.setName(descriptor.originalFilename());
-                fileEntity.setLink(objectName);
-                fileEntity.setType(fileType);
-                File savedFile = fileRepository.save(fileEntity);
-                savedFiles.add(savedFile);
-
-                AnimalCardFileType cardFileType = animalCardFileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
-                if (cardFileType == null) {
-                    throw new RuntimeException("AnimalCardFileType not found: " + descriptor.fileType().name().toLowerCase());
-                }
-                AnimalCardFile cardFile = new AnimalCardFile();
-                cardFile.setAnimalCard(animalCard);
-                cardFile.setFile(savedFile);
-                cardFile.setFileType(cardFileType);
-                AnimalCardFile savedCardFile = animalCardFileRepository.save(cardFile);
-                savedCardFiles.add(savedCardFile);
-            }
+            // After successful upload, save metadata in a separate transactional method
+            saveFileMetadata(adId, fileMetadataList);
 
         } catch (Exception e) {
             for (String objectName : uploadedObjectNames) {
@@ -136,10 +93,45 @@ public class FileUploadEventListener {
         }
     }
 
-    private String getFileExtension(String filename) {
-        if (filename == null || filename.lastIndexOf('.') == -1) {
-            return "";
+    @Transactional
+    private void saveFileMetadata(Long adId, List<FileMetadata> fileMetadataList) {
+        AnimalCard animalCard = animalCardRepository.findById(adId).orElseThrow(() -> new RuntimeException("AnimalCard not found"));
+
+        for (FileMetadata fileMetadata : fileMetadataList) {
+            FileDescriptor descriptor = fileMetadata.descriptor;
+            String objectName = fileMetadata.objectName;
+
+            FileType fileType = fileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
+            if (fileType == null) {
+                throw new RuntimeException("FileType not found: " + descriptor.fileType().name().toLowerCase());
+            }
+            File fileEntity = new File();
+            fileEntity.setName(descriptor.originalFilename());
+            fileEntity.setLink(objectName);
+            fileEntity.setType(fileType);
+            File savedFile = fileRepository.save(fileEntity);
+
+            AnimalCardFileType cardFileType = animalCardFileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
+            if (cardFileType == null) {
+                throw new RuntimeException("AnimalCardFileType not found: " + descriptor.fileType().name().toLowerCase());
+            }
+            AnimalCardFile cardFile = new AnimalCardFile();
+            cardFile.setAnimalCard(animalCard);
+            cardFile.setFile(savedFile);
+            cardFile.setFileType(cardFileType);
+            animalCardFileRepository.save(cardFile);
         }
-        return filename.substring(filename.lastIndexOf('.') + 1);
     }
+
+    private static class FileMetadata {
+        final FileDescriptor descriptor;
+        final String objectName;
+
+        FileMetadata(FileDescriptor descriptor, String objectName) {
+            this.descriptor = descriptor;
+            this.objectName = objectName;
+        }
+    }
+
+
 }

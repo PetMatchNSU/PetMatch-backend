@@ -43,11 +43,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.testcontainers.containers.MinIOContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -57,28 +52,11 @@ import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
 @ActiveProfiles("test")
-public class FileControllerIntegrationTest {
+public class FileControllerIntegrationTest extends AbstractIntegrationTest {
 
     @MockitoBean
     private JWTUtil jwtUtil;
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
-
-    @Container
-    static MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2023-03-20T20-16-18Z");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("minio.endpoint", minio::getS3URL);
-        registry.add("minio.access-key", minio::getUserName);
-        registry.add("minio.secret-key", minio::getPassword);
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -142,7 +120,6 @@ public class FileControllerIntegrationTest {
         user.setFirstName("Test");
         user.setSecondName("User");
         user.setLastName("Testovich");
-        user.setFullName("Test User Testovich");
         user.setPassword("password");
         user.setGender(Gender.M);
         user.setEmailVerified(true);

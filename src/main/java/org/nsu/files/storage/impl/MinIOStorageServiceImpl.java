@@ -7,28 +7,27 @@ import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import org.nsu.files.config.MinIOConfigProperties;
 import org.nsu.files.storage.StorageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
 @Service
+@RequiredArgsConstructor
 public class MinIOStorageServiceImpl implements StorageService {
 
     private final MinioClient minioClient;
-    private final String bucketName;
+    private final MinIOConfigProperties properties;
 
-    @Autowired
-    public MinIOStorageServiceImpl(MinioClient minioClient, MinIOConfigProperties properties) {
-        this.minioClient = minioClient;
-        this.bucketName = properties.bucketName();
+    private String getBucketName() {
+        return properties.bucketName();
     }
 
     @Override
-    public String upload(MultipartFile file, String bucket, String objectName) throws Exception {
+    public String upload(MultipartFile file, String bucket, String objectName) {
         if (bucket == null || bucket.isEmpty()) {
-            bucket = bucketName;
+            bucket = getBucketName();
         }
         try (InputStream inputStream = file.getInputStream()) {
             minioClient.putObject(
@@ -40,52 +39,70 @@ public class MinIOStorageServiceImpl implements StorageService {
                     .build()
             );
             return objectName;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload file", e);
         }
     }
 
     @Override
-    public InputStream get(String bucket, String objectName) throws Exception {
+    public InputStream get(String bucket, String objectName) {
         if (bucket == null || bucket.isEmpty()) {
-            bucket = bucketName;
+            bucket = getBucketName();
         }
-        return minioClient.getObject(
-            GetObjectArgs.builder()
-                .bucket(bucket)
-                .object(objectName)
-                .build()
-        );
+        try {
+            return minioClient.getObject(
+                GetObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(objectName)
+                    .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get file", e);
+        }
     }
 
     @Override
-    public void delete(String bucket, String objectName) throws Exception {
+    public void delete(String bucket, String objectName) {
         if (bucket == null || bucket.isEmpty()) {
-            bucket = bucketName;
+            bucket = getBucketName();
         }
-        minioClient.removeObject(
-            RemoveObjectArgs.builder()
-                .bucket(bucket)
-                .object(objectName)
-                .build()
-        );
+        try {
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(objectName)
+                    .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete file", e);
+        }
     }
 
     @Override
-    public boolean bucketExists(String bucket) throws Exception {
+    public boolean bucketExists(String bucket) {
         if (bucket == null || bucket.isEmpty()) {
-            bucket = bucketName;
+            bucket = getBucketName();
         }
-        return minioClient.bucketExists(
-            io.minio.BucketExistsArgs.builder().bucket(bucket).build()
-        );
+        try {
+            return minioClient.bucketExists(
+                io.minio.BucketExistsArgs.builder().bucket(bucket).build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to check bucket existence", e);
+        }
     }
 
     @Override
-    public void createBucket(String bucket) throws Exception {
+    public void createBucket(String bucket) {
         if (bucket == null || bucket.isEmpty()) {
-            bucket = bucketName;
+            bucket = getBucketName();
         }
-        minioClient.makeBucket(
-            MakeBucketArgs.builder().bucket(bucket).build()
-        );
+        try {
+            minioClient.makeBucket(
+                MakeBucketArgs.builder().bucket(bucket).build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create bucket", e);
+        }
     }
 }

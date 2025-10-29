@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class FileServiceTest {
+public class FileServiceTest extends AbstractIntegrationTest {
 
     @MockitoBean
     private JWTUtil jwtUtil;
@@ -26,29 +26,29 @@ public class FileServiceTest {
 
     @Test
     public void testGetFilesWithNullFilter() {
-        FilterDTO filter = new FilterDTO(null, null, null, null);
-        MetadataDTO result = fileService.getFiles(filter);
+        String query = "{}";
+        MetadataDTO result = fileService.getFiles(query);
         assertNotNull(result);
     }
 
     @Test
     public void testGetFilesWithFileIds() {
-        FilterDTO filter = new FilterDTO(List.of(1L, 2L), null, null, null);
-        MetadataDTO result = fileService.getFiles(filter);
+        String query = "{\"fileIds\":[1,2]}";
+        MetadataDTO result = fileService.getFiles(query);
         assertNotNull(result);
     }
 
     @Test
     public void testGetFilesWithCardIds() {
-        FilterDTO filter = new FilterDTO(null, List.of(1L), null, null);
-        MetadataDTO result = fileService.getFiles(filter);
+        String query = "{\"cardIds\":[1]}";
+        MetadataDTO result = fileService.getFiles(query);
         assertNotNull(result);
     }
 
     @Test
     public void testGetFilesWithFileTypes() {
-        FilterDTO filter = new FilterDTO(null, null, null, List.of("PHOTO"));
-        MetadataDTO result = fileService.getFiles(filter);
+        String query = "{\"fileTypes\":[\"PHOTO\"]}";
+        MetadataDTO result = fileService.getFiles(query);
         assertNotNull(result);
     }
 }
