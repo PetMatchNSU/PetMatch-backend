@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+jwt:
+  secret-access: testsecret
+  secret-refresh: testrefreshsecret
+
+file-validation:
+  photo-formats: [JPEG, PNG]
+  doc-formats: [PDF]
+  max-size-mb: 5
