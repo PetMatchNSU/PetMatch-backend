@@ -13,7 +13,6 @@ public record FileDescriptor(
     Long cardId,
     String content
 ) {
-
     public enum FileType {
         PHOTO, DOC
     }
