@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,8 +67,8 @@ public class User {
     @JoinColumn(name = "id_authority", nullable = false)
     private Set<Authority> authorities = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<BondTime> bondTimes;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<BondTime> bondTimes = new ArrayList<>();
 
     private boolean isEmailVerified = false;
 
