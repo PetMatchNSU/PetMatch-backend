@@ -169,10 +169,20 @@ services:
       petmatch-redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-i", "http://localhost:8091/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8091/actuator/health"]
       interval: 5s
       timeout: 5s
       retries: 3
+  # PetMatch frontend - Node.js application Production version with image tag
+  petmatch-frontend:
+    image: andrvat/petmatch-frontend:${FRONTEND_IMAGE_TAG:-latest}
+    container_name: petmatch-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      petmatch-service:
+        condition: service_healthy
   # Redis cache
   petmatch-redis:
     image: redis:7-alpine
