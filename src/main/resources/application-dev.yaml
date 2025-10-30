@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 8091
 
 spring:
   liquibase:
@@ -7,34 +7,46 @@ spring:
     enabled: true
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:6543/petmatch
-    username: bel9sh
-    password: 1234
+    url: jdbc:postgresql://localhost:5433/petmatch
+    username: petmatch
+    password: secret
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
     show-sql: true
-  mail:
-    host: ${SMTP_HOST:smtp.gmail.com}
-    port: ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME:petmatch@gmail.com}
-    password: ${SMTP_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
   data:
     redis:
       host: localhost
       port: 6379
-      password: your_redis_password
-      database: 0
-      timeout: 60000
-  app:
-    cache:
-      verification-code:
-        ttl-minutes: 5
+      password: secret
+minio:
+  endpoint: http://localhost:9000
+  access-key: petmatch-access-key
+  secret-key: petmatch-secret-key
+  bucket-name: petmatch-uploads
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    prometheus:
+      access: read_only
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+otel:
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+  logs:
+    exporter: none
+  metrics:
+    exporter: none

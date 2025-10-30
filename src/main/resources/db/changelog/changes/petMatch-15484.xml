@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Таблица t_users_authorities -->
+    <changeSet id="1" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_users_authorities" remarks="Таблица связи пользователей и их прав">
+            <column name="id" type="BIGSERIAL">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="id_authority" type="BIGINT" remarks="Идентификатор права">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_user" type="BIGINT" remarks="Идентификатор пользователя">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_users_authorities"
+                                            foreignKeyName="fk_t_users_authorities_id_authority"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_users_authorities"
+                                 baseColumnNames="id_authority"
+                                 constraintName="fk_t_users_authorities_id_authority"
+                                 referencedTableName="t_authorities"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="3" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_users_authorities"
+                                            foreignKeyName="fk_t_users_authorities_id_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_users_authorities"
+                                 baseColumnNames="id_user"
+                                 constraintName="fk_t_users_authorities_id_user"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="4" author="helttek">
+        <preConditions>
+            <not>
+                <indexExists indexName="t_users_authorities_id_authority_idx" tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="t_users_authorities" indexName="t_users_authorities_id_authority_idx">
+            <column name="id_authority"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="5" author="helttek">
+        <preConditions>
+            <not>
+                <indexExists indexName="t_users_authorities_id_user_idx" tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="t_users_authorities" indexName="t_users_authorities_id_user_idx">
+            <column name="id_user"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
