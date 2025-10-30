@@ -4,14 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.dto.requests.RegistrationRequest;
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
-import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
-import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
-import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.authorization.core.utils.VerificationCodeGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,12 +17,10 @@ import org.nsu.users.entity.User;
 @RequiredArgsConstructor
 public class RegistrationService {
 
-    private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final PersonDetailsService personDetailsService;
     private final EmailVerificationSenderService emailVerificationSenderService;
     private final JWTUtil jwtUtil;
-    @Autowired
     private VerificationCodeGenerator verificationCodeGenerator;
     private final String emailSubject = "Email Verification";
 

@@ -5,8 +5,6 @@ import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCust
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
 import java.time.Duration;
@@ -14,7 +12,7 @@ import java.time.Duration;
 @Configuration
 public class RedisCacheConfig {
 
-    @Value("${spring.app.cache.verification-code.ttl-minutes}")
+    @Value("${spring.data.redis.verification-code.ttl-minutes}")
     private int ttl_minutes;
 
     private static final String VERIFICATION_CODE_CACHE = "Verification codes";
