@@ -22,7 +22,6 @@ public class UserProfileService {
     private final RegionRepository regionRepository;
     private final ContactRepository contactRepository;
     private final ContactTypeRepository contactTypeRepository;
-    private final BondTimeRepository bondTimeRepository;
 
     public void updateProfile(String email, UpdateUserRequest dto) {
         updateUserBasicInfo(email, dto);
@@ -52,10 +51,8 @@ public class UserProfileService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // With orphanRemoval = true on User.bondTimes we update the managed collection.
-        // Clearing the collection will mark existing BondTime rows as orphans and they will be deleted on flush.
+      
         user.getBondTimes().clear();
-
         if (bondTimeDtos == null || bondTimeDtos.isEmpty()) {
             userRepository.save(user);
             return;
