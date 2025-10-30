@@ -1,69 +1,101 @@
 #!/bin/bash
 
-# Deployment script for PetMatch backend
-# Usage: ./deploy.sh [tag] [environment]
-# Example: ./deploy.sh v1.0.0 production
+# Deployment script for PetMatch backend and frontend
+# Usage: ./deploy.sh [image:tag] [environment]
+# Examples:
+#   ./deploy.sh andrvat/petmatch-backend:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad production
+#   ./deploy.sh andrvat/petmatch-frontend:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad production
 
 set -e
 
 # Configuration
-BACKEND_IMAGE_NAME="andrvat/petmatch-backend"
-FRONTEND_IMAGE_NAME="andrvat/petmatch-frontend"
 DOCKER_COMPOSE_FILE="docker-compose.prod.yml"
 
-# Default values
-TAG=${1:-"latest"}
+# Parse input arguments
+FULL_IMAGE_NAME=${1:-""}
 ENVIRONMENT=${2:-"production"}
 
-# Update environment variables for the new tag
-export BACKEND_IMAGE_TAG="${TAG##*:}"
-export FRONTEND_IMAGE_TAG="${TAG##*:}"
+# Extract image name and tag from first argument
+IMAGE_NAME="${FULL_IMAGE_NAME%:*}"
+TAG="${FULL_IMAGE_NAME##*:}"
 
-echo "Using docker image tag $BACKEND_IMAGE_TAG..."
+# Extract service name from image name (last part after /)
+SERVICE_NAME="${IMAGE_NAME##*/}"
 
 echo "🚀 Starting deployment..."
+echo "Full image: $FULL_IMAGE_NAME"
+echo "Service: $SERVICE_NAME"
 echo "Tag: $TAG"
 echo "Environment: $ENVIRONMENT"
+
+# Validate service name and set compose service name
+if [[ "$SERVICE_NAME" == "petmatch-backend" ]]; then
+    COMPOSE_SERVICE_NAME="petmatch-service"
+    export BACKEND_IMAGE_TAG="$TAG"
+elif [[ "$SERVICE_NAME" == "petmatch-frontend" ]]; then
+    COMPOSE_SERVICE_NAME="petmatch-frontend"
+    export FRONTEND_IMAGE_TAG="$TAG"
+else
+    echo "❌ Invalid service name: $SERVICE_NAME"
+    echo "   Must be either 'petmatch-backend' or 'petmatch-frontend'"
+    exit 1
+fi
+
+echo "Using compose service: $COMPOSE_SERVICE_NAME"
 
 echo "Export environment variables for the given environment..."
 export $(cat .env.$ENVIRONMENT | grep -v '^#' | xargs)
 
 echo "Using compose file: $DOCKER_COMPOSE_FILE"
 
-# Pull latest images
-echo "📥 Pulling latest images..."
-docker pull "$TAG" || echo "Backend image not found"
+# Pull latest image
+echo "📥 Pulling latest image..."
+docker pull "$FULL_IMAGE_NAME" || echo "Tagged image not found, using local image"
 
-# Stop only application services (keep infrastructure running)
-echo "⏹️ Stopping application services..."
-docker-compose -f "$DOCKER_COMPOSE_FILE" stop petmatch-service || true
+# Stop only the target service (keep infrastructure running)
+echo "⏹️ Stopping $COMPOSE_SERVICE_NAME service..."
+docker-compose -f "$DOCKER_COMPOSE_FILE" stop "$COMPOSE_SERVICE_NAME" || true
 
-# Remove old application containers
-echo "🗑️ Removing old application containers..."
-docker-compose -f "$DOCKER_COMPOSE_FILE" rm -f petmatch-service || true
+# Remove old service container
+echo "🗑️ Removing old $COMPOSE_SERVICE_NAME container..."
+docker-compose -f "$DOCKER_COMPOSE_FILE" rm -f "$COMPOSE_SERVICE_NAME" || true
 
-# Start application services
-echo "▶️ Starting application services..."
-docker-compose -f "$DOCKER_COMPOSE_FILE" up -d petmatch-service
+# Start the service
+echo "▶️ Starting $COMPOSE_SERVICE_NAME service..."
+docker-compose -f "$DOCKER_COMPOSE_FILE" up -d "$COMPOSE_SERVICE_NAME"
 
 # Wait for health check
-echo "⏳ Waiting for application to be healthy..."
+echo "⏳ Waiting for $COMPOSE_SERVICE_NAME to be healthy..."
 timeout=60
 counter=0
 while [ $counter -lt $timeout ]; do
-    if docker-compose -f "$DOCKER_COMPOSE_FILE" ps petmatch-service | grep -q "healthy"; then
-        echo "✅ Application is healthy!"
-        break
+    if [[ "$SERVICE_NAME" == "petmatch-backend" ]]; then
+      if docker-compose -f "$DOCKER_COMPOSE_FILE" ps "$COMPOSE_SERVICE_NAME" | grep -q "healthy"; then
+          echo "✅ $COMPOSE_SERVICE_NAME is healthy!"
+          break
+      fi
+      echo "Waiting for petmatch-backend health check... ($counter/$timeout)"
+      sleep 2
+      counter=$((counter + 2))
+    elif [[ "$SERVICE_NAME" == "petmatch-frontend" ]]; then
+      if docker-compose -f "$DOCKER_COMPOSE_FILE" logs "$COMPOSE_SERVICE_NAME" | grep -q "vite preview"; then
+          echo "✅ $COMPOSE_SERVICE_NAME is healthy!"
+          break
+      fi
+      echo "Waiting for petmatch-frontend health check... ($counter/$timeout)"
+      sleep 2
+      counter=$((counter + 2))
+    else
+        echo "❌ Invalid service name: $SERVICE_NAME"
+        echo "   Must be either 'petmatch-backend' or 'petmatch-frontend' during health check"
+        exit 1
     fi
-    echo "Waiting for health check... ($counter/$timeout)"
-    sleep 2
-    counter=$((counter + 2))
 done
 
 if [ $counter -ge $timeout ]; then
-    echo "❌ Application failed to become healthy within $timeout seconds"
-    echo "📋 Application logs:"
-    docker-compose -f "$DOCKER_COMPOSE_FILE" logs petmatch-service
+    echo "❌ $COMPOSE_SERVICE_NAME failed to become healthy within $timeout seconds"
+    echo "📋 Service logs:"
+    docker-compose -f "$DOCKER_COMPOSE_FILE" logs "$COMPOSE_SERVICE_NAME"
     exit 1
 fi
 
@@ -72,5 +104,5 @@ echo "🧹 Cleaning up old images..."
 docker image prune -f
 
 echo "🎉 Deployment completed successfully!"
-echo "📊 Application status:"
-docker-compose -f "$DOCKER_COMPOSE_FILE" ps petmatch-service
+echo "📊 Service status:"
+docker-compose -f "$DOCKER_COMPOSE_FILE" ps "$COMPOSE_SERVICE_NAME"
