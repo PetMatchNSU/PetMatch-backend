@@ -1,5 +1,9 @@
 package org.nsu.users.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,6 +63,11 @@ public class User {
     @JoinColumn(name = "id_region", nullable = false)
     @ToString.Exclude
     private Region region;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_authority", nullable = false)
+    @ToString.Exclude
+    private Set<Authority> authorities = new HashSet<>();// JWUtils are dependent on it
 
     private boolean isEmailVerified = false;
 
