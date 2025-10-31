@@ -1,4 +1,4 @@
-package org.nsu.authorization.core.dto.requests;
+package org.nsu.authorization.core.dto.requests.registrationRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -36,7 +36,7 @@ public class RegistrationRequest {
     private String lastName;
 
     @NotBlank(message = "Gender should not be empty")
-    @Schema(description = "Пол (М/Ж)", example = "M")
+    @Schema(description = "Пол (M/F)", example = "M")
     private String gender;
 
     @NotBlank(message = "Region should not be empty")
@@ -58,34 +58,4 @@ public class RegistrationRequest {
     @Valid
     @Schema(description = "Массив способов связи")
     private List<ContactInfo> contactInfo;
-
-    @Getter
-    @Setter
-    @Schema(description = "Временной интервал для связи")
-    private static class BondTime {
-        @NotBlank(message = "Bond time start should not be empty")
-        @Schema(description = "Начало временного интервала (HH:MM)", example = "10:00")
-        private String bondTimeStart;
-
-        @NotBlank(message = "Bond time end should not be empty")
-        @Schema(description = "Конец временного интервала (HH:MM)", example = "12:00")
-        private String bondTimeEnd;
-    }
-
-    @Getter
-    @Setter
-    @Schema(description = "Способ связи")
-    private static class ContactInfo {
-        @NotBlank(message = "Contact type should not be empty")
-        @Schema(description = "Тип связи (PHONE/EMAIL/TELEGRAM/VK)", example = "VK")
-        private String type;
-
-        @NotBlank(message = "Contact detail should not be empty")
-        @Schema(description = "Ссылка, номер или email", example = "https://vk.com/t.test")
-        private String contact;
-
-        @NotNull(message = "Visibility flag should not be null")
-        @Schema(description = "Флаг отображения конкретного типа связи", example = "true")
-        private Boolean visible;
-    }
 }

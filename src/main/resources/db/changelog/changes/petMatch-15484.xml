@@ -13,15 +13,14 @@
             </not>
         </preConditions>
         <createTable tableName="t_users_authorities" remarks="Таблица связи пользователей и их прав">
-            <column name="id" type="BIGSERIAL">
-                <constraints nullable="false" unique="true" primaryKey="true"/>
-            </column>
             <column name="id_authority" type="BIGINT" remarks="Идентификатор права">
                 <constraints nullable="false"/>
             </column>
             <column name="id_user" type="BIGINT" remarks="Идентификатор пользователя">
                 <constraints nullable="false"/>
             </column>
+            <constraints primaryKey="true" primaryKeyName="pk_t_users_authorities" 
+                         primaryKeyColumns="id_user, id_authority"/>
         </createTable>
     </changeSet>
 

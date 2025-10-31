@@ -1,6 +1,5 @@
 package org.nsu.users.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,13 +10,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.Index;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "t_regions")
+@Table(name = "t_regions", indexes = { @Index(name = "idx_regions_city", columnList = "city"),
+        @Index(name = "id_regions_region_city", columnList = "region, city", unique = true) })
 public class Region {
 
     @Id

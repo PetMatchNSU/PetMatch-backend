@@ -6,6 +6,7 @@ import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException
 import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
+import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -50,6 +51,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MailException.class)
     public ResponseEntity<AbstractNegativeResponse> HandleMailException(MailException e) {
+        return simplePersonResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(UserCreationFailException.class)
+    public ResponseEntity<AbstractNegativeResponse> HandleUserCreationFailException(UserCreationFailException e) {
         return simplePersonResponse(HttpStatus.CONFLICT, e.getMessage());
     }
 }

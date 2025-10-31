@@ -12,39 +12,44 @@ import java.time.Duration;
 @Configuration
 public class RedisCacheConfig {
 
-    @Value("${spring.data.redis.verification-code.ttl-minutes}")
-    private int ttl_minutes;
+        @Value("${spring.data.redis.verification-code.ttl-minutes}")
+        private int ttl_minutes;
 
-    private static final String VERIFICATION_CODE_CACHE = "Verification codes";
+        @Value("${spring.data.redis.verification-code.default-ttl-minutes}")
+        private int default_ttl_minutes;
 
-    @Bean
-    public RedisCacheConfiguration cacheConfiguration() {
-        return RedisCacheConfiguration.defaultCacheConfig()
-                // Set a sensible default TTL (e.g., no TTL or a long one)
-                .entryTtl(Duration.ofMinutes(60))
-                .disableCachingNullValues()
-                .serializeValuesWith(SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
-    }
+        private static final String VERIFICATION_CODE_CACHE = "Verification codes";
 
-    /**
-     * Customizes the RedisCacheManager to set a specific TTL for the
-     * "Verification codes" cache, overriding the default configuration.
-     */
-    @Bean
-    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-        // Calculate the Duration using the injected value
-        final Duration verificationCodeTtl = Duration.ofMinutes(ttl_minutes);
-
-        return (builder) -> builder
-                .withCacheConfiguration(
-                        VERIFICATION_CODE_CACHE,
-                        // Create a specific config for this cache, inheriting from the default,
-                        // but overriding the TTL.
-                        RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(verificationCodeTtl)
+        @Bean
+        public RedisCacheConfiguration cacheConfiguration() {
+                return RedisCacheConfiguration.defaultCacheConfig()
+                                // Set a sensible default TTL (e.g., no TTL or a long one)
+                                .entryTtl(Duration.ofMinutes(default_ttl_minutes))
                                 .disableCachingNullValues()
-                                .serializeValuesWith(
-                                        SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())));
-    }
+                                .serializeValuesWith(SerializationPair
+                                                .fromSerializer(new GenericJackson2JsonRedisSerializer()));
+        }
+
+        /**
+         * Customizes the RedisCacheManager to set a specific TTL for the
+         * "Verification codes" cache, overriding the default configuration.
+         */
+        @Bean
+        public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+                // Calculate the Duration using the injected value
+                final Duration verificationCodeTtl = Duration.ofMinutes(ttl_minutes);
+
+                return (builder) -> builder
+                                .withCacheConfiguration(
+                                                VERIFICATION_CODE_CACHE,
+                                                // Create a specific config for this cache, inheriting from the default,
+                                                // but overriding the TTL.
+                                                RedisCacheConfiguration.defaultCacheConfig()
+                                                                .entryTtl(verificationCodeTtl)
+                                                                .disableCachingNullValues()
+                                                                .serializeValuesWith(
+                                                                                SerializationPair.fromSerializer(
+                                                                                                new GenericJackson2JsonRedisSerializer())));
+        }
 
 }
