@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() //openAPI
                         .requestMatchers("/api/v1/user/login").permitAll()
                         .requestMatchers("/api/v1/user/refresh").permitAll()
+                        .requestMatchers("/api/v1/user/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)

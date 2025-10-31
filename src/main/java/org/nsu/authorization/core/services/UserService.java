@@ -3,16 +3,18 @@ package org.nsu.authorization.core.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.HashSet;
+
 import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
 import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
 import org.nsu.users.entity.Authority;
 import org.nsu.users.entity.Gender;
 import org.nsu.users.entity.User;
-import org.nsu.users.entity.userAuthority.UserAuthority;
 import org.nsu.authorization.core.repositories.AuthorityRepository;
 import org.nsu.authorization.core.repositories.RegionRepository;
 import org.nsu.authorization.core.repositories.StatusRepository;
-import org.nsu.authorization.core.repositories.UserAuthorityRepository;
 import org.nsu.authorization.core.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -24,14 +26,23 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final StatusRepository statusRepository;
     private final AuthorityRepository authorityRepository;
-    private final UserAuthorityRepository userAuthorityRepository;
 
     @Transactional
     public User AddNewUser(RegistrationRequest request) {
         User newUser = mapRequestToUserEntity(request);
+        Authority defaultAuthority = authorityRepository.findByName("Regular")
+                .orElseThrow(() -> new UserCreationFailException(
+                        "Default authority ('Regular') is missing from the database"));
+
+        newUser.setAuthorities(new HashSet<>(Collections.singletonList(defaultAuthority)));
+
         User savedUser = userRepository.save(newUser);
-        assignDefaultAuthority(savedUser);
         return savedUser;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     private User mapRequestToUserEntity(RegistrationRequest request) {
@@ -52,20 +63,8 @@ public class UserService {
         user.setStatus(statusRepository.findByName("Active")
                 .orElseThrow(
                         () -> new UserCreationFailException(
-                                "Default user status (\"Active\") is missing from the database")));
+                                "Default user status ('Active') is missing from the database")));
 
         return user;
-    }
-
-    private void assignDefaultAuthority(User user) {
-        Authority defaultAuthority = authorityRepository.findByName("Regular")
-                .orElseThrow(() -> new UserCreationFailException(
-                        "Default authority \"Regular\" is missing from the database"));
-
-        UserAuthority userAuthority = new UserAuthority();
-        userAuthority.setUser(user);
-        userAuthority.setAuthority(defaultAuthority);
-
-        userAuthorityRepository.save(userAuthority);
     }
 }

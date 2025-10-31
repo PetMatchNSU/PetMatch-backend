@@ -81,4 +81,25 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="7" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists 
+                foreignKeyTableName="t_authorities" 
+                foreignKeyName="fk_t_authorities_on_id_authority"/>
+        </preConditions>
+    
+        <dropForeignKeyConstraint 
+            baseTableName="t_authorities" 
+            constraintName="fk_t_authorities_on_id_authority"/>
+    </changeSet>
+
+    <changeSet id="8" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="id_authority" tableName="t_authorities"/>
+        </preConditions>
+        <dropColumn tableName="t_authorities">
+            <column name="id_authority" type="boolean"/>
+        </dropColumn>
+    </changeSet>
+
 </databaseChangeLog>

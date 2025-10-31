@@ -7,7 +7,6 @@ import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsExce
 import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.authorization.core.utils.VerificationCodeGenerator;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.nsu.users.entity.User;
 
@@ -16,17 +15,14 @@ import org.nsu.users.entity.User;
 public class RegistrationService {
 
     private final UserService userService;
-    private final PersonDetailsService personDetailsService;
     private final EmailVerificationSenderService emailVerificationSenderService;
     private final JWTUtil jwtUtil;
     private VerificationCodeGenerator verificationCodeGenerator;
 
     public RegistrationResponse register(RegistrationRequest dto) {
 
-        try {
-            personDetailsService.loadUserByUsername(dto.getEmail());
+        if (userService.existsByEmail(dto.getEmail())) {
             throw new UserAlreadyExistsException("A user with this email already exists.");
-        } catch (UsernameNotFoundException e) {
         }
 
         User user = userService.AddNewUser(dto);
