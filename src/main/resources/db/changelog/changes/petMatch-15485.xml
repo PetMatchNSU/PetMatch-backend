@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
 
     <!-- Таблица t_users_authorities -->
     <changeSet id="1" author="helttek">
@@ -19,12 +19,19 @@
             <column name="id_user" type="BIGINT" remarks="Идентификатор пользователя">
                 <constraints nullable="false"/>
             </column>
-            <constraints primaryKey="true" primaryKeyName="pk_t_users_authorities" 
-                         primaryKeyColumns="id_user, id_authority"/>
         </createTable>
     </changeSet>
 
     <changeSet id="2" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <primaryKeyExists tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <addPrimaryKey tableName="t_users_authorities" columnNames="id_authority,id_user" constraintName="pk_t_users_authorities"/>
+    </changeSet>
+
+    <changeSet id="3" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyTableName="t_users_authorities"
@@ -38,7 +45,7 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
-    <changeSet id="3" author="helttek">
+    <changeSet id="4" author="helttek">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyTableName="t_users_authorities"
@@ -52,8 +59,8 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
-    <changeSet id="4" author="helttek">
-        <preConditions>
+    <changeSet id="5" author="helttek">
+        <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists indexName="t_users_authorities_id_authority_idx" tableName="t_users_authorities"/>
             </not>
@@ -63,8 +70,8 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="5" author="helttek">
-        <preConditions>
+    <changeSet id="6" author="helttek">
+        <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists indexName="t_users_authorities_id_user_idx" tableName="t_users_authorities"/>
             </not>
