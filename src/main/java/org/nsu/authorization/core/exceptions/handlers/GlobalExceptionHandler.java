@@ -2,6 +2,7 @@ package org.nsu.authorization.core.exceptions.handlers;
 
 import org.nsu.authorization.core.dto.responses.AbstractNegativeResponse;
 import org.nsu.authorization.core.dto.responses.negative.PersonErrorResponse;
+import org.nsu.authorization.core.dto.responses.negative.RegistrationErrorResponse;
 import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
 import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
@@ -21,6 +22,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(httpStatus)
                 .body(new PersonErrorResponse(message, System.currentTimeMillis()));
+    }
+
+    private ResponseEntity<AbstractNegativeResponse> RegistrationFailResponse(HttpStatus httpStatus, String message) {
+        return ResponseEntity
+                .status(httpStatus)
+                .body(new RegistrationErrorResponse(message, System.currentTimeMillis()));
     }
 
     @ExceptionHandler(PersonNotFoundException.class)
@@ -46,16 +53,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RegionNotFoundException.class)
     public ResponseEntity<AbstractNegativeResponse> HandleRegionNotFoundException(RegionNotFoundException e) {
-        return simplePersonResponse(HttpStatus.CONFLICT, e.getMessage());
+        return simplePersonResponse(HttpStatus.CONFLICT, "Failed to find region in db: " + e.getMessage());
     }
 
     @ExceptionHandler(MailException.class)
     public ResponseEntity<AbstractNegativeResponse> HandleMailException(MailException e) {
-        return simplePersonResponse(HttpStatus.CONFLICT, e.getMessage());
+        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send mail: " + e.getMessage());
     }
 
     @ExceptionHandler(UserCreationFailException.class)
     public ResponseEntity<AbstractNegativeResponse> HandleUserCreationFailException(UserCreationFailException e) {
-        return simplePersonResponse(HttpStatus.CONFLICT, e.getMessage());
+        return RegistrationFailResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user: " + e.getMessage());
     }
 }
