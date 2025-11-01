@@ -17,7 +17,7 @@ public class RegistrationService {
     private final UserService userService;
     private final EmailVerificationSenderService emailVerificationSenderService;
     private final JWTUtil jwtUtil;
-    private VerificationCodeGenerator verificationCodeGenerator;
+    private final VerificationCodeGenerator verificationCodeGenerator;
 
     public RegistrationResponse register(RegistrationRequest dto) {
 
