@@ -5,7 +5,6 @@ import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationR
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
 import org.nsu.authorization.core.utils.JWTUtil;
-import org.nsu.authorization.core.utils.VerificationCodeGenerator;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.nsu.users.entity.User;
@@ -17,7 +16,7 @@ public class RegistrationService {
     private final UserService userService;
     private final EmailVerificationSenderService emailVerificationSenderService;
     private final JWTUtil jwtUtil;
-    private final VerificationCodeGenerator verificationCodeGenerator;
+    private final VerificationCodeCachingService verificationCodeCachingService;
 
     public RegistrationResponse register(RegistrationRequest dto) {
 
@@ -27,8 +26,7 @@ public class RegistrationService {
 
         User user = userService.AddNewUser(dto);
 
-        String tempCodeKey = "registrationService:user:" + user.getId() + ":email:code";
-        String tempCode = verificationCodeGenerator.generateVerificationCodeAndCacheIt(tempCodeKey);
+        String tempCode = verificationCodeCachingService.generateAndCacheCode(user.getId().toString());
 
         emailVerificationSenderService.Send(dto.getEmail(), tempCode);
 
