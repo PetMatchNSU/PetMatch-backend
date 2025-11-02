@@ -4,31 +4,39 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.nsu.authorization.core.dto.requests.EmailVerifierRequest;
-import org.nsu.authorization.core.services.EmailVerifierService;
+import org.nsu.authorization.core.services.EmailVerificationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.RestController;
+
+// Removed unused imports:
+// import org.springframework.http.HttpHeaders;
+// import org.springframework.web.bind.annotation.RequestHeader;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
 public class EmailVerifierController {
-    private final EmailVerifierService service;
+    private final EmailVerificationService service;
 
+    /**
+     * Handles the email verification request.
+     * Spring Security validates the Bearer token and injects the parsed Jwt
+     * as the 'principal'.
+     */
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailVerifierRequest dto,
-            @RequestHeader("Authorization") String authorizationHeader, @RequestHeader HttpHeaders requestHeaders) {
+            @AuthenticationPrincipal Jwt jwt) {
 
-        service.verifyEmail(dto, authorizationHeader);
+        // We no longer pass the raw header.
+        // We pass the authenticated, validated Jwt object directly to the service.
+        service.verifyEmail(dto, jwt);
 
-        return ResponseEntity
-                .ok()
-                .headers(requestHeaders)
-                .build();
-
+        // Return a simple 200 OK.
+        return ResponseEntity.ok().build();
     }
 }
