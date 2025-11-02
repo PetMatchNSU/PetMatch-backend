@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "t_authorities")
@@ -17,14 +18,20 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Authority {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Authority implements GrantedAuthority {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(unique = true, nullable = false, length = 64)
-    private String name;
+	@Column(unique = true, nullable = false, length = 64)
+	private String name;
 
-    @Column(unique = true, nullable = false, length = 256)
-    private String description;
+	@Column(unique = true, nullable = false, length = 256)
+	private String description;
+
+	@Override
+	public String getAuthority() {
+		// This is the method the JWT fix relies on to get the String value
+		return this.name;
+	}
 }

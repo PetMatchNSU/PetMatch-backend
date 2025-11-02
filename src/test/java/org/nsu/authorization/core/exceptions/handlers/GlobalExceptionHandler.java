@@ -1,5 +1,3 @@
-// Create this in a new file, e.g., /controllers/GlobalExceptionHandler.java
-
 package org.nsu.authorization.core.exceptions.handlers;
 
 import org.nsu.authorization.core.dto.responses.negative.ErrorResponse;

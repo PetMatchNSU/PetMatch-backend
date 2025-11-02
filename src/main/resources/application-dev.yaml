@@ -26,11 +26,13 @@ spring:
   mail:
     host: mailhog
     port: 1025
-    username: ""
+    username: "justanewacc9@gmail.com"
     password: ""
     properties:
+      mail.transport.protocol: smtp
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
+      mail.debug: false
 minio:
   endpoint: http://petmatch-minio:9000
   access-key: petmatch-access-key

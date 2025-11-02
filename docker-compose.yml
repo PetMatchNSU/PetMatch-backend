@@ -142,7 +142,7 @@ services:
       - "8091:8091"
     environment:
       POSTGRES_HOST: petmatch-postgres
-      POSTGRES_PORT: 5433
+      POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

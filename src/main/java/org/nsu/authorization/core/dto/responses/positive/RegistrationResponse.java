@@ -13,22 +13,20 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RegistrationResponse {
 
-    @NotBlank
-    @Schema(description = "Access JWT токен для авторизации на сервисах", example = "some.access.token")
-    private String accessToken;
+	@Schema(description = "Access JWT токен для авторизации на сервисах", example = "some.access.token")
+	private String accessToken;
 
-    @NotBlank
-    @Schema(description = "Refresh JWT токен для восстановления Access и Refresh JWT токенов", example = "some.refresh.token")
-    private String refreshToken;
+	@Schema(description = "Refresh JWT токен для восстановления Access и Refresh JWT токенов", example = "some.refresh.token")
+	private String refreshToken;
 
-    @NonNull
-    private UserDto user;
+	@NonNull
+	private UserDto user;
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class UserDto {
-        private boolean isEmailVerified;
-    }
+	@Getter
+	@Setter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class UserDto {
+		private boolean isEmailVerified;
+	}
 }
