@@ -12,9 +12,6 @@ import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.dto.responses.negative.UserErrorResponseLogin;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.services.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,10 +62,7 @@ public class UserController {
                     )
             )
     })
-    public ResponseEntity<UserResponse> getUserProfile() {
-
-        return ResponseEntity
-            .ok()
-            .body(userService.getUserProfile());
+    public UserResponse getUserProfile() {
+        return userService.getUserProfile();
     }
 }
