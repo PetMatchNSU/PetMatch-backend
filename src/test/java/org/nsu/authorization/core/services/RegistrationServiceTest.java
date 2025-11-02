@@ -10,7 +10,6 @@ import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationR
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
 import org.nsu.authorization.core.utils.JWTUtil;
-import org.nsu.authorization.core.utils.VerificationCodeGenerator;
 import org.nsu.users.entity.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -19,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) 
+@ExtendWith(MockitoExtension.class)
 class RegistrationServiceTest {
 
     @Mock
@@ -29,7 +28,7 @@ class RegistrationServiceTest {
     @Mock
     private JWTUtil jwtUtil;
     @Mock
-    private VerificationCodeGenerator verificationCodeGenerator;
+    private VerificationCodeCachingService verificationCodeCachingService;
 
     @InjectMocks
     private RegistrationService registrationService;
@@ -53,15 +52,15 @@ class RegistrationServiceTest {
 
     @Test
     void testRegister_Success() {
-        when(mockUser.getId()).thenReturn(1L); 
+        when(mockUser.getId()).thenReturn(1L);
 
         when(userService.existsByEmail("test@example.com")).thenReturn(false);
 
         when(userService.AddNewUser(registrationRequest)).thenReturn(mockUser);
 
         String testCode = "123456";
-        String expectedCacheKey = "registrationService:user:1:email:code";
-        when(verificationCodeGenerator.generateVerificationCodeAndCacheIt(expectedCacheKey)).thenReturn(testCode);
+        String expectedCacheKey = "1";
+        when(verificationCodeCachingService.generateAndCacheCode(expectedCacheKey)).thenReturn(testCode);
 
         String accessToken = "fake-access-token";
         String refreshToken = "fake-refresh-token";
@@ -77,7 +76,7 @@ class RegistrationServiceTest {
 
         verify(userService).existsByEmail("test@example.com");
         verify(userService).AddNewUser(registrationRequest);
-        verify(verificationCodeGenerator).generateVerificationCodeAndCacheIt(expectedCacheKey);
+        verify(verificationCodeCachingService).generateAndCacheCode(expectedCacheKey);
         verify(emailVerificationSenderService).Send("test@example.com", testCode);
         verify(jwtUtil).generateAccessToken(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtUtil).generateRefreshToken(any(UsernamePasswordAuthenticationToken.class));
@@ -92,7 +91,7 @@ class RegistrationServiceTest {
         });
 
         verify(userService, never()).AddNewUser(any());
-        verify(verificationCodeGenerator, never()).generateVerificationCodeAndCacheIt(anyString());
+        verify(verificationCodeCachingService, never()).generateAndCacheCode(anyString());
         verify(emailVerificationSenderService, never()).Send(anyString(), anyString());
         verify(jwtUtil, never()).generateAccessToken(any());
     }
