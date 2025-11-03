@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.repositories.UserRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
 import org.nsu.users.entity.*;
-import org.nsu.users.repositories.BondTimeRepository;
-import org.nsu.users.repositories.ContactRepository;
+import org.nsu.users.mappers.BondTimeMapper;
+import org.nsu.users.mappers.ContactMapper;
 import org.nsu.users.repositories.ContactTypeRepository;
 import org.nsu.users.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,17 +21,11 @@ public class UserProfileService {
 
     private final UserRepository userRepository;
     private final RegionRepository regionRepository;
-    private final ContactRepository contactRepository;
     private final ContactTypeRepository contactTypeRepository;
+    private final BondTimeMapper bondTimeMapper;
+    private final ContactMapper contactMapper;
 
     public void updateProfile(String email, UpdateUserRequest dto) {
-        updateUserBasicInfo(email, dto);
-        updateBondTimes(email, dto.getBondTime());
-        updateContacts(email, dto.getContactInfo());
-    }
-
-    @Transactional
-    protected void updateUserBasicInfo(String email, UpdateUserRequest dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -43,54 +38,43 @@ public class UserProfileService {
                 .orElseThrow(() -> new IllegalArgumentException("Region not found: " + dto.getLocationId()));
         user.setRegion(region);
 
-        userRepository.save(user);
-    }
+        Map<String, ContactType> typesMap = contactTypeRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(ContactType::getName, ct -> ct));
 
-    @Transactional
-    protected void updateBondTimes(String email, List<UpdateUserRequest.BondTimeDto> bondTimeDtos) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-      
         user.getBondTimes().clear();
-        if (bondTimeDtos == null || bondTimeDtos.isEmpty()) {
-            userRepository.save(user);
-            return;
+        if (dto.getBondTime() != null && !dto.getBondTime().isEmpty()) {
+            List<BondTime> bondEntities = dto.getBondTime().stream()
+                    .map(b -> {
+                        BondTime bt = bondTimeMapper.toEntity(b);
+                        bt.setUser(user);
+                        return bt;
+                    })
+                    .collect(Collectors.toList());
+            user.getBondTimes().addAll(bondEntities);
         }
 
-        for (UpdateUserRequest.BondTimeDto b : bondTimeDtos) {
-            BondTime bt = new BondTime();
-            bt.setStart(b.getBondTimeStart());
-            bt.setEnd(b.getBondTimeEnd());
-            bt.setUser(user);
-            user.getBondTimes().add(bt);
+        user.getContacts().clear();
+        if (dto.getContactInfo() != null && !dto.getContactInfo().isEmpty()) {
+            List<Contact> contactEntities = dto.getContactInfo().stream()
+                    .map(cdto -> {
+                        Contact contact = contactMapper.toEntity(cdto);
+                        contact.setUser(user);
+                        ContactType ct = typesMap.get(cdto.getType());
+                        if (ct == null) throw new IllegalArgumentException("Unknown contact type: " + cdto.getType());
+                        contact.setType(ct);
+                        return contact;
+                    })
+                    .collect(Collectors.toList());
+            user.getContacts().addAll(contactEntities);
         }
 
-        userRepository.save(user);
+        saveUserAggregate(user);
     }
 
     @Transactional
-    protected void updateContacts(String email, List<UpdateUserRequest.ContactInfoDto> contactDtos) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        contactRepository.deleteByUserId(user.getId());
-        
-        if (contactDtos == null || contactDtos.isEmpty()) {
-            return;
-        }
-
-        List<Contact> toSave = new ArrayList<>();
-        for (UpdateUserRequest.ContactInfoDto c : contactDtos) {
-            ContactType type = contactTypeRepository.findByName(c.getType())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown contact type: " + c.getType()));
-            Contact contact = new Contact();
-            contact.setType(type);
-            contact.setLink(c.getContact());
-            contact.setUser(user);
-            contact.setIsVisible(c.getVisible());
-            toSave.add(contact);
-        }
-        contactRepository.saveAll(toSave);
+    protected void saveUserAggregate(User user) {
+        userRepository.save(user);
     }
+
 }
