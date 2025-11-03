@@ -4,8 +4,7 @@ public final class ValidationPatterns {
     private ValidationPatterns() {}
 
     /**
-     * Pattern matching time in HH:mm 24-hour format (00:00 - 23:59)
+     * Jackson/DateTime pattern for LocalTime formatting/parsing
      */
-    public static final String TIME_HH_MM = "^(?:[01]\\d|2[0-3]):[0-5]\\d$";
-    
+    public static final String TIME_FORMAT = "HH:mm";
 }
