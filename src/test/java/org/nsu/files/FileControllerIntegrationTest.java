@@ -14,7 +14,7 @@ import org.nsu.animal.repository.AnimalCardRepository;
 import org.nsu.animal.repository.AnimalRepository;
 import org.nsu.animal.repository.AnimalCardStatusRepository;
 import org.nsu.animal.repository.PlacementGoalRepository;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.files.dto.FileDescriptor;
@@ -51,7 +51,6 @@ import java.util.Base64;
 import java.util.List;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class FileControllerIntegrationTest extends AbstractIntegrationTest {
 
