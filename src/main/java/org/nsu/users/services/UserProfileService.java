@@ -61,10 +61,11 @@ public class UserProfileService {
         if (!CollectionUtils.isEmpty(dto.getContactInfo())) {
             List<Contact> contactEntities = dto.getContactInfo().stream()
                     .map(cdto -> {
-                        Contact contact = contactMapper.toEntity(cdto);
-                        contact.setUser(user);
                         ContactType ct = typesMap.get(cdto.getType());
                         if (ct == null) throw new IllegalArgumentException("Unknown contact type: " + cdto.getType());
+
+                        Contact contact = contactMapper.toEntity(cdto);
+                        contact.setUser(user);
                         contact.setType(ct);
                         return contact;
                     })
