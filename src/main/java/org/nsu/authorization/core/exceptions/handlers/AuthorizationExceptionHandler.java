@@ -1,7 +1,7 @@
 package org.nsu.authorization.core.exceptions.handlers;
 
-import org.nsu.authorization.core.dto.responses.AbstractNegativeResponse;
-import org.nsu.authorization.core.dto.responses.negative.PersonErrorResponse;
+import common.dto.responses.negative.AbstractNegativeResponse;
+import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
 import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
 import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class AuthorizationExceptionHandler {
 
     private ResponseEntity<AbstractNegativeResponse> simplePersonResponse(HttpStatus httpStatus, String message) {
         return ResponseEntity
@@ -25,15 +25,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PersonHasNotVerifiedEmailException.class)
-    public ResponseEntity<AbstractNegativeResponse> handlePersonNotFoundException(PersonHasNotVerifiedEmailException e) {
+    public ResponseEntity<AbstractNegativeResponse> handlePersonHasNotVerifiedEmailException(PersonHasNotVerifiedEmailException e) {
         return  simplePersonResponse(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
     @ExceptionHandler(JWTIsExpiredException.class)
-    public ResponseEntity<AbstractNegativeResponse> handlePersonNotFoundException(JWTIsExpiredException e) {
+    public ResponseEntity<AbstractNegativeResponse> handlePersonNotAuthorized(JWTIsExpiredException e) {
         return simplePersonResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
-
-
 
 }
