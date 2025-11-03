@@ -25,6 +25,7 @@
         <modelMapper.version>3.2.2</modelMapper.version>
         <springDoc.version>2.8.6</springDoc.version>
         <google.findbugs.version>3.0.2</google.findbugs.version>
+        <org.springdoc.version>2.8.6</org.springdoc.version>
     </properties>
 
     <dependencyManagement>

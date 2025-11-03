@@ -12,6 +12,7 @@ import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.dto.responses.negative.UserErrorResponseLogin;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.services.UserService;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +34,7 @@ public class UserController {
                     responseCode = "200",
                     description = "Данные пользователя успешно получены",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponse.class)
                     )
             ),
@@ -41,7 +42,7 @@ public class UserController {
                     responseCode = "401",
                     description = "Пользователь не авторизован",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PersonErrorResponse.class)
                     )
             ),
@@ -49,7 +50,7 @@ public class UserController {
                     responseCode = "403",
                     description = "Доступ запрещён",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PersonErrorResponse.class)
                     )
             ),
@@ -57,7 +58,7 @@ public class UserController {
                     responseCode = "404",
                     description = "Пользователь не найден",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserErrorResponseLogin.class)
                     )
             )

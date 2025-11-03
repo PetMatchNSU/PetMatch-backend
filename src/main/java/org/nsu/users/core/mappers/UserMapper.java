@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
+import org.nsu.users.core.services.TimezoneService;
 import org.nsu.users.entity.BondTime;
 import org.nsu.users.entity.Contact;
 import org.nsu.users.entity.Gender;
@@ -11,8 +12,6 @@ import org.nsu.users.entity.User;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -48,11 +47,6 @@ public interface UserMapper {
 
     @Named("localTimeToOffsetDateTime")
     default OffsetDateTime localTimeToOffsetDateTime(LocalTime localTime) {
-        if (localTime == null) {
-            return null;
-        }
-        ZoneId moscowZone = ZoneId.of("Europe/Moscow");
-        ZonedDateTime zdt = ZonedDateTime.now(moscowZone).with(localTime);
-        return zdt.toOffsetDateTime();
+        return TimezoneService.convertLocalTimeToOffsetDateTimeStatic(localTime);
     }
 }

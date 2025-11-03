@@ -1,6 +1,10 @@
 server:
   port: 8091
 
+app:
+  properties:
+    timezone: "Europe/Moscow"
+
 spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
@@ -8,8 +12,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5433/petmatch
-    username: petmatch
-    password: secret
+    username: bel9sh
+    password: 1234
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

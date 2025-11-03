@@ -8,21 +8,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.nsu.admin.services.StatusCommentService;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
+import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.testutils.TestDataFactory;
 import org.nsu.users.core.mappers.UserMapper;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.entity.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,6 +59,16 @@ class UserServiceTest {
         Long userId = 1L;
         Set<Contact> contacts = TestDataFactory.createTestContacts(testUser);
 
+        // Mock Security Context
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        PersonDetails personDetails = mock(PersonDetails.class);
+        
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(personDetails);
+        when(personDetails.getUserId()).thenReturn(userId);
+        SecurityContextHolder.setContext(securityContext);
+
         UserResponse expectedResponse = new UserResponse(
                 "Ivan",
                 "Petrov",
@@ -66,8 +80,8 @@ class UserServiceTest {
                 "Active",
                 null,
                 List.of(new UserResponse.BondTimeDto(
-                        java.time.OffsetDateTime.now(java.time.ZoneId.of("Europe/Moscow")).with(java.time.LocalTime.of(9, 0)),
-                        java.time.OffsetDateTime.now(java.time.ZoneId.of("Europe/Moscow")).with(java.time.LocalTime.of(18, 0))
+                        OffsetDateTime.now().with(LocalTime.of(9, 0)),
+                        OffsetDateTime.now().with(LocalTime.of(18, 0))
                 )),
                 List.of(new UserResponse.ContactInfoDto(
                         "Phone",
@@ -89,6 +103,17 @@ class UserServiceTest {
     @Test
     void getUserProfile_ShouldThrowPersonNotFoundException_WhenUserNotExists() {
         Long userId = 999L;
+        
+        // Mock Security Context
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        PersonDetails personDetails = mock(PersonDetails.class);
+        
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(personDetails);
+        when(personDetails.getUserId()).thenReturn(userId);
+        SecurityContextHolder.setContext(securityContext);
+        
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getUserProfile())

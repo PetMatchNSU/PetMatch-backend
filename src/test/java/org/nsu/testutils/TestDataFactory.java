@@ -81,12 +81,10 @@ public class TestDataFactory {
         user.setRegion(region);
         user.setEmailVerified(true);
         
-        // Добавляем BondTime
         List<BondTime> bondTimes = new ArrayList<>();
         bondTimes.add(createTestBondTime(user));
         user.setBondTimes(bondTimes);
         
-        // Добавляем Authority
         Set<Authority> authorities = new HashSet<>();
         authorities.add(createTestAuthority());
         user.setAuthorities(authorities);
