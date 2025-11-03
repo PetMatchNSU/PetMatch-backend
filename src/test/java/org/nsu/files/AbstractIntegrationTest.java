@@ -14,7 +14,7 @@ public abstract class AbstractIntegrationTest {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
 
     @Container
-    static MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2023-03-20T20-16-18Z");
+    static MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2025-04-22T22-12-26Z");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
