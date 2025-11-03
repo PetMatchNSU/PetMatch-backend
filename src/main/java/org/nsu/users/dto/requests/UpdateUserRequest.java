@@ -49,11 +49,11 @@ public class UpdateUserRequest {
     @Schema(description = "Время доступности")
     public static class BondTimeDto {
         @NotNull
-        @Schema(description = "Время начала доступности", example = "10:00", type = "string", pattern = ValidationPatterns.TIME_HH_MM)
+        @Schema(description = "Время начала доступности", example = "10:00", type = "string", pattern = ValidationPatterns.TIME_FORMAT)
         private LocalTime bondTimeStart;
         
         @NotNull
-        @Schema(description = "Время конца доступности", example = "12:00", type = "string", pattern = ValidationPatterns.TIME_HH_MM)
+        @Schema(description = "Время конца доступности", example = "12:00", type = "string", pattern = ValidationPatterns.TIME_FORMAT)
         private LocalTime bondTimeEnd;
     }
 

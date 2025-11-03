@@ -73,8 +73,8 @@ class UserProfileServiceTest {
         when(contactTypeRepository.findAll()).thenReturn(List.of(ct));
 
         BondTime btEntity = new BondTime();
-        btEntity.setStart(b.getStartContactTime());
-        btEntity.setEnd(b.getEndContactTime());
+        btEntity.setStartContactTime(b.getBondTimeStart());
+        btEntity.setEndContactTime(b.getBondTimeEnd());
         when(bondTimeMapper.toEntity(b)).thenReturn(btEntity);
 
         Contact contactEntity = new Contact();
