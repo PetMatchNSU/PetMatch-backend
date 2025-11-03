@@ -2,8 +2,7 @@ server:
   port: 8091
 
 app:
-  properties:
-    timezone: "Europe/Moscow"
+  timezone: "Europe/Moscow"
 
 spring:
   liquibase:
@@ -12,8 +11,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5433/petmatch
-    username: bel9sh
-    password: 1234
+    username: petmatch
+    password: secret
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

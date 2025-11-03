@@ -52,5 +52,4 @@ otel:
     exporter: none
 
 app:
-  properties:
-    timezone: Europe/Moscow
+  timezone: "Europe/Moscow"

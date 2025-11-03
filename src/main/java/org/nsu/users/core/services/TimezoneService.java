@@ -1,10 +1,8 @@
 package org.nsu.users.core.services;
 
-import org.nsu.authorization.core.config.AppProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -13,32 +11,18 @@ import java.time.ZonedDateTime;
 @Service
 public class TimezoneService {
 
-    private final AppProperties appProperties;
-    private static TimezoneService instance;
+    private final ZoneId appTimezoneId;
 
-    @Autowired
-    public TimezoneService(AppProperties appProperties) {
-        this.appProperties = appProperties;
+    public TimezoneService(@Value("${app.timezone}") String appTimezoneId) {
+        this.appTimezoneId = ZoneId.of(appTimezoneId);
     }
 
-    @PostConstruct
-    public void init() {
-        instance = this;
-    }
-
-    public String getConfiguredTimezone() {
-        return appProperties.getTimezone();
-    }
-
-    public static OffsetDateTime convertLocalTimeToOffsetDateTimeStatic(LocalTime localTime) {
+    public OffsetDateTime convertLocalTimeToOffsetDateTime(LocalTime localTime) {
         if (localTime == null) {
             return null;
         }
-        
-        String timezone = instance != null ? instance.getConfiguredTimezone() : "Europe/Moscow";
-        ZoneId configuredZone = ZoneId.of(timezone);
-        ZonedDateTime zdt = ZonedDateTime.now(configuredZone).with(localTime);
+
+        ZonedDateTime zdt = ZonedDateTime.now(appTimezoneId).with(localTime);
         return zdt.toOffsetDateTime();
     }
-
 }

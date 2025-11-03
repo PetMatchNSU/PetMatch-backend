@@ -2,31 +2,56 @@ package org.nsu.users.core.mappers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.nsu.testutils.TestDataFactory;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
+import org.nsu.users.core.services.TimezoneService;
 import org.nsu.users.entity.BondTime;
 import org.nsu.users.entity.Contact;
 import org.nsu.users.entity.User;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 
+@ExtendWith(MockitoExtension.class)
 class UserMapperTest {
 
+    @Mock
+    private TimezoneService timezoneService;
+    
     private UserMapper userMapper;
     private User testUser;
     private Set<Contact> testContacts;
 
     @BeforeEach
     void setUp() {
-        userMapper = Mappers.getMapper(UserMapper.class);
+        userMapper = new UserMapperImpl();
+        ReflectionTestUtils.setField(userMapper, "timezoneService", timezoneService);
+        
         testUser = TestDataFactory.createTestUser();
         testContacts = TestDataFactory.createTestContacts(testUser);
+        setupTimezoneServiceMock();
+    }
+    
+    private void setupTimezoneServiceMock() {
+        // Mock the timezone service behavior with lenient stubbing
+        lenient().when(timezoneService.convertLocalTimeToOffsetDateTime(any(LocalTime.class)))
+            .thenAnswer(invocation -> {
+                LocalTime localTime = invocation.getArgument(0);
+                if (localTime == null) return null;
+                ZonedDateTime zdt = ZonedDateTime.now(ZoneId.of("Europe/Moscow")).with(localTime);
+                return zdt.toOffsetDateTime();
+            });
     }
 
     @Test
