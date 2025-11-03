@@ -10,6 +10,8 @@ import lombok.Setter;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.nsu.users.utils.ValidationPatterns;
+
 @Getter
 @Setter
 @Schema(description = "Запрос на обновление профиля пользователя")
@@ -47,11 +49,11 @@ public class UpdateUserRequest {
     @Schema(description = "Время доступности")
     public static class BondTimeDto {
         @NotNull
-        @Schema(description = "Время начала доступности", example = "10:00", type = "string", pattern = "HH:mm")
+        @Schema(description = "Время начала доступности", example = "10:00", type = "string", pattern = ValidationPatterns.TIME_HH_MM)
         private LocalTime bondTimeStart;
         
         @NotNull
-        @Schema(description = "Время конца доступности", example = "12:00", type = "string", pattern = "HH:mm")
+        @Schema(description = "Время конца доступности", example = "12:00", type = "string", pattern = ValidationPatterns.TIME_HH_MM)
         private LocalTime bondTimeEnd;
     }
 
