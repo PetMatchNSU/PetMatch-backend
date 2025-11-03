@@ -10,7 +10,7 @@ public interface BondTimeMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
-    @Mapping(source = "bondTimeStart", target = "start")
-    @Mapping(source = "bondTimeEnd", target = "end")
+    @Mapping(source = "bondTimeStart", target = "startContactTime")
+    @Mapping(source = "bondTimeEnd", target = "endContactTime")
     BondTime toEntity(UpdateUserRequest.BondTimeDto dto);
 }

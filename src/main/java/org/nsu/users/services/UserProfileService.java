@@ -27,7 +27,6 @@ public class UserProfileService {
     private final BondTimeMapper bondTimeMapper;
     private final ContactMapper contactMapper;
 
-    @Transactional
     public void updateProfile(String email, UpdateUserRequest dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
