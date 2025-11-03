@@ -12,7 +12,7 @@ import org.nsu.users.entity.*;
 import org.nsu.users.mappers.BondTimeMapper;
 import org.nsu.users.mappers.ContactMapper;
 import org.nsu.users.repositories.ContactTypeRepository;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.repositories.RegionRepository;
 
 import java.time.LocalTime;

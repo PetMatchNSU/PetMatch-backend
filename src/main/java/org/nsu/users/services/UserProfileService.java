@@ -1,7 +1,7 @@
 package org.nsu.users.services;
 
 import lombok.RequiredArgsConstructor;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
 import org.nsu.users.entity.*;
 import org.nsu.users.mappers.BondTimeMapper;

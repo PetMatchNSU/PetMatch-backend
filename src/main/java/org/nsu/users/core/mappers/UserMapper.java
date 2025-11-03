@@ -36,8 +36,8 @@ public abstract class UserMapper {
     @Mapping(target = "contactInfo", source = "contacts")
      public abstract UserResponse toUserResponse(User user, String reviewComment, Set<Contact> contacts);
 
-    @Mapping(target = "bondTimeStart", source = "startContactTime", qualifiedByName = "localTimeToOffsetDateTime")
-    @Mapping(target = "bondTimeEnd", source = "endContactTime", qualifiedByName = "localTimeToOffsetDateTime")
+    @Mapping(target = "bondTimeStart", source = "start", qualifiedByName = "localTimeToOffsetDateTime")
+    @Mapping(target = "bondTimeEnd", source = "end", qualifiedByName = "localTimeToOffsetDateTime")
     public abstract UserResponse.BondTimeDto toBondTimeDto(BondTime bondTime);
 
     @Mapping(target = "type", source = "type.name")
