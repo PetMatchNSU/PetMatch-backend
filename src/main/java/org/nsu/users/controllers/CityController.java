@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/city")
 @Tag(name = "City", description = "API для работы с городами и регионами")
 public class CityController {
 
     private final CityService cityService;
 
-    @GetMapping("/city")
+    @GetMapping
     @Operation(summary = "Поиск городов и регионов", description = "Поиск городов и регионов по названию")
     public CitySearchResponse search(
             @Parameter(description = "Название города или региона для поиска", example = "Новосибирск")

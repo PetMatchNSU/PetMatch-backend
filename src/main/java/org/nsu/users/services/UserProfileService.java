@@ -10,9 +10,11 @@ import org.nsu.users.repositories.ContactTypeRepository;
 import org.nsu.users.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +27,7 @@ public class UserProfileService {
     private final BondTimeMapper bondTimeMapper;
     private final ContactMapper contactMapper;
 
+    @Transactional
     public void updateProfile(String email, UpdateUserRequest dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -40,10 +43,10 @@ public class UserProfileService {
 
         Map<String, ContactType> typesMap = contactTypeRepository.findAll()
                 .stream()
-                .collect(Collectors.toMap(ContactType::getName, ct -> ct));
+                .collect(Collectors.toMap(ContactType::getName, Function.identity()));
 
         user.getBondTimes().clear();
-        if (dto.getBondTime() != null && !dto.getBondTime().isEmpty()) {
+        if (!CollectionUtils.isEmpty(dto.getBondTime())) {
             List<BondTime> bondEntities = dto.getBondTime().stream()
                     .map(b -> {
                         BondTime bt = bondTimeMapper.toEntity(b);
@@ -55,7 +58,7 @@ public class UserProfileService {
         }
 
         user.getContacts().clear();
-        if (dto.getContactInfo() != null && !dto.getContactInfo().isEmpty()) {
+        if (!CollectionUtils.isEmpty(dto.getContactInfo())) {
             List<Contact> contactEntities = dto.getContactInfo().stream()
                     .map(cdto -> {
                         Contact contact = contactMapper.toEntity(cdto);
@@ -69,11 +72,6 @@ public class UserProfileService {
             user.getContacts().addAll(contactEntities);
         }
 
-        saveUserAggregate(user);
-    }
-
-    @Transactional
-    protected void saveUserAggregate(User user) {
         userRepository.save(user);
     }
 

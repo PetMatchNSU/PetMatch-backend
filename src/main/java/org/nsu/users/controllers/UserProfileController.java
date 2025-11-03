@@ -1,6 +1,8 @@
 package org.nsu.users.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,12 @@ public class UserProfileController {
 
     @PutMapping
     @Operation(summary = "Обновление профиля пользователя", description = "Обновление данных пользователя")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Профиль успешно обновлен"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные запроса"),
+            @ApiResponse(responseCode = "401", description = "Неавторизован"),
+            @ApiResponse(responseCode = "404", description = "Пользователь или регион не найден")
+    })
     public void update(
             @AuthenticationPrincipal PersonDetails principal,
             @Valid @RequestBody UpdateUserRequest dto
@@ -32,6 +40,10 @@ public class UserProfileController {
 
     @GetMapping("/contacts")
     @Operation(summary = "Получение списка типов контактов", description = "Получение списка доступных типов контактов")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список типов контактов"),
+            @ApiResponse(responseCode = "401", description = "Неавторизован")
+    })
     public ContactTypeResponse contactTypes() {
         return contactTypeService.getAllContactTypes();
     }
