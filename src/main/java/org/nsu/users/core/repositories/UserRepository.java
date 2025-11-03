@@ -1,4 +1,4 @@
-package org.nsu.authorization.core.repositories;
+package org.nsu.users.core.repositories;
 
 import org.nsu.users.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

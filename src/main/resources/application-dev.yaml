@@ -1,6 +1,9 @@
 server:
   port: 8091
 
+app:
+  timezone: "Europe/Moscow"
+
 spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
