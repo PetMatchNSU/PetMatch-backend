@@ -10,6 +10,7 @@ import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationR
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
 import org.nsu.authorization.core.utils.JWTUtil;
+import org.nsu.users.entity.Gender;
 import org.nsu.users.entity.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -44,7 +45,7 @@ class RegistrationServiceTest {
         registrationRequest.setFirstName("Test");
         registrationRequest.setSecondName("User");
         registrationRequest.setLastName("McTest");
-        registrationRequest.setGender("M");
+        registrationRequest.setGender(Gender.M);
         registrationRequest.setRegion("Test Region");
 
         mockUser = mock(User.class);

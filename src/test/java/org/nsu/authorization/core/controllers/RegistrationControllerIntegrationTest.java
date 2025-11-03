@@ -7,6 +7,7 @@ import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationR
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
 import org.nsu.authorization.core.services.RegistrationService;
+import org.nsu.users.entity.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,13 +19,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
+
 import java.util.List;
+
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.nsu.authorization.core.dto.requests.registrationRequest.BondTime;
 import org.nsu.authorization.core.dto.requests.registrationRequest.ContactInfo;
 
@@ -34,8 +38,8 @@ import org.nsu.authorization.core.dto.requests.registrationRequest.ContactInfo;
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.nsu.authorization.core.utils.JWTUtil"),
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.nsu.authorization.core.services.PersonDetailsService")
 })
-@ContextConfiguration(classes = { RegistrationController.class, TestSecurityConfig.class,
-        GlobalExceptionHandler.class })
+@ContextConfiguration(classes = {RegistrationController.class, TestSecurityConfig.class,
+        GlobalExceptionHandler.class})
 @TestPropertySource(properties = {
         "spring.main.allow-bean-definition-overriding=true",
         "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
@@ -64,7 +68,7 @@ class RegistrationControllerIntegrationTest {
         validRequest.setFirstName("John");
         validRequest.setSecondName("Doe");
         validRequest.setLastName("Smith");
-        validRequest.setGender("M");
+        validRequest.setGender(Gender.M);
         validRequest.setRegion("Novosibirsk");
         validRequest.setCity("Novosibirsk");
 
@@ -100,8 +104,8 @@ class RegistrationControllerIntegrationTest {
                 .thenReturn(mockResponse);
 
         mockMvc.perform(post("/api/v1/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken", is("fake.access.token")));
     }
@@ -112,8 +116,8 @@ class RegistrationControllerIntegrationTest {
                 .thenThrow(new UserAlreadyExistsException("Email already taken"));
 
         mockMvc.perform(post("/api/v1/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isConflict());
     }
 
@@ -123,8 +127,8 @@ class RegistrationControllerIntegrationTest {
                 .thenThrow(new DataAccessResourceFailureException("Simulating DB connection failed"));
 
         mockMvc.perform(post("/api/v1/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isInternalServerError());
     }
 }

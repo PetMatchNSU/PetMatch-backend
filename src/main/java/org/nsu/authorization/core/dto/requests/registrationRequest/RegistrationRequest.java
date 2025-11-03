@@ -8,8 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.List;
+
 import org.hibernate.validator.constraints.Length;
+import org.nsu.users.entity.Gender;
 
 @Getter
 @Setter
@@ -35,9 +38,9 @@ public class RegistrationRequest {
     @Schema(description = "Отчество", example = "Иванович")
     private String lastName;
 
-    @NotBlank(message = "Gender should not be empty")
+    @NotNull(message = "Gender should not be empty")
     @Schema(description = "Пол (M/F)", example = "M")
-    private String gender;
+    private Gender gender;
 
     @NotBlank(message = "Region should not be empty")
     @Schema(description = "Регион проживания пользователя", example = "Новосибирская область")
