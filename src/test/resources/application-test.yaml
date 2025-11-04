@@ -4,6 +4,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+<<<<<<< HEAD
   mail:
     host: localhost
     port: 1025
@@ -12,6 +13,8 @@ spring:
     properties:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
+=======
+>>>>>>> 1fee1ce (final fix)
 
 jwt:
   secret-access: testsecret
