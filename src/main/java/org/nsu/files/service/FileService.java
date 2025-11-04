@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import org.nsu.animal.entity.AnimalCardFile;
 
 @RequiredArgsConstructor
@@ -83,7 +84,7 @@ public class FileService {
 
     public MetadataDTO getFiles(String query) {
         try {
-            String decodedQuery = new String(Base64.getDecoder().decode(query));
+            String decodedQuery = new String(Base64.getDecoder().decode(query), StandardCharsets.UTF_8);
             FilterDTO filter = objectMapper.readValue(decodedQuery, FilterDTO.class);
             return getFiles(filter);
         } catch (Exception e) {
