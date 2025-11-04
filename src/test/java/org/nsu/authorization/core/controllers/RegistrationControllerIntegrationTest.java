@@ -3,10 +3,14 @@ package org.nsu.authorization.core.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.nsu.authorization.core.dto.requests.registrationRequest.ContactInfo;
 import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
+import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
+import org.nsu.authorization.core.services.PersonDetailsService;
 import org.nsu.authorization.core.services.RegistrationService;
+import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.users.entity.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,8 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -28,9 +32,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.nsu.authorization.core.dto.requests.registrationRequest.BondTime;
-import org.nsu.authorization.core.dto.requests.registrationRequest.ContactInfo;
 
 @WebMvcTest(controllers = RegistrationController.class, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.nsu.authorization.core.config.*"),
@@ -58,6 +59,12 @@ class RegistrationControllerIntegrationTest {
     @MockBean
     private RegistrationService registrationService;
 
+    @MockBean
+    private JWTUtil jwtUtil;
+
+    @MockBean
+    private PersonDetailsService personDetailsService;
+
     private RegistrationRequest validRequest;
 
     @BeforeEach
@@ -72,33 +79,25 @@ class RegistrationControllerIntegrationTest {
         validRequest.setRegion("Novosibirsk");
         validRequest.setCity("Novosibirsk");
 
-        // --- FIX: Create and add valid DTOs for the lists ---
+        org.nsu.authorization.core.dto.requests.registrationRequest.BondTime dummyBondTime =
+                new org.nsu.authorization.core.dto.requests.registrationRequest.BondTime();
+        dummyBondTime.setBondTimeStart(LocalTime.parse("10:00"));
+        dummyBondTime.setBondTimeEnd(LocalTime.parse("12:00"));
 
-        // 1. Create a valid BondTime object
-        // This satisfies the @NotBlank fields in BondTime.java
-        BondTime dummyBondTime = new BondTime();
-        dummyBondTime.setBondTimeStart("10:00");
-        dummyBondTime.setBondTimeEnd("12:00");
-
-        // 2. Create a valid ContactInfo object
-        // This satisfies the @NotBlank and @NotNull fields in ContactInfo.java
         ContactInfo dummyContact = new ContactInfo();
         dummyContact.setType("TELEGRAM");
         dummyContact.setContact("@testuser");
         dummyContact.setVisible(true);
 
-        // 3. Set the lists with these valid objects
-        // This satisfies the @Size(min = 1) and @Valid in RegistrationRequest.java
         validRequest.setBondTime(List.of(dummyBondTime));
         validRequest.setContactInfo(List.of(dummyContact));
     }
 
     @Test
-    void register_whenValidRequest_shouldReturnSuccess() throws Exception {
+    void register_whenValidRequest_shouldReturnOKAndTokens() throws Exception {
         RegistrationResponse mockResponse = new RegistrationResponse(
-                "fake.access.token",
-                "fake.refresh.token",
-                new RegistrationResponse.UserDto(false));
+                "fake.access.token", "fake.refresh.token", new RegistrationResponse.UserDto()
+        );
 
         when(registrationService.register(any(RegistrationRequest.class)))
                 .thenReturn(mockResponse);

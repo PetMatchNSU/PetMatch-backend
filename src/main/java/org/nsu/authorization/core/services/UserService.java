@@ -6,8 +6,6 @@ import org.nsu.users.mapping.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -32,8 +30,6 @@ public class UserService {
     private final StatusRepository statusRepository;
     private final AuthorityRepository authorityRepository;
     private final UserMapper userMapper;
-
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     @Transactional
     public User AddNewUser(RegistrationRequest request) {
@@ -70,9 +66,9 @@ public class UserService {
         List<BondTime> bondTimeEntities = request.getBondTime().stream()
                 .map(bondTimeDto -> {
                     BondTime entity = new BondTime();
-                    entity.setStartContactTime(LocalTime.parse(bondTimeDto.getBondTimeStart(), TIME_FORMATTER));
-                    entity.setEndContactTime(LocalTime.parse(bondTimeDto.getBondTimeEnd(), TIME_FORMATTER));
-                    entity.setUser(user);
+                    entity.setStartContactTime(bondTimeDto.getBondTimeStart());
+                    entity.setEndContactTime(bondTimeDto.getBondTimeEnd());
+                    entity.setUser(user); // back-reference
                     return entity;
                 })
                 .collect(Collectors.toList());
