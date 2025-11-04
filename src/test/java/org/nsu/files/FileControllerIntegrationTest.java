@@ -35,6 +35,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -44,6 +46,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -92,6 +98,9 @@ public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
 
     @Autowired
     private PlacementGoalRepository placementGoalRepository;
+
+    private User testUser;
+    private AnimalCard testAnimalCard;
 
     @BeforeEach
     public void setUp() {
@@ -162,7 +171,9 @@ public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
         animalCard.setCreated(LocalDateTime.now());
         animalCard.setUpdated(LocalDateTime.now());
         animalCard.setStatus(cardStatus);
-        animalCardRepository.save(animalCard);
+        testAnimalCard = animalCardRepository.save(animalCard);
+
+        testUser = user;
 
         // Типы файлов
         FileType photoType = new FileType();
@@ -195,15 +206,6 @@ public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
 
     @Test
     public void testUploadFilesEndpointSuccess() throws Exception {
-        User mockUser = new User();
-        mockUser.setId(1L);
-        mockUser.setEmail("test@example.com");
-
-        PersonDetails personDetails = new PersonDetails(mockUser);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                personDetails, null, personDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
         MockMultipartFile mockFile = new MockMultipartFile(
                 "files", "test.jpg", "image/jpeg", "test content".getBytes());
 
@@ -215,14 +217,17 @@ public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
         MockPart metadataPart = new MockPart("metadata", metadataJson.getBytes(StandardCharsets.UTF_8));
         metadataPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        MockPart adIdPart = new MockPart("adId", "1".getBytes(StandardCharsets.UTF_8));
+        MockPart adIdPart = new MockPart("adId", String.valueOf(testAnimalCard.getId()).getBytes(StandardCharsets.UTF_8));
         adIdPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        PersonDetails personDetails = new PersonDetails(testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/files/upload")
                 .file(mockFile)
                 .part(metadataPart)
                 .part(adIdPart)
-                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
