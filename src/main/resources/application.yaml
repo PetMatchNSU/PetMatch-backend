@@ -61,3 +61,6 @@ otel:
     exporter: none
   metrics:
     exporter: none
+
+app:
+  timezone: "Europe/Moscow"

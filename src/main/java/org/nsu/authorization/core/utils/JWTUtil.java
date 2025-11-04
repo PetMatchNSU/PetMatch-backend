@@ -5,7 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;

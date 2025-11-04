@@ -2,7 +2,7 @@ package org.nsu.authorization.core.services;
 
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,7 +23,7 @@ public class PersonDetailsService implements UserDetailsService {
         return new PersonDetails(userRepository
                 .findByEmail(email)
                 .orElseThrow(
-                        () -> new PersonNotFoundException(String.format("User with %s email not found", email))
+                        () -> new PersonNotFoundException("User with this email not found")
                 )
         );
     }
@@ -32,7 +32,7 @@ public class PersonDetailsService implements UserDetailsService {
         return new PersonDetails(userRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new PersonNotFoundException(String.format("User with %d id not found", id)))
+                        () -> new PersonNotFoundException("User with this id not found"))
         );
     }
 
