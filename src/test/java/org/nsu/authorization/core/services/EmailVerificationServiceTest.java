@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.nsu.authorization.core.dto.requests.EmailVerifierRequest;
 import org.nsu.authorization.core.exceptions.authorization.EmailVerificationFailException;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.entity.User;
 import org.springframework.security.oauth2.jwt.Jwt;
 

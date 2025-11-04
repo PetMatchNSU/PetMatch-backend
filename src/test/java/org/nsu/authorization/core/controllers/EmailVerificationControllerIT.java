@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.nsu.authorization.core.dto.requests.EmailVerifierRequest;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.authorization.core.utils.VerificationCodeGenerator;
 import org.nsu.users.entity.User; // Убедитесь, что этот импорт корректен
 import org.springframework.beans.factory.annotation.Autowired;

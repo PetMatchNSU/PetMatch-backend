@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.dto.requests.EmailVerifierRequest;
 import org.nsu.authorization.core.exceptions.authorization.EmailVerificationFailException;
-import org.nsu.authorization.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.UserRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.nsu.users.entity.User;
@@ -19,7 +19,7 @@ public class EmailVerificationService {
 
     /**
      * Verifies an email using a code, based on the authenticated user from the JWT.
-     * 
+     *
      * @param dto The request DTO containing the verification code.
      * @param jwt The parsed JWT token provided by Spring Security.
      */
