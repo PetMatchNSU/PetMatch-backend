@@ -5,7 +5,7 @@ import java.util.List;
 public record FilterDTO(
     List<Long> fileIds,
     List<Long> cardIds,
-    String isMain,
+    Boolean isMain,
     List<String> fileTypes
 ) {
 }

@@ -106,10 +106,9 @@ public class FileService {
 
         List<AnimalCardFile> animalCardFiles = new ArrayList<>(animalCardFilesSet);
 
-        if (filter.isMain() != null && !"all".equals(filter.isMain())) {
-            boolean isMain = "true".equals(filter.isMain());
+        if (filter.isMain() != null) {
             animalCardFiles = animalCardFiles.stream()
-                .filter(acf -> (acf.getFileType().getName().equals("photo")) == isMain)
+                .filter(acf -> (acf.getFileType().getName().equals("photo")) == filter.isMain())
                 .collect(Collectors.toList());
         }
         if (filter.fileTypes() != null && !filter.fileTypes().isEmpty()) {
