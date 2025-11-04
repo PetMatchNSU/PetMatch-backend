@@ -1,16 +1,21 @@
 package org.nsu.authorization.core.services;
 
 import lombok.RequiredArgsConstructor;
+import org.nsu.users.entity.BondTime;
+import org.nsu.users.mapping.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
 import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
 import org.nsu.users.entity.Authority;
-import org.nsu.users.entity.Gender;
 import org.nsu.users.entity.User;
 import org.nsu.authorization.core.repositories.AuthorityRepository;
 import org.nsu.authorization.core.repositories.RegionRepository;
@@ -26,6 +31,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final StatusRepository statusRepository;
     private final AuthorityRepository authorityRepository;
+    private final UserMapper userMapper;
+
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     @Transactional
     public User AddNewUser(RegistrationRequest request) {
@@ -36,8 +44,7 @@ public class UserService {
 
         newUser.setAuthorities(new HashSet<>(Collections.singletonList(defaultAuthority)));
 
-        User savedUser = userRepository.save(newUser);
-        return savedUser;
+        return userRepository.save(newUser);
     }
 
     @Transactional(readOnly = true)
@@ -47,15 +54,10 @@ public class UserService {
 
     private User mapRequestToUserEntity(RegistrationRequest request) {
         String hashedPassword = passwordEncoder.encode(request.getPassword());
-        User user = new User();
+
+        User user = userMapper.toUser(request);
 
         user.setPassword(hashedPassword);
-        user.setEmail(request.getEmail());
-        user.setFirstName(request.getFirstName());
-        user.setSecondName(request.getSecondName());
-        user.setLastName(request.getLastName());
-        user.setGender((request.getGender().equals("M")) ? Gender.M : Gender.F);
-        user.setEmailVerified(false);
 
         user.setRegion(regionRepository.findByRegion(request.getRegion())
                 .orElseThrow(() -> new UserCreationFailException("Failed to find region in the database")));
@@ -64,6 +66,18 @@ public class UserService {
                 .orElseThrow(
                         () -> new UserCreationFailException(
                                 "Default user status ('Active') is missing from the database")));
+
+        List<BondTime> bondTimeEntities = request.getBondTime().stream()
+                .map(bondTimeDto -> {
+                    BondTime entity = new BondTime();
+                    entity.setStartContactTime(LocalTime.parse(bondTimeDto.getBondTimeStart(), TIME_FORMATTER));
+                    entity.setEndContactTime(LocalTime.parse(bondTimeDto.getBondTimeEnd(), TIME_FORMATTER));
+                    entity.setUser(user);
+                    return entity;
+                })
+                .collect(Collectors.toList());
+
+        user.setBondTimes(bondTimeEntities);
 
         return user;
     }
