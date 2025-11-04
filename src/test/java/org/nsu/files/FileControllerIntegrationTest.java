@@ -37,6 +37,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.http.MediaType;
@@ -52,7 +54,24 @@ import java.util.List;
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
-public class FileControllerIntegrationTest extends AbstractIntegrationTest {
+public class FileControllerIntegrationTest {
+
+    static {
+        // Ensure containers are started before any test
+        org.nsu.testutils.TestContainerManager.postgres.start();
+        org.nsu.testutils.TestContainerManager.minio.start();
+    }
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", org.nsu.testutils.TestContainerManager.postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", org.nsu.testutils.TestContainerManager.postgres::getUsername);
+        registry.add("spring.datasource.password", org.nsu.testutils.TestContainerManager.postgres::getPassword);
+        registry.add("minio.endpoint", org.nsu.testutils.TestContainerManager.minio::getS3URL);
+        registry.add("minio.access-key", org.nsu.testutils.TestContainerManager.minio::getUserName);
+        registry.add("minio.secret-key", org.nsu.testutils.TestContainerManager.minio::getPassword);
+        registry.add("minio.bucket-name", () -> "test-bucket");
+    }
 
     @MockitoBean
     private JWTUtil jwtUtil;
@@ -99,6 +118,7 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
         animalCardStatusRepository.deleteAll();
         animalCardFileTypeRepository.deleteAll();
         fileTypeRepository.deleteAll();
+        // Skip BondTime deletion as it's not used in this test
         userRepository.deleteAll();
         statusRepository.deleteAll();
         regionRepository.deleteAll();
