@@ -36,13 +36,12 @@ import org.springframework.mock.web.MockPart;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -50,8 +49,9 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 
-@SpringBootTest
 @ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
 public class FileControllerIntegrationTest extends AbstractIntegrationTest {
 
     @MockitoBean
@@ -92,18 +92,18 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        // Удаляем в правильном порядке, от зависимых к справочным
+        // Очистка в правильном порядке
         animalCardRepository.deleteAll();
         animalRepository.deleteAll();
         placementGoalRepository.deleteAll();
         animalCardStatusRepository.deleteAll();
-        fileTypeRepository.deleteAll();
         animalCardFileTypeRepository.deleteAll();
+        fileTypeRepository.deleteAll();
         userRepository.deleteAll();
         statusRepository.deleteAll();
         regionRepository.deleteAll();
 
-        // Создаём и сохраняем справочники
+        // Справочники
         Status status = new Status();
         status.setName("Active");
         statusRepository.save(status);
@@ -113,7 +113,7 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
         region.setCity("Test City");
         regionRepository.save(region);
 
-        // Создаём пользователя
+        // Пользователь
         User user = new User();
         user.setEmail("test@example.com");
         user.setFirstName("Test");
@@ -126,22 +126,22 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
         user.setRegion(region);
         userRepository.save(user);
 
-        // Создаём животное
+        // Животное
         Animal animal = new Animal();
         animal.setName("Dog");
         animalRepository.save(animal);
 
-        // Создаём цель
+        // Цель размещения
         PlacementGoal goal = new PlacementGoal();
         goal.setGoal("Adoption");
         placementGoalRepository.save(goal);
 
-        // Создаём статус карточки
+        // Статус карточки
         AnimalCardStatus cardStatus = new AnimalCardStatus();
         cardStatus.setName("Active");
         animalCardStatusRepository.save(cardStatus);
 
-        // Создаём карточку животного
+        // Карточка животного
         AnimalCard animalCard = new AnimalCard();
         animalCard.setCardAuthor(user);
         animalCard.setAnimal(animal);
@@ -160,7 +160,7 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
         animalCard.setStatus(cardStatus);
         animalCardRepository.save(animalCard);
 
-        // Создаём типы файлов
+        // Типы файлов
         FileType photoType = new FileType();
         photoType.setName("photo");
         fileTypeRepository.save(photoType);
@@ -170,21 +170,20 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
         animalCardFileTypeRepository.save(cardFileType);
     }
 
-
     @Test
     public void testGetFilesEndpoint() throws Exception {
-        // Create a mock user
         User mockUser = new User();
         mockUser.setId(1L);
         mockUser.setEmail("test@example.com");
 
         PersonDetails personDetails = new PersonDetails(mockUser);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                personDetails, null, personDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Test the GET /api/v1/files endpoint
         String filterJson = "{}";
-        String encodedQuery = Base64.getEncoder().encodeToString(filterJson.getBytes());
+        String encodedQuery = Base64.getEncoder().encodeToString(filterJson.getBytes(StandardCharsets.UTF_8));
+
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/files")
                 .param("query", encodedQuery))
             .andExpect(MockMvcResultMatchers.status().isOk());
@@ -192,20 +191,20 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testUploadFilesEndpointSuccess() throws Exception {
-        // Create a mock user
         User mockUser = new User();
         mockUser.setId(1L);
         mockUser.setEmail("test@example.com");
 
         PersonDetails personDetails = new PersonDetails(mockUser);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                personDetails, null, personDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Create mock file
-        MockMultipartFile mockFile = new MockMultipartFile("files", "test.jpg", "image/jpeg", "test content".getBytes());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "files", "test.jpg", "image/jpeg", "test content".getBytes());
 
-        // Create metadata
-        FileDescriptor descriptor = new FileDescriptor("test.jpg", true, FileDescriptor.FileType.PHOTO, null, null, null, null, null);
+        FileDescriptor descriptor = new FileDescriptor(
+                "test.jpg", true, FileDescriptor.FileType.PHOTO, null, null, null, null, null);
         MetadataDTO metadata = new MetadataDTO(List.of(descriptor));
         String metadataJson = objectMapper.writeValueAsString(metadata);
 
@@ -215,7 +214,6 @@ public class FileControllerIntegrationTest extends AbstractIntegrationTest {
         MockPart adIdPart = new MockPart("adId", "1".getBytes(StandardCharsets.UTF_8));
         adIdPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        // Perform the request
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/files/upload")
                 .file(mockFile)
                 .part(metadataPart)

@@ -11,3 +11,23 @@ file-validation:
   photo-formats: [JPEG, PNG]
   doc-formats: [PDF]
   max-size-mb: 5
+
+management:
+  tracing:
+    enabled: false
+  observations:
+    enabled: false
+
+otel:
+  sdk:
+    disabled: true
+  exporter:
+    otlp:
+      endpoint: ""
+  metrics:
+    exporter: none
+  traces:
+    exporter: none
+
+minio:
+  bucket-name: test-bucket

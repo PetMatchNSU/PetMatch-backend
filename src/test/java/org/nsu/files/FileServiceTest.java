@@ -1,6 +1,9 @@
 package org.nsu.files;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.files.dto.FilterDTO;
 import org.nsu.files.dto.MetadataDTO;
@@ -14,14 +17,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class FileServiceTest extends AbstractIntegrationTest {
 
     @MockitoBean
     private JWTUtil jwtUtil;
 
-    @Autowired
+    @Mock
     private FileService fileService;
 
     @Test

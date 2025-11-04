@@ -8,7 +8,6 @@ import org.nsu.files.dto.*;
 import org.nsu.files.service.FileService;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,25 +20,22 @@ public class FileController {
 
     @Operation(summary = "Upload files", description = "Upload files with metadata and ad ID")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MetadataDTO> uploadFiles(
+    public MetadataDTO uploadFiles(
             @RequestPart("files") MultipartFile[] files,
             @RequestPart("metadata") String metadataJson,
             @RequestPart("adId") Long adId) throws JsonProcessingException {
-        MetadataDTO result = fileService.uploadFiles(files, metadataJson, adId);
-        return ResponseEntity.ok(result);
+        return fileService.uploadFiles(files, metadataJson, adId);
     }
 
     @Operation(summary = "Get files", description = "Get files based on query filter")
     @GetMapping
-    public ResponseEntity<MetadataDTO> getFiles(@RequestParam("query") String query) {
-        MetadataDTO result = fileService.getFiles(query);
-        return ResponseEntity.ok(result);
+    public MetadataDTO getFiles(@RequestParam("query") String query) {
+        return fileService.getFiles(query);
     }
 
     @Operation(summary = "Delete files", description = "Delete files by IDs or animal card IDs")
     @DeleteMapping
-    public ResponseEntity<MetadataDTO> deleteFiles(@RequestBody DeleteRequest deleteRequest) {
-        MetadataDTO result = fileService.deleteFiles(deleteRequest);
-        return ResponseEntity.ok(result);
+    public MetadataDTO deleteFiles(@RequestBody DeleteRequest deleteRequest) {
+        return fileService.deleteFiles(deleteRequest);
     }
 }
