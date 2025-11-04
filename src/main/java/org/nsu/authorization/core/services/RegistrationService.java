@@ -8,6 +8,7 @@ import org.nsu.authorization.core.utils.JWTUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.nsu.users.entity.User;
+import org.nsu.users.core.services.UserService;
 
 @Service
 @RequiredArgsConstructor

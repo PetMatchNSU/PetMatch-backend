@@ -33,4 +33,8 @@ public class PersonDetails implements UserDetails {
     public boolean getIsVerifiedEmail() {
         return user.isEmailVerified();
     }
+
+    public Long getUserId() {
+        return user.getId();
+    }
 }

@@ -1,8 +1,8 @@
-package org.nsu.authorization.core.dto.responses.negative;
+package common.dto.responses.negative.jwtPerson;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.nsu.authorization.core.dto.responses.AbstractNegativeResponse;
+import common.dto.responses.negative.AbstractNegativeResponse;
 
 @ToString
 @Getter
