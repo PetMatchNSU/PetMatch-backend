@@ -31,7 +31,6 @@ public class VerificationCodeCachingService {
      * Generates a new code, sends the email, and puts the result in the cache.
      * 
      * @param userId   The cache key.
-     * @param emailDst The email address to send the code to.
      * @return The newly generated code, which @CachePut then stores.
      */
     @CachePut(value = CACHE_NAME, key = "T(org.nsu.authorization.core.services.VerificationCodeCachingService).TEMP_CODE_KEY_FIRST_PART + #userId + T(org.nsu.authorization.core.services.VerificationCodeCachingService).TEMP_CODE_KEY_SECOND_PART")

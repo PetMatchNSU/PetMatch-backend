@@ -28,13 +28,13 @@ public class BondTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "start", nullable = false)
+    @Column(name = "startTime", nullable = false)
     private LocalTime startContactTime;
 
-    @Column(name = "end", nullable = false)
+    @Column(name = "endTime", nullable = false)
     private LocalTime endContactTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_user", insertable = false, updatable = false)
+    @JoinColumn(name = "id_user")
     private User user;
 }

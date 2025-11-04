@@ -13,14 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// Removed unused imports:
-// import org.springframework.http.HttpHeaders;
-// import org.springframework.web.bind.annotation.RequestHeader;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
-public class EmailVerifierController {
+public class EmailVerificationController {
     private final EmailVerificationService service;
 
     /**
@@ -30,13 +26,10 @@ public class EmailVerifierController {
      */
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailVerifierRequest dto,
-            @AuthenticationPrincipal Jwt jwt) {
+                                         @AuthenticationPrincipal Jwt jwt) {
 
-        // We no longer pass the raw header.
-        // We pass the authenticated, validated Jwt object directly to the service.
         service.verifyEmail(dto, jwt);
 
-        // Return a simple 200 OK.
         return ResponseEntity.ok().build();
     }
 }
