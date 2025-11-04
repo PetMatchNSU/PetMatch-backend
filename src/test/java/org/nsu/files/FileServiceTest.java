@@ -36,7 +36,7 @@ public class FileServiceTest extends AbstractIntegrityTest {
     @MockitoBean
     private JWTUtil jwtUtil;
 
-    @Mock
+    @Autowired
     private FileService fileService;
 
     @Test
