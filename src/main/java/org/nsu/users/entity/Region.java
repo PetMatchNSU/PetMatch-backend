@@ -10,15 +10,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.Index;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "t_regions", indexes = { @Index(name = "idx_regions_city", columnList = "city"),
-        @Index(name = "id_regions_region_city", columnList = "region, city", unique = true) })
+@Table(name = "t_regions")
 public class Region {
 
     @Id
