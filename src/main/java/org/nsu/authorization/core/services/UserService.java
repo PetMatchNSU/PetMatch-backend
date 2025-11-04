@@ -6,16 +6,13 @@ import org.nsu.users.mapping.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
 import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
-import org.nsu.users.entity.Authority;
 import org.nsu.users.entity.User;
-import org.nsu.authorization.core.repositories.AuthorityRepository;
 import org.nsu.authorization.core.repositories.RegionRepository;
 import org.nsu.authorization.core.repositories.StatusRepository;
 import org.nsu.authorization.core.repositories.UserRepository;
@@ -28,17 +25,12 @@ public class UserService {
     private final RegionRepository regionRepository;
     private final PasswordEncoder passwordEncoder;
     private final StatusRepository statusRepository;
-    private final AuthorityRepository authorityRepository;
     private final UserMapper userMapper;
 
-    @Transactional
-    public User AddNewUser(RegistrationRequest request) {
+    public User addNewUser(RegistrationRequest request) {
         User newUser = mapRequestToUserEntity(request);
-        Authority defaultAuthority = authorityRepository.findByName("Regular")
-                .orElseThrow(() -> new UserCreationFailException(
-                        "Default authority ('Regular') is missing from the database"));
 
-        newUser.setAuthorities(new HashSet<>(Collections.singletonList(defaultAuthority)));
+        newUser.setAuthorities(new HashSet<>());
 
         return userRepository.save(newUser);
     }

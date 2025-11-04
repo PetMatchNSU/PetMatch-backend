@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nsu.authorization.core.dto.requests.registrationRequest.ContactInfo;
 import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
+import org.nsu.authorization.core.dto.requests.registrationRequest.Type;
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
 import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
@@ -85,7 +86,7 @@ class RegistrationControllerIntegrationTest {
         dummyBondTime.setBondTimeEnd(LocalTime.parse("12:00"));
 
         ContactInfo dummyContact = new ContactInfo();
-        dummyContact.setType("TELEGRAM");
+        dummyContact.setType(Type.TELEGRAM);
         dummyContact.setContact("@testuser");
         dummyContact.setVisible(true);
 

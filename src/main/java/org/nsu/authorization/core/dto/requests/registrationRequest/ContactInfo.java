@@ -10,9 +10,9 @@ import lombok.Setter;
 @Setter
 @Schema(description = "Способ связи")
 public class ContactInfo {
-    @NotBlank(message = "Contact type should not be empty")
+    @NotNull(message = "Contact type should not be empty")
     @Schema(description = "Тип связи (PHONE/EMAIL/TELEGRAM/VK)", example = "VK")
-    private String type;
+    private Type type;
 
     @NotBlank(message = "Contact detail should not be empty")
     @Schema(description = "Ссылка, номер или email", example = "https://vk.com/t.test")

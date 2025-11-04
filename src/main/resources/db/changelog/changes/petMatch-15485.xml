@@ -150,5 +150,28 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="13" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="end_time" tableName="t_bond_times"/>
+            </not>
+        </preConditions>
+        <renameColumn
+                tableName="t_bond_times"
+                oldColumnName="end"
+                newColumnName="end_time"/>
+    </changeSet>
+
+    <changeSet id="14" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="start_time" tableName="t_bond_times"/>
+            </not>
+        </preConditions>
+        <renameColumn
+                tableName="t_bond_times"
+                oldColumnName="start"
+                newColumnName="start_time"/>
+    </changeSet>
 
 </databaseChangeLog>

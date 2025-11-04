@@ -24,12 +24,6 @@ public class GlobalExceptionHandler {
                 .body(new PersonErrorResponse(message, System.currentTimeMillis()));
     }
 
-    private ResponseEntity<AbstractNegativeResponse> RegistrationFailResponse(HttpStatus httpStatus, String message) {
-        return ResponseEntity
-                .status(httpStatus)
-                .body(new RegistrationErrorResponse(message, System.currentTimeMillis()));
-    }
-
     @ExceptionHandler(PersonNotFoundException.class)
     public ResponseEntity<AbstractNegativeResponse> handlePersonNotFoundException(PersonNotFoundException e) {
         return simplePersonResponse(HttpStatus.NOT_FOUND, e.getMessage());
@@ -63,6 +57,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserCreationFailException.class)
     public ResponseEntity<AbstractNegativeResponse> HandleUserCreationFailException(UserCreationFailException e) {
-        return RegistrationFailResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user: " + e.getMessage());
+        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user: " + e.getMessage());
     }
 }

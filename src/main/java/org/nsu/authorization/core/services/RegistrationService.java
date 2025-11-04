@@ -24,7 +24,7 @@ public class RegistrationService {
             throw new UserAlreadyExistsException("A user with this email already exists.");
         }
 
-        User user = userService.AddNewUser(dto);
+        User user = userService.addNewUser(dto);
 
         String tempCode = verificationCodeCachingService.generateAndCacheCode(user.getId().toString());
 

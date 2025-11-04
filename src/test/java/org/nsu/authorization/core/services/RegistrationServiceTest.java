@@ -57,7 +57,7 @@ class RegistrationServiceTest {
 
         when(userService.existsByEmail("test@example.com")).thenReturn(false);
 
-        when(userService.AddNewUser(registrationRequest)).thenReturn(mockUser);
+        when(userService.addNewUser(registrationRequest)).thenReturn(mockUser);
 
         String testCode = "123456";
         String expectedCacheKey = "1";
@@ -76,7 +76,7 @@ class RegistrationServiceTest {
         assertFalse(response.getUser().isEmailVerified());
 
         verify(userService).existsByEmail("test@example.com");
-        verify(userService).AddNewUser(registrationRequest);
+        verify(userService).addNewUser(registrationRequest);
         verify(verificationCodeCachingService).generateAndCacheCode(expectedCacheKey);
         verify(emailVerificationSenderService).Send("test@example.com", testCode);
         verify(jwtUtil).generateAccessToken(any(UsernamePasswordAuthenticationToken.class));
@@ -91,7 +91,7 @@ class RegistrationServiceTest {
             registrationService.register(registrationRequest);
         });
 
-        verify(userService, never()).AddNewUser(any());
+        verify(userService, never()).addNewUser(any());
         verify(verificationCodeCachingService, never()).generateAndCacheCode(anyString());
         verify(emailVerificationSenderService, never()).Send(anyString(), anyString());
         verify(jwtUtil, never()).generateAccessToken(any());
