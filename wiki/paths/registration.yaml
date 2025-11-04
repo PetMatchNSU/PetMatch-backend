@@ -1,0 +1,115 @@
+post:
+  summary: Регистрация пользователя через email
+  operationId: registerUser
+  description: |
+    Регистрирует нового пользователя по email и паролю.  
+    После успешной регистрации отправляется письмо для подтверждения почты.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - email
+            - password
+            - firstName
+            - secondName
+            - gender
+            - region
+            - city
+          properties:
+            email:
+              type: string
+              format: email
+              example: newuser@example.com
+            password:
+              type: string
+              format: password
+              example: Password123
+            firstName:
+              type: string
+              example: Тестовик
+            secondName:
+              type: string
+              example: Тестович
+            lastName:
+              type: string
+              example: Тестер
+            gender:
+              type: string
+              enum: [ M, F ]
+              example: M
+            region:
+              type: string
+              example: Новосибирская область
+            city:
+              type: string
+              example: Новосибирск
+            bondTime:
+              type: array
+              description: Список временных интервалов для связи
+              items:
+                type: object
+                required:
+                  - bondTimeStart
+                  - bondTimeEnd
+                properties:
+                  bondTimeStart:
+                    type: string
+                    format: time
+                    example: "10:00"
+                  bondTimeEnd:
+                    type: string
+                    format: time
+                    example: "12:00"
+            contactInfo:
+              type: array
+              description: Список способов связи
+              items:
+                type: object
+                required:
+                  - type
+                  - contact
+                  - visible
+                properties:
+                  type:
+                    type: string
+                    enum: [ PHONE, EMAIL, TELEGRAM, VK ]
+                    example: VK
+                  contact:
+                    type: string
+                    example: https://vk.com/t.test
+                  visible:
+                    type: boolean
+                    example: true
+  responses:
+    '200':
+      description: Регистрация успешна, возвращены JWT токены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+              refreshToken:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+              user:
+                type: object
+                properties:
+                  isEmailVerified:
+                    type: boolean
+                    example: false
+    '409':
+      description: Пользователь с таким email уже существует
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Пользователь с таким email уже существует

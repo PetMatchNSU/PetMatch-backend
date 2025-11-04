@@ -1,0 +1,31 @@
+post:
+  summary: Подтверждение email пользователя
+  operationId: verifyEmail
+  description: |
+    Подтверждает адрес электронной почты по коду из письма.  
+    Если код истёк или недействителен, возвращает ошибку.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              example: eqtr6q798wet6
+  responses:
+    '200':
+      description: Почта успешно подтверждена
+    '400':
+      description: Неверный код или срок действия истёк
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Неверный код или срок действия истёк. Мы выслали новое письмо для подтверждения почты
