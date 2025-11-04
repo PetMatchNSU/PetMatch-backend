@@ -8,6 +8,7 @@ import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.files.dto.FilterDTO;
 import org.nsu.files.dto.MetadataDTO;
 import org.nsu.files.service.FileService;
+import org.nsu.testutils.AbstractIntegrityTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
-public class FileServiceTest {
+public class FileServiceTest extends AbstractIntegrityTest {
 
     static {
         // Ensure containers are started before any test
