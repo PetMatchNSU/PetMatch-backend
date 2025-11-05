@@ -93,7 +93,6 @@ public class FileUploadEventListener {
         }
     }
 
-    @Transactional
     private void saveFileMetadata(Long adId, List<FileMetadata> fileMetadataList) {
         AnimalCard animalCard = animalCardRepository.findById(adId).orElseThrow(() -> new RuntimeException("AnimalCard not found"));
 
