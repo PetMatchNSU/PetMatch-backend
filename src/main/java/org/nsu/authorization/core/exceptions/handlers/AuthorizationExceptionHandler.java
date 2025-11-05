@@ -24,12 +24,12 @@ public class AuthorizationExceptionHandler {
     }
 
     @ExceptionHandler(PersonHasNotVerifiedEmailException.class)
-    public ResponseEntity<common.dto.responses.negative.AbstractNegativeResponse> handlePersonHasNotVerifiedEmailException(PersonHasNotVerifiedEmailException e) {
+    public ResponseEntity<AbstractNegativeResponse> handlePersonHasNotVerifiedEmailException(PersonHasNotVerifiedEmailException e) {
         return simplePersonResponse(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
     @ExceptionHandler(JWTIsExpiredException.class)
-    public ResponseEntity<common.dto.responses.negative.AbstractNegativeResponse> handlePersonNotAuthorized(JWTIsExpiredException e) {
+    public ResponseEntity<AbstractNegativeResponse> handlePersonNotAuthorized(JWTIsExpiredException e) {
         return simplePersonResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
