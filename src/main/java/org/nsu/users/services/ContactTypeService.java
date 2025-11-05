@@ -8,6 +8,7 @@ import org.nsu.users.repositories.ContactTypeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +18,10 @@ public class ContactTypeService {
     private final ContactTypeMapper contactTypeMapper;
 
     public ContactTypeResponse getAllContactTypes() {
-        List<ContactType> contactTypes = contactTypeRepository.findAll();
-        List<ContactTypeResponse.ContactTypeDto> dtos = contactTypeMapper.toContactTypeDtoList(contactTypes);
-        
-        return new ContactTypeResponse(dtos);
+        return Optional.ofNullable(contactTypeRepository.findAll())
+                .map(contactTypeMapper::toContactTypeDtoList)
+                .map(ContactTypeResponse::new)
+                .filter(r -> r.getContactTypes() != null && !r.getContactTypes().isEmpty())
+                .orElse(ContactTypeResponse.EMPTY);
     }
 }

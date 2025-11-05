@@ -21,6 +21,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.nsu.users.exceptions.ContactTypeNotFoundException;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -110,7 +112,7 @@ class UserProfileServiceTest {
         when(regionRepository.findById(1L)).thenReturn(Optional.of(TestDataFactory.createTestRegion()));
         when(contactTypeRepository.findAll()).thenReturn(List.of());
 
-        assertThrows(IllegalArgumentException.class, () -> userProfileService.updateProfile("test@example.com", dto));
+        assertThrows(ContactTypeNotFoundException.class, () -> userProfileService.updateProfile("test@example.com", dto));
         verify(userRepository, never()).save(any());
     }
 }

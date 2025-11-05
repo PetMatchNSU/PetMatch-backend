@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
 import org.nsu.users.entity.*;
+import org.nsu.users.exceptions.ProfileNotFoundException;
+import org.nsu.users.exceptions.RegionNotFoundException;
+import org.nsu.users.exceptions.ContactTypeNotFoundException;
 import org.nsu.users.mappers.BondTimeMapper;
 import org.nsu.users.mappers.ContactMapper;
 import org.nsu.users.repositories.ContactTypeRepository;
@@ -29,15 +32,17 @@ public class UserProfileService {
 
     public void updateProfile(String email, UpdateUserRequest dto) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ProfileNotFoundException(email));
 
         user.setFirstName(dto.getFirstName());
         user.setSecondName(dto.getSecondName());
         user.setLastName(dto.getLastName());
-        user.setGender(Gender.valueOf(dto.getGender().name()));
+        if (dto.getGender() != null) {
+            user.setGender(Gender.valueOf(dto.getGender().name()));
+        }
 
         Region region = regionRepository.findById(dto.getLocationId())
-                .orElseThrow(() -> new IllegalArgumentException("Region not found: " + dto.getLocationId()));
+                .orElseThrow(() -> new RegionNotFoundException(dto.getLocationId()));
         user.setRegion(region);
 
         Map<String, ContactType> typesMap = contactTypeRepository.findAll()
@@ -61,7 +66,7 @@ public class UserProfileService {
             List<Contact> contactEntities = dto.getContactInfo().stream()
                     .map(cdto -> {
                         ContactType ct = typesMap.get(cdto.getType());
-                        if (ct == null) throw new IllegalArgumentException("Unknown contact type: " + cdto.getType());
+                        if (ct == null) throw new ContactTypeNotFoundException(cdto.getType());
 
                         Contact contact = contactMapper.toEntity(cdto);
                         contact.setUser(user);
