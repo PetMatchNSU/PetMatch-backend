@@ -3,6 +3,8 @@ package org.nsu.users.core.services;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.nsu.admin.entity.StatusComment;
@@ -13,29 +15,16 @@ import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.mappers.UserMapper;
 import org.nsu.users.core.repositories.UserRepository;
-import org.nsu.users.entity.Contact;
-import org.nsu.users.entity.User;
+import org.nsu.users.entity.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
-import org.nsu.users.entity.BondTime;
-import org.nsu.users.core.mappers.UserMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
+import org.nsu.users.core.repositories.ContactRepository;
+import org.nsu.users.core.repositories.ContactTypeRepository;
 import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
 import org.nsu.users.entity.User;
-import org.nsu.authorization.core.repositories.RegionRepository;
-import org.nsu.authorization.core.repositories.StatusRepository;
-import org.nsu.users.core.repositories.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 @RequiredArgsConstructor
@@ -48,13 +37,38 @@ public class UserService {
     private final org.nsu.authorization.core.repositories.RegionRepository regionRepository;
     private final PasswordEncoder passwordEncoder;
     private final org.nsu.authorization.core.repositories.StatusRepository statusRepository;
+    private final ContactRepository contactRepository;
+    private final ContactTypeRepository contactTypeRepository;
 
     public User addNewUser(RegistrationRequest request) {
         User newUser = mapRequestToUserEntity(request);
 
         newUser.setAuthorities(new HashSet<>());
 
-        return userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
+
+        List<Contact> contactsToSave = request.getContactInfo().stream()
+                .map(contactInfo -> {
+                    // Find the ContactType entity (e.g., "VK", "EMAIL")
+                    String typeName = contactInfo.getType().name();
+                    ContactType contactType = contactTypeRepository.findByName(typeName)
+                            .orElseThrow(() -> new UserCreationFailException(
+                                    "Contact type not found in database: " + typeName));
+
+                    // Create the new Contact entity
+                    Contact contact = new Contact();
+                    contact.setUser(savedUser); // Link to the user we just saved
+                    contact.setType(contactType);
+                    contact.setLink(contactInfo.getContact());
+                    contact.setIsVisible(contactInfo.getVisible());
+                    return contact;
+                })
+                .collect(Collectors.toList());
+
+        // Save the list of new Contact entities
+        contactRepository.saveAll(contactsToSave);
+
+        return savedUser;
     }
 
     @Transactional(readOnly = true)
