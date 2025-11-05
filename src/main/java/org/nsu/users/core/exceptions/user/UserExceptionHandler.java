@@ -17,9 +17,9 @@ public class UserExceptionHandler {
                 .body(new UserErrorResponseLogin(message, System.currentTimeMillis()));
     }
 
-//    @ExceptionHandler(PersonNotFoundException.class)
-//    public ResponseEntity<AbstractUserNegativeResponse> handlePersonNotFoundException(PersonNotFoundException e) {
-//        return simplePersonResponse(HttpStatus.NOT_FOUND, e.getMessage());
-//    }
+    @ExceptionHandler(PersonNotFoundException.class)
+    public ResponseEntity<AbstractUserNegativeResponse> handlePersonNotFoundException(PersonNotFoundException e) {
+        return simplePersonResponse(HttpStatus.NOT_FOUND, e.getMessage());
+    }
 
 }

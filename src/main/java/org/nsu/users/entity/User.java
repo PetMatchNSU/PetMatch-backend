@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
 import java.util.List;
 
 @Entity
@@ -65,9 +66,8 @@ public class User {
     @JoinColumn(name = "id_region", nullable = false)
     private Region region;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "t_users_authorities", joinColumns = @JoinColumn(name = "id_user", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "id_authority", referencedColumnName = "id"))
-    @ToString.Exclude
     private Set<Authority> authorities = new HashSet<>();// JWUtils are dependent on it
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
