@@ -9,17 +9,20 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.services.PersonDetailsService;
 import org.nsu.authorization.core.utils.JWTTypes;
 import org.nsu.authorization.core.utils.JWTUtil;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
@@ -27,6 +30,16 @@ public class JWTFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
     private final PersonDetailsService personDetailsService;
 
+    @Qualifier("handlerExceptionResolver")
+    private final HandlerExceptionResolver resolver;
+
+    public JWTFilter(JWTUtil jwtUtil,
+                     PersonDetailsService personDetailsService,
+                     @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) { // <-- 4. Add @Qualifier here
+        this.jwtUtil = jwtUtil;
+        this.personDetailsService = personDetailsService;
+        this.resolver = resolver;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -39,25 +52,34 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String JWTToken = header.replaceFirst(BEARER_PREFIX, "");
 
-        if (JWTToken.isBlank()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JWT Token");
-            return;
-        }
-
         try {
+            if (JWTToken.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid JWT Token (Blank)");
+            }
+
             long id = Long.parseLong(jwtUtil.extractClaim(JWTToken, JWTTypes.ACCESS_TOKEN, "userID"));
             UserDetails userDetails = personDetailsService.loadUserById(id);
 
-            UsernamePasswordAuthenticationToken  authentication =
+            UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            filterChain.doFilter(request, response);
+
         } catch (JWTVerificationException e) {
+
             SecurityContextHolder.getContext().setAuthentication(null);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+            resolver.resolveException(request, response, null, e);
+
+        } catch (ResponseStatusException e) {
+
+            resolver.resolveException(request, response, null, e);
+
+        } catch (Exception e) {
+
+            SecurityContextHolder.getContext().setAuthentication(null);
+            resolver.resolveException(request, response, null, e);
         }
-
-        filterChain.doFilter(request, response);
-
     }
 }
