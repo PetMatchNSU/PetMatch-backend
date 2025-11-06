@@ -71,7 +71,7 @@ public class EmailVerificationController {
                     ),
                     @ApiResponse(
                             responseCode = "500",
-                            description = "Server encountered an error that he could not address to answer the client correctly"
+                            description = "У сервера произошла внутренняя ошибка, которая не позволила корректно обработать запрос клиента"
                     )
             }
     )

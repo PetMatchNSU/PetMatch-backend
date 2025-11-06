@@ -32,8 +32,8 @@ public class EmailVerificationService {
         String userId;
         String emailDst;
         try {
-            userId = jwt.getClaimAsString(JwtClaimKey.getUSER_ID());
-            emailDst = jwt.getClaimAsString(JwtClaimKey.getUSER_EMAIL());
+            userId = jwt.getClaimAsString(JwtClaimKey.USER_ID);
+            emailDst = jwt.getClaimAsString(JwtClaimKey.USER_EMAIL);
         } catch (Exception e) {
             throw new EmailVerificationFailException("Failed to extract claims from token: " + e.getMessage(), e);
         }

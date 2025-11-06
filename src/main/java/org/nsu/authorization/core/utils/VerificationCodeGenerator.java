@@ -14,7 +14,7 @@ public class VerificationCodeGenerator {
         try {
             sr = SecureRandom.getInstanceStrong();
         } catch (NoSuchAlgorithmException e) {
-            throw new VerificationCodeGenerationFailException("Failed to generate code for email verification");
+            throw new VerificationCodeGenerationFailException("Failed to generate code for email verification", e);
         }
         int myInt = sr.nextInt(900000) + 100000;
         return String.valueOf(myInt);

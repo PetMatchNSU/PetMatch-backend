@@ -1,6 +1,5 @@
 package org.nsu.authorization.core.security;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -8,8 +7,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-
-import java.io.IOException;
 
 @Component
 public class DelegatedAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -26,8 +23,7 @@ public class DelegatedAuthenticationEntryPoint implements AuthenticationEntryPoi
     }
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
 
         // Delegate the exception to Spring MVC's error infrastructure.
         // This prevents the response from being committed prematurely.

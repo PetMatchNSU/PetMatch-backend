@@ -35,7 +35,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     public JWTFilter(JWTUtil jwtUtil,
                      PersonDetailsService personDetailsService,
-                     @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) { // <-- 4. Add @Qualifier here
+                     @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
         this.jwtUtil = jwtUtil;
         this.personDetailsService = personDetailsService;
         this.resolver = resolver;
