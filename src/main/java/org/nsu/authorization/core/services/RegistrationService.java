@@ -29,7 +29,7 @@ public class RegistrationService {
 
         String tempCode = verificationCodeCachingService.generateAndCacheCode(user.getId().toString());
 
-        emailVerificationSenderService.Send(dto.getEmail(), tempCode);
+        emailVerificationSenderService.send(dto.getEmail(), tempCode);
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 dto.getEmail(), dto.getPassword());

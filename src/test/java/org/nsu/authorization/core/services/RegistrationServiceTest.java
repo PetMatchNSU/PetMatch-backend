@@ -79,7 +79,7 @@ class RegistrationServiceTest {
         verify(userService).existsByEmail("test@example.com");
         verify(userService).addNewUser(registrationRequest);
         verify(verificationCodeCachingService).generateAndCacheCode(expectedCacheKey);
-        verify(emailVerificationSenderService).Send("test@example.com", testCode);
+        verify(emailVerificationSenderService).send("test@example.com", testCode);
         verify(jwtUtil).generateAccessToken(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtUtil).generateRefreshToken(any(UsernamePasswordAuthenticationToken.class));
     }
@@ -94,7 +94,7 @@ class RegistrationServiceTest {
 
         verify(userService, never()).addNewUser(any());
         verify(verificationCodeCachingService, never()).generateAndCacheCode(anyString());
-        verify(emailVerificationSenderService, never()).Send(anyString(), anyString());
+        verify(emailVerificationSenderService, never()).send(anyString(), anyString());
         verify(jwtUtil, never()).generateAccessToken(any());
     }
 }

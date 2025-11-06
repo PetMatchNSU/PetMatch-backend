@@ -1,18 +1,16 @@
 package org.nsu.authorization.core.exceptions.handlers;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import common.dto.responses.negative.AbstractNegativeResponse;
 import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
-import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
-import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
-import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
-import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
-import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
+import org.nsu.authorization.core.exceptions.authorization.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.nsu.authorization.core.exceptions.authorization.RegionNotFoundException;
 
 @ControllerAdvice
 public class AuthorizationExceptionHandler {
@@ -51,5 +49,37 @@ public class AuthorizationExceptionHandler {
     @ExceptionHandler(UserCreationFailException.class)
     public ResponseEntity<AbstractNegativeResponse> HandleUserCreationFailException(UserCreationFailException e) {
         return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user: " + e.getMessage());
+    }
+
+    /**
+     * Handles exceptions from the JWTFilter (e.g., bad signature, expired token, malformed).
+     * This catches the *actual* exception your filter is delegating.
+     */
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleJWTVerificationException(JWTVerificationException e) {
+        return simplePersonResponse(HttpStatus.UNAUTHORIZED, "Invalid Token: " + e.getMessage());
+    }
+
+    /**
+     * Handles exceptions from DelegatedAuthenticationEntryPoint.
+     * This is for when authentication is required but missing (e.g., no Bearer token).
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleAuthenticationException(AuthenticationException e) {
+        return simplePersonResponse(HttpStatus.UNAUTHORIZED, "Authentication Required");
+    }
+
+    /**
+     * Handles exceptions from DelegatedAccessDeniedHandler.
+     * This is for when the user is authenticated but not authorized (e.g., wrong role).
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleAccessDeniedException(AccessDeniedException e) {
+        return simplePersonResponse(HttpStatus.FORBIDDEN, "Access Denied");
+    }
+
+    @ExceptionHandler(VerificationCodeGenerationFailException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleVerificationCodeGenerationFailException(VerificationCodeGenerationFailException e) {
+        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 }

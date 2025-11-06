@@ -21,8 +21,8 @@ spring:
       port: 6379
       password: ${REDIS_PASSWORD}
       verification-code:
-        ttl-minutes: 5
-        default-ttl-minutes: 60
+        ttl-minutes: ${REDIS_DEFAULT_VERIFICATION_CODE_TTL}
+      default-ttl-minutes: ${REDIS_DEFAULT_TTL}
   mail:
     host: smtp.gmail.com
     port: 587

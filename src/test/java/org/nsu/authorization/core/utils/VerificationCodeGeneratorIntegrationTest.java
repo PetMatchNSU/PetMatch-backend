@@ -78,7 +78,7 @@ class VerificationCodeGeneratorIntegrationTest {
         public CacheManager cacheManager() {
             // Must define the cache name used in the service: "Verification codes"
             // The ConcurrentMapCacheManager creates a simple, in-memory cache.
-            return new ConcurrentMapCacheManager("Verification codes");
+            return new ConcurrentMapCacheManager(CacheUtil.VERIFICATION_CODE_CACHE_NAME);
         }
     }
 }

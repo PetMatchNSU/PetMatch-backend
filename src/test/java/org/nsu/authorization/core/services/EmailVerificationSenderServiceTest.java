@@ -39,7 +39,7 @@ class EmailVerificationSenderServiceTest {
 
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
 
-        emailService.Send(testToEmail, testCode);
+        emailService.send(testToEmail, testCode);
 
         verify(mailSender).send(messageCaptor.capture());
 
