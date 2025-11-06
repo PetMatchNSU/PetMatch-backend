@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class EmailVerifierRequest {
+public class EmailVerificationRequest {
     @NotBlank(message = "Code should not be empty")
     @Schema(description = "Код подтверждения", example = "eqtr6q798wet6")
     private String code;

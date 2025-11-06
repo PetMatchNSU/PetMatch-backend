@@ -1,5 +1,6 @@
 package org.nsu.authorization.core.config;
 
+import org.nsu.authorization.core.utils.CacheUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -13,11 +14,9 @@ import java.time.Duration;
 public class RedisCacheConfig {
 
         @Value("${spring.data.redis.verification-code.ttl-minutes}")
-        private int ttl_minutes;
+        private int ttlMinutes;
 
-        private static final String VERIFICATION_CODE_CACHE = "Verification codes";
-
-        @Value("${spring.data.redis.verification-code.default-ttl-minutes}")
+        @Value("${spring.data.redis.default-ttl-minutes}")
         private int defaultTtl;
 
         @Bean
@@ -35,11 +34,11 @@ public class RedisCacheConfig {
          */
         @Bean
         public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-                final Duration verificationCodeTtl = Duration.ofMinutes(ttl_minutes);
+                final Duration verificationCodeTtl = Duration.ofMinutes(ttlMinutes);
 
                 return (builder) -> builder
                                 .withCacheConfiguration(
-                                                VERIFICATION_CODE_CACHE,
+                                        CacheUtil.VERIFICATION_CODE_CACHE_NAME,
                                                 RedisCacheConfiguration.defaultCacheConfig()
                                                                 .entryTtl(verificationCodeTtl)
                                                                 .disableCachingNullValues()

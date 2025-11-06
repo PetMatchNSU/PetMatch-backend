@@ -17,7 +17,7 @@ services:
       - /opt/petmatch/infrastructure/databases/petmatch:/docker-entrypoint-initdb.d:ro
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U petmatch -p 5432" ]
+      test: ["CMD-SHELL", "pg_isready -U petmatch -p 5432"]
       # Скрипт pg_isready будет запускаться с интервалом 10с, таймаут на выполнение скрипта 5с, макс. количество попыток 20
       interval: 10s
       timeout: 5s
@@ -46,7 +46,7 @@ services:
     volumes:
       - /opt/petmatch/infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "http://localhost:9090/-/healthy" ]
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/-/healthy"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -60,7 +60,7 @@ services:
     volumes:
       - /opt/petmatch/infrastructure/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3100/ready" ]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -69,7 +69,7 @@ services:
     image: grafana/tempo:2.4.1
     container_name: tempo
     restart: always
-    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
     ports:
       - "3200:3200"
     volumes:
@@ -129,7 +129,7 @@ services:
       - grafana_data:/var/lib/grafana
       - nexus-data:/nexus-data
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "http://localhost:3000/api/health" ]
+      test: ["CMD", "wget", "--spider", "http://localhost:3000/api/health"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -169,10 +169,20 @@ services:
       petmatch-redis:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8091/actuator/health"]
       interval: 5s
       timeout: 5s
       retries: 3
+  # PetMatch frontend - Node.js application Production version with image tag
+  petmatch-frontend:
+    image: andrvat/petmatch-frontend:${FRONTEND_IMAGE_TAG:-latest}
+    container_name: petmatch-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      petmatch-service:
+        condition: service_healthy
   # Redis cache
   petmatch-redis:
     image: redis:7-alpine
@@ -184,7 +194,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -219,11 +229,11 @@ services:
       # То же самое, что secret key
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_DEFAULT_BUCKETS: ${MINIO_DEFAULT_BUCKETS}
-      MINIO_PROMETHEUS_AUTH_TYPE: "public" # Make metrics publicly accessible
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"  # Make metrics publicly accessible
     volumes:
       - minio_data:/data
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3

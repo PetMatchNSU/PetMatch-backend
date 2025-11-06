@@ -3,9 +3,7 @@ package org.nsu.authorization.core.exceptions.handlers;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import common.dto.responses.negative.AbstractNegativeResponse;
 import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
-import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
-import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
-import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
+import org.nsu.authorization.core.exceptions.authorization.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -35,6 +33,16 @@ public class AuthorizationExceptionHandler {
     @ExceptionHandler(JWTIsExpiredException.class)
     public ResponseEntity<AbstractNegativeResponse> handlePersonNotAuthorized(JWTIsExpiredException e) {
         return simplePersonResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    @ExceptionHandler(EmailVerificationFailException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleEmailVerificationFailException(EmailVerificationFailException e) {
+        return simplePersonResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(VerificationCodeGenerationFailException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleVerificationCodeGenerationFailException(VerificationCodeGenerationFailException e) {
+        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     /**

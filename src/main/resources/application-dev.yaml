@@ -10,7 +10,7 @@ spring:
     enabled: true
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://petmatch-postgres:5432/petmatch
+    url: jdbc:postgresql://localhost:5433/petmatch
     username: petmatch
     password: secret
   jpa:
@@ -20,14 +20,14 @@ spring:
     show-sql: true
   data:
     redis:
-      host: petmatch-redis
+      host: localhost
       port: 6379
       password: secret
       verification-code:
         ttl-minutes: 5
-        default-ttl-minutes: 60
+      default-ttl-minutes: 60
   mail:
-    host: mailhog
+    host: localhost
     port: 1025
     username: ""
     password: ""
@@ -35,7 +35,7 @@ spring:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
 minio:
-  endpoint: http://petmatch-minio:9000
+  endpoint: http://localhost:9000
   access-key: petmatch-access-key
   secret-key: petmatch-secret-key
   bucket-name: petmatch-uploads
@@ -58,7 +58,7 @@ management:
 otel:
   exporter:
     otlp:
-      endpoint: ${OTLP_EXPORTER_ENDPOINT}
+      endpoint: http://localhost:4318
       protocol: http/protobuf
   logs:
     exporter: none

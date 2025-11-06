@@ -11,16 +11,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import org.nsu.authorization.core.dto.requests.EmailVerifierRequest;
+import org.nsu.authorization.core.dto.requests.EmailVerificationRequest;
 import org.nsu.authorization.core.services.EmailVerificationService;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "User Management", description = "Operations related to user accounts (e.g., email verification)")
@@ -45,7 +41,7 @@ public class EmailVerificationController {
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = EmailVerifierRequest.class),
+                            schema = @Schema(implementation = EmailVerificationRequest.class),
                             examples = @ExampleObject(
                                     name = "Verification Request",
                                     value = "{\"code\": \"eqtr6q798wet6\"}"
@@ -72,11 +68,14 @@ public class EmailVerificationController {
                     @ApiResponse(
                             responseCode = "401",
                             description = "Unauthorized - Не предоставлен или недействителен Bearer-токен."
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Server encountered an error that he could not address to answer the client correctly"
                     )
             }
     )
-    public void verifyEmail(@Valid @RequestBody EmailVerifierRequest dto,
-                                  @AuthenticationPrincipal Jwt jwt) {
+    public void verifyEmail(@Valid @RequestBody EmailVerificationRequest dto, @AuthenticationPrincipal Jwt jwt) {
 
         service.verifyEmail(dto, jwt);
 

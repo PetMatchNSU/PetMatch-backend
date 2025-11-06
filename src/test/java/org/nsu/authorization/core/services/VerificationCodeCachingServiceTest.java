@@ -37,7 +37,7 @@ class VerificationCodeCachingServiceTest {
     void testGenerateAndCacheCode() {
         // Arrange
         String userId = "user-123";
-        String expectedCode = "abc-123-def-456";
+        String expectedCode = "123456";
         when(verificationCodeGenerator.generateVerificationCode()).thenReturn(expectedCode);
 
         // Act

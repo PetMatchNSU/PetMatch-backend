@@ -218,7 +218,7 @@ services:
       timeout: 20s
       retries: 3
   mailhog:
-    image: mailhog/mailhog:latest
+    image: mailhog/mailhog:v1.0.1
     container_name: mailhog
     restart: always
     ports:

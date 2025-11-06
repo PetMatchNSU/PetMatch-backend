@@ -7,7 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.nsu.authorization.core.dto.requests.EmailVerifierRequest;
+import org.nsu.authorization.core.dto.requests.EmailVerificationRequest;
+import org.nsu.authorization.core.utils.CacheUtil;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.authorization.core.utils.VerificationCodeGenerator;
 import org.nsu.users.entity.User; // Убедитесь, что этот импорт корректен
@@ -87,16 +88,15 @@ class EmailVerificationControllerIT {
     // --- Тестовые данные ---
     private static final String TEST_USER_ID = "123";
     private static final String TEST_EMAIL = "test@example.com";
-    private static final String VALID_CODE = "valid-code-123";
-    private static final String INVALID_CODE = "invalid-code-456";
-    private static final String NEW_GENERATED_CODE = "new-code-789";
-    private static final String CACHE_NAME = "Verification codes";
-    private static final String CACHE_KEY = "registrationService:user:123:email:code";
+    private static final String VALID_CODE = "123456";
+    private static final String INVALID_CODE = "789012";
+    private static final String NEW_GENERATED_CODE = "345678";
+    private static final String CACHE_KEY = "user:123:email:code";
 
     @BeforeEach
     void setUp() {
         // Очищаем кэш Redis перед каждым тестом
-        Optional.ofNullable(cacheManager.getCache(CACHE_NAME)).ifPresent(Cache::clear);
+        Optional.ofNullable(cacheManager.getCache(CacheUtil.VERIFICATION_CODE_CACHE_NAME)).ifPresent(Cache::clear);
 
         // Сбрасываем моки
         reset(userRepository, javaMailSender, verificationCodeGenerator);
@@ -105,8 +105,8 @@ class EmailVerificationControllerIT {
     /**
      * Создает DTO запроса
      */
-    private EmailVerifierRequest createRequest(String code) {
-        EmailVerifierRequest request = new EmailVerifierRequest();
+    private EmailVerificationRequest createRequest(String code) {
+        EmailVerificationRequest request = new EmailVerificationRequest();
         request.setCode(code);
         return request;
     }
@@ -131,7 +131,7 @@ class EmailVerificationControllerIT {
     void testVerifyEmail_Success() throws Exception {
         // --- Arrange ---
         // 1. Помещаем правильный код в кэш
-        cacheManager.getCache(CACHE_NAME).put(CACHE_KEY, VALID_CODE);
+        cacheManager.getCache(CacheUtil.VERIFICATION_CODE_CACHE_NAME).put(CACHE_KEY, VALID_CODE);
 
         // 2. Готовим мок пользователя
         User mockUser = new User();
@@ -142,7 +142,7 @@ class EmailVerificationControllerIT {
         when(userRepository.getReferenceById(Long.parseLong(TEST_USER_ID))).thenReturn(mockUser);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        EmailVerifierRequest request = createRequest(VALID_CODE);
+        EmailVerificationRequest request = createRequest(VALID_CODE);
 
         // --- Act & Assert ---
         mockMvc.perform(post("/api/v1/user/verify-email")
@@ -168,7 +168,7 @@ class EmailVerificationControllerIT {
     @DisplayName("2. Записи в Redis нет: Генерируется новый код и отправляется письмо")
     void testVerifyEmail_CodeNotInRedis_ResendsEmail() throws Exception {
         when(verificationCodeGenerator.generateVerificationCode()).thenReturn(NEW_GENERATED_CODE);
-        EmailVerifierRequest request = createRequest("any-code-will-do");
+        EmailVerificationRequest request = createRequest("any-code-will-do");
 
         // --- Act ---
         mockMvc.perform(post("/api/v1/user/verify-email")
@@ -195,7 +195,7 @@ class EmailVerificationControllerIT {
         verify(userRepository, never()).save(any(User.class));
 
         // 3. Убеждаемся, что новый код появился в кэше
-        String cachedCode = Objects.requireNonNull(cacheManager.getCache(CACHE_NAME)).get(CACHE_KEY, String.class);
+        String cachedCode = Objects.requireNonNull(cacheManager.getCache(CacheUtil.VERIFICATION_CODE_CACHE_NAME)).get(CACHE_KEY, String.class);
         assertThat(cachedCode).isEqualTo(NEW_GENERATED_CODE);
     }
 
@@ -204,10 +204,10 @@ class EmailVerificationControllerIT {
     void testVerifyEmail_CodeMismatch_ReturnsError() throws Exception {
         // --- Arrange ---
         // 1. Помещаем правильный (ожидаемый) код в кэш
-        cacheManager.getCache(CACHE_NAME).put(CACHE_KEY, VALID_CODE);
+        cacheManager.getCache(CacheUtil.VERIFICATION_CODE_CACHE_NAME).put(CACHE_KEY, VALID_CODE);
 
         // 2. Создаем запрос с НЕПРАВИЛЬНЫМ кодом
-        EmailVerifierRequest request = createRequest(INVALID_CODE);
+        EmailVerificationRequest request = createRequest(INVALID_CODE);
 
         // --- Act & Assert ---
         mockMvc.perform(post("/api/v1/user/verify-email")
@@ -233,13 +233,13 @@ class EmailVerificationControllerIT {
     void testVerifyEmail_CodeMatches_DatabaseError() throws Exception {
         // --- Arrange ---
         // 1. Помещаем правильный код в кэш
-        cacheManager.getCache(CACHE_NAME).put(CACHE_KEY, VALID_CODE);
+        cacheManager.getCache(CacheUtil.VERIFICATION_CODE_CACHE_NAME).put(CACHE_KEY, VALID_CODE);
 
         // 2. Настраиваем мок репозитория на ошибку
         when(userRepository.getReferenceById(Long.parseLong(TEST_USER_ID)))
                 .thenThrow(new EntityNotFoundException("Test DB Error: User not found"));
 
-        EmailVerifierRequest request = createRequest(VALID_CODE);
+        EmailVerificationRequest request = createRequest(VALID_CODE);
 
         // --- Act & Assert ---
         mockMvc.perform(post("/api/v1/user/verify-email")
