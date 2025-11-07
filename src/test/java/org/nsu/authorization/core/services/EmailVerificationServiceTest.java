@@ -77,8 +77,12 @@ class EmailVerificationServiceTest {
         EmailVerificationRequest request = new EmailVerificationRequest();
         request.setCode(VALID_CODE);
 
-        // Act
-        emailVerificationService.verifyEmail(request, jwt);
+        // Act & Assert
+        // Verify that the expected exception is thrown
+        EmailVerificationFailException exception = assertThrows(
+                EmailVerificationFailException.class,
+                () -> emailVerificationService.verifyEmail(request, jwt) // This line should throw
+        );
 
         // Assert
         verify(verificationCodeCachingService, times(1)).generateAndCacheCode(TEST_USER_ID);

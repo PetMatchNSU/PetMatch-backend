@@ -168,14 +168,15 @@ class EmailVerificationControllerIT {
     @DisplayName("2. Записи в Redis нет: Генерируется новый код и отправляется письмо")
     void testVerifyEmail_CodeNotInRedis_ResendsEmail() throws Exception {
         when(verificationCodeGenerator.generateVerificationCode()).thenReturn(NEW_GENERATED_CODE);
-        EmailVerificationRequest request = createRequest("any-code-will-do");
+        EmailVerificationRequest request = createRequest("189898");
 
         // --- Act ---
         mockMvc.perform(post("/api/v1/user/verify-email")
                         .with(jwtWithClaims())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("Неверный код или срок действия истёк")));
 
         // --- Verify ---
         // 1. Создаем "ловушку" для SimpleMailMessage

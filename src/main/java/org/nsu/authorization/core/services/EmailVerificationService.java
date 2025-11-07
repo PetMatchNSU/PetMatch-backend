@@ -52,7 +52,7 @@ public class EmailVerificationService {
         if (cachedCode == null) { // if the code is expired, generate a new one and send it
             cachedCode = verificationCodeCachingService.generateAndCacheCode(userId);
             emailVerificationSenderService.send(emailDst, cachedCode);
-            return;
+            throw new EmailVerificationFailException("Неверный код или срок действия истёк. Мы выслали новое письмо для подтверждения почты");
         }
 
         // check if the code matches the one from the cache
