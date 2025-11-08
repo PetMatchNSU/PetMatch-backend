@@ -14,17 +14,17 @@
         </preConditions>
 
         <!-- Таблица t_bond_times -->
-        <createTable tableName="t_bond_times">
-            <column name="id" type="BIGINT" autoIncrement="true">
+        <createTable tableName="t_bond_times" remarks="Таблица времен доступности для связи">
+            <column name="id" type="BIGINT" autoIncrement="true" remarks="PK">
                 <constraints primaryKey="true" primaryKeyName="pk_t_bond_times"/>
             </column>
-            <column name="start" type="TIME">
+            <column name="start" type="TIME" remarks="Время начала доступности">
                 <constraints nullable="false"/>
             </column>
-            <column name="end" type="TIME">
+            <column name="end" type="TIME" remarks="Время конца доступности">
                 <constraints nullable="false"/>
             </column>
-            <column name="id_user" type="BIGINT">
+            <column name="id_user" type="BIGINT" remarks="Пользователь">
                 <constraints nullable="false"/>
             </column>
         </createTable>
