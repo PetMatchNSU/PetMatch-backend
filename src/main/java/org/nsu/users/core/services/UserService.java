@@ -21,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.nsu.users.core.repositories.ContactRepository;
 import org.nsu.users.core.repositories.ContactTypeRepository;
 import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
 import org.nsu.users.entity.User;
@@ -37,7 +36,6 @@ public class UserService {
     private final org.nsu.authorization.core.repositories.RegionRepository regionRepository;
     private final PasswordEncoder passwordEncoder;
     private final org.nsu.authorization.core.repositories.StatusRepository statusRepository;
-    private final ContactRepository contactRepository;
     private final ContactTypeRepository contactTypeRepository;
 
     public User addNewUser(RegistrationRequest request) {
@@ -45,30 +43,7 @@ public class UserService {
 
         newUser.setAuthorities(new HashSet<>());
 
-        User savedUser = userRepository.save(newUser);
-
-        List<Contact> contactsToSave = request.getContactInfo().stream()
-                .map(contactInfo -> {
-                    // Find the ContactType entity (e.g., "VK", "EMAIL")
-                    String typeName = contactInfo.getType().name();
-                    ContactType contactType = contactTypeRepository.findByName(typeName)
-                            .orElseThrow(() -> new UserCreationFailException(
-                                    "Contact type not found in database: " + typeName));
-
-                    // Create the new Contact entity
-                    Contact contact = new Contact();
-                    contact.setUser(savedUser); // Link to the user we just saved
-                    contact.setType(contactType);
-                    contact.setLink(contactInfo.getContact());
-                    contact.setIsVisible(contactInfo.getVisible());
-                    return contact;
-                })
-                .collect(Collectors.toList());
-
-        // Save the list of new Contact entities
-        contactRepository.saveAll(contactsToSave);
-
-        return savedUser;
+        return userRepository.save(newUser);
     }
 
     @Transactional(readOnly = true)
@@ -102,6 +77,26 @@ public class UserService {
                 .collect(Collectors.toList());
 
         user.setBondTimes(bondTimeEntities);
+
+        List<Contact> contactsToSave = request.getContactInfo().stream()
+                .map(contactInfo -> {
+                    // Find the ContactType entity (e.g., "VK", "EMAIL")
+                    String typeName = contactInfo.getType().name();
+                    ContactType contactType = contactTypeRepository.findByName(typeName)
+                            .orElseThrow(() -> new UserCreationFailException(
+                                    "Contact type not found in database: " + typeName));
+
+                    // Create the new Contact entity
+                    Contact contact = new Contact();
+                    contact.setUser(user); // Link to the user we just saved
+                    contact.setType(contactType);
+                    contact.setLink(contactInfo.getContact());
+                    contact.setIsVisible(contactInfo.getVisible());
+                    return contact;
+                })
+                .collect(Collectors.toList());
+
+        user.setContacts(contactsToSave);
 
         return user;
     }

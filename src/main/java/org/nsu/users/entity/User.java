@@ -73,6 +73,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<BondTime> bondTimes;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Contact> contacts;
+
     @Column(name = "is_email_verified")
     private boolean isEmailVerified = false;
 
