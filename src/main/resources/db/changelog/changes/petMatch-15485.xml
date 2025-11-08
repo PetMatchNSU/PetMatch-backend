@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+
+    <!-- Таблица t_users_authorities -->
+    <changeSet id="1" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_users_authorities" remarks="Таблица связи пользователей и их прав">
+            <column name="id_authority" type="BIGINT" remarks="Идентификатор права">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_user" type="BIGINT" remarks="Идентификатор пользователя">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <primaryKeyExists tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <addPrimaryKey tableName="t_users_authorities" columnNames="id_authority,id_user"
+                       constraintName="pk_t_users_authorities"/>
+    </changeSet>
+
+    <changeSet id="3" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_users_authorities"
+                                            foreignKeyName="fk_t_users_authorities_id_authority"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_users_authorities"
+                                 baseColumnNames="id_authority"
+                                 constraintName="fk_t_users_authorities_id_authority"
+                                 referencedTableName="t_authorities"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="4" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_users_authorities"
+                                            foreignKeyName="fk_t_users_authorities_id_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="t_users_authorities"
+                                 baseColumnNames="id_user"
+                                 constraintName="fk_t_users_authorities_id_user"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="5" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_users_authorities_id_authority_idx" tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="t_users_authorities" indexName="t_users_authorities_id_authority_idx">
+            <column name="id_authority"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="6" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_users_authorities_id_user_idx" tableName="t_users_authorities"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="t_users_authorities" indexName="t_users_authorities_id_user_idx">
+            <column name="id_user"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="7" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists
+                    foreignKeyTableName="t_authorities"
+                    foreignKeyName="fk_t_authorities_on_id_authority"/>
+        </preConditions>
+
+        <dropForeignKeyConstraint
+                baseTableName="t_authorities"
+                constraintName="fk_t_authorities_on_id_authority"/>
+    </changeSet>
+
+    <changeSet id="8" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="id_authority" tableName="t_authorities"/>
+        </preConditions>
+        <dropColumn tableName="t_authorities">
+            <column name="id_authority" type="boolean"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="9" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_authorities"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_authorities">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_t_authorities"/>
+            </column>
+            <column name="name" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="10" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists constraintName="uc_t_authorities_description" tableName="t_authorities"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="description" constraintName="uc_t_authorities_description"
+                             tableName="t_authorities"/>
+    </changeSet>
+    <changeSet id="11" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists constraintName="uc_t_authorities_name" tableName="t_authorities"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="name" constraintName="uc_t_authorities_name" tableName="t_authorities"/>
+    </changeSet>
+
+    <changeSet id="12" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="is_email_verified" tableName="t_users"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="t_users">
+            <column name="is_email_verified" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="13" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="end_time" tableName="t_bond_times"/>
+            </not>
+        </preConditions>
+        <renameColumn
+                tableName="t_bond_times"
+                oldColumnName="end"
+                newColumnName="end_time"/>
+    </changeSet>
+
+    <changeSet id="14" author="helttek">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="start_time" tableName="t_bond_times"/>
+            </not>
+        </preConditions>
+        <renameColumn
+                tableName="t_bond_times"
+                oldColumnName="start"
+                newColumnName="start_time"/>
+    </changeSet>
+
+</databaseChangeLog>
