@@ -150,6 +150,8 @@ services:
       # Redis configuration
       REDIS_HOST: petmatch-redis
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_DEFAULT_TTL: ${REDIS_DEFAULT_TTL}
+      REDIS_DEFAULT_VERIFICATION_CODE_TTL: ${REDIS_DEFAULT_VERIFICATION_CODE_TTL}
       # MinIO configuration
       MINIO_ENDPOINT: http://petmatch-minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
@@ -161,6 +163,13 @@ services:
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
       # Java options
       JAVA_OPTS: "-XX:+UseG1GC -XX:+UseContainerSupport"
+      # Mail server config
+      SPRING_MAIL_HOST: ${MAIL_SERVER_HOSTNAME}
+      SPRING_MAIL_PORT: ${MAIL_SERVER_PORT}
+      SPRING_MAIL_USERNAME: ${MAIL_SENDER_EMAIL}
+      SPRING_MAIL_PASSWORD: ${MAIL_APP_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${MAIL_PROPERTIES_MAIL_SMTP_AUTH} # Security Properties (Required for TLS)
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE}
     depends_on:
       petmatch-postgres:
         condition: service_healthy

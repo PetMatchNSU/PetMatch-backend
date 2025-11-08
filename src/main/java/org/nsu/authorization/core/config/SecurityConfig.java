@@ -1,6 +1,8 @@
 package org.nsu.authorization.core.config;
 
 import lombok.RequiredArgsConstructor;
+import org.nsu.authorization.core.security.DelegatedAccessDeniedHandler;
+import org.nsu.authorization.core.security.DelegatedAuthenticationEntryPoint;
 import org.nsu.authorization.core.security.JWTFilter;
 import org.nsu.authorization.core.services.PersonDetailsService;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +32,8 @@ public class SecurityConfig {
 
     private final JWTFilter jwtFilter;
     private final PersonDetailsService userDetailsService;
+    private final DelegatedAuthenticationEntryPoint authenticationEntryPoint;
+    private final DelegatedAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
@@ -48,7 +52,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .passwordManagement(password -> passwordEncoder())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
+        ;
 
         return http.build();
     }

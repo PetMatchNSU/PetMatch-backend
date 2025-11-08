@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info:
+  title: PetMatch-backend
+  version: 1.0.0
+
+paths:
+  /api/v1/user/register:
+    $ref: './paths/registration.yaml'
+  /api/v1/user/verify-email:
+    $ref: './paths/emailVerification.yaml'

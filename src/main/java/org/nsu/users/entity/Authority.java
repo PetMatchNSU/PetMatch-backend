@@ -1,6 +1,5 @@
 package org.nsu.users.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "t_authorities")
@@ -18,14 +18,20 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Authority {
+public class Authority implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false,  length = 64)
+    @Column(unique = true, nullable = false, length = 64)
     private String name;
 
-    @Column(unique = true, nullable = false,  length = 256)
+    @Column(unique = true, nullable = false, length = 256)
     private String description;
+
+    @Override
+    public String getAuthority() {
+        // This is the method the JWT fix relies on to get the String value
+        return this.name;
+    }
 }
