@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
+import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.services.TimezoneService;
 import org.nsu.users.entity.BondTime;
@@ -57,4 +58,13 @@ public abstract class UserMapper {
         }
         return timezoneService.convertLocalTimeToOffsetDateTime(localTime);
     }
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "region", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "emailVerified", ignore = true)
+    @Mapping(target = "bondTimes", ignore = true)
+    public abstract User toUser(RegistrationRequest request);
 }

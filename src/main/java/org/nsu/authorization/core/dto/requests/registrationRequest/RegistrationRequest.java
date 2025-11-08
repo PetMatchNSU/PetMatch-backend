@@ -1,0 +1,64 @@
+package org.nsu.authorization.core.dto.requests.registrationRequest;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+import org.hibernate.validator.constraints.Length;
+import org.nsu.users.entity.Gender;
+
+@Getter
+@Setter
+public class RegistrationRequest {
+    @Email(message = "Email should be valid")
+    @NotBlank(message = "Email should not be empty")
+    @Schema(description = "Почта пользователя", example = "i.ivanov@ivanov.ru")
+    private String email;
+
+    @NotBlank(message = "Password should not be empty")
+    @Schema(description = "Пароль пользователя", example = "09090909")
+    @Length(min = 8, max = 64)
+    private String password;
+
+    @NotBlank(message = "First name should not be empty")
+    @Schema(description = "Имя", example = "Иван")
+    private String firstName;
+
+    @NotBlank(message = "Second name should not be empty")
+    @Schema(description = "Фамилия", example = "Иванов")
+    private String secondName;
+
+    @Schema(description = "Отчество", example = "Иванович")
+    private String lastName;
+
+    @NotNull(message = "Gender should not be empty")
+    @Schema(description = "Пол (M/F)", example = "M")
+    private Gender gender;
+
+    @NotBlank(message = "Region should not be empty")
+    @Schema(description = "Регион проживания пользователя", example = "Новосибирская область")
+    private String region;
+
+    @NotBlank(message = "City should not be empty")
+    @Schema(description = "Город проживания пользователя", example = "Новосибирск")
+    private String city;
+
+    @NotNull(message = "Bond time array must be provided")
+    @Size(min = 1, message = "At least one bond time interval is required")
+    @Valid
+    @Schema(description = "Массив времени для связи")
+    private List<BondTime> bondTime;
+
+    @NotNull(message = "Contact info array must be provided")
+    @Size(min = 1, message = "At least one contact method is required")
+    @Valid
+    @Schema(description = "Массив способов связи")
+    private List<ContactInfo> contactInfo;
+}

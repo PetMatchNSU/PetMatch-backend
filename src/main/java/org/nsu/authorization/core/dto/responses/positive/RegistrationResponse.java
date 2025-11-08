@@ -1,0 +1,32 @@
+package org.nsu.authorization.core.dto.responses.positive;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class RegistrationResponse {
+
+	@Schema(description = "Access JWT токен для авторизации на сервисах", example = "some.access.token")
+	private String accessToken;
+
+	@Schema(description = "Refresh JWT токен для восстановления Access и Refresh JWT токенов", example = "some.refresh.token")
+	private String refreshToken;
+
+	@NonNull
+	private UserDto user;
+
+	@Getter
+	@Setter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class UserDto {
+		private boolean isEmailVerified;
+	}
+}
