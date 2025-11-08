@@ -209,7 +209,7 @@ services:
       # То же самое, что secret key
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_DEFAULT_BUCKETS: ${MINIO_DEFAULT_BUCKETS}
-      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+      MINIO_PROMETHEUS_AUTH_TYPE: "public" # Make metrics publicly accessible
     volumes:
       - minio_data:/data
     healthcheck:

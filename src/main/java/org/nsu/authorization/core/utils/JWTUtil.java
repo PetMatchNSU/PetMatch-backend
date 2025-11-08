@@ -41,17 +41,17 @@ public class JWTUtil {
 			accessKey = decodeSecret(accessChars);
 			refreshKey = decodeSecret(refreshChars);
 
-			this.accessAlgorithm = Algorithm.HMAC256(accessKey);
-			this.refreshAlgorithm = Algorithm.HMAC256(refreshKey);
-		} finally {
-			if (accessKey != null)
-				Arrays.fill(accessKey, (byte) 0);
-			if (refreshKey != null)
-				Arrays.fill(refreshKey, (byte) 0);
-			Arrays.fill(accessChars, '\0');
-			Arrays.fill(refreshChars, '\0');
-		}
-	}
+            this.accessAlgorithm = Algorithm.HMAC256(accessKey);
+            this.refreshAlgorithm = Algorithm.HMAC256(refreshKey);
+        } finally {
+            if (accessKey != null)
+                Arrays.fill(accessKey, (byte) 0);
+            if (refreshKey != null)
+                Arrays.fill(refreshKey, (byte) 0);
+            Arrays.fill(accessChars, '\0');
+            Arrays.fill(refreshChars, '\0');
+        }
+    }
 
 	private char[] readEnvAsChars(String name) {
 		String value = System.getenv(name);
@@ -80,16 +80,16 @@ public class JWTUtil {
 		}
 	}
 
-	private boolean isLikelyHex(char[] encoded) {
-		if ((encoded.length & 1) != 0)
-			return false;
-		for (char c : encoded) {
-			boolean isHex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
-			if (!isHex)
-				return false;
-		}
-		return true;
-	}
+    private boolean isLikelyHex(char[] encoded) {
+        if ((encoded.length & 1) != 0)
+            return false;
+        for (char c : encoded) {
+            boolean isHex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+            if (!isHex)
+                return false;
+        }
+        return true;
+    }
 
 	private byte[] hexToBytes(char[] hex) {
 		int len = hex.length;
@@ -112,26 +112,25 @@ public class JWTUtil {
 
 	private String generateJWT(User user, Date expirationDate, Algorithm algorithm) {
 
-		return JWT.create()
-				.withSubject("Person details")
-				.withClaim("userID", user.getId())
-				.withClaim("email", user.getEmail())
-				.withClaim("firstName", user.getFirstName())
-				.withClaim("surname", user.getSecondName())
-				.withClaim("patronymic", user.getLastName())
-				.withClaim("authorities", user.getAuthorities().stream()
-						.map(authority -> authority.getAuthority())
-						.toList())
-				.withIssuer("spring-app")
-				.withExpiresAt(expirationDate)
-				.sign(algorithm);
-	}
+        return JWT.create()
+                .withSubject("Person details")
+                .withClaim("userID", user.getId())
+                .withClaim("email", user.getEmail())
+                .withClaim("firstName", user.getFirstName())
+                .withClaim("surname", user.getSecondName())
+                .withClaim("patronymic", user.getLastName())
+                .withClaim("authorities",
+                        user.getAuthorities().stream().map(authority -> authority.getAuthority()).toList())
+                .withIssuer("spring-app")
+                .withExpiresAt(expirationDate)
+                .sign(algorithm);
+    }
 
 	public String generateAccessToken(Authentication authentication) {
 		Date expirationDate = Date.from(ZonedDateTime.now().plusHours(1).toInstant());
 
-		User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
-				String.format("Person with email %s not found", authentication.getName())));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
+                String.format("Person with email %s not found", authentication.getName())));
 
 		return generateJWT(user, expirationDate, accessAlgorithm);
 	}
@@ -139,8 +138,8 @@ public class JWTUtil {
 	public String generateRefreshToken(Authentication authentication) {
 		Date expirationDate = Date.from(ZonedDateTime.now().plusDays(7).toInstant());
 
-		User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
-				String.format("Person with email %s not found", authentication.getName())));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
+                String.format("Person with email %s not found", authentication.getName())));
 
 		return generateJWT(user, expirationDate, refreshAlgorithm);
 	}

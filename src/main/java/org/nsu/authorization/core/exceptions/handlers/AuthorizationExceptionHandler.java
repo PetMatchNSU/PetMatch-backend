@@ -3,7 +3,9 @@ package org.nsu.authorization.core.exceptions.handlers;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import common.dto.responses.negative.AbstractNegativeResponse;
 import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
-import org.nsu.authorization.core.exceptions.authorization.*;
+import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
+import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
+import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -11,6 +13,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
+import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
+import org.nsu.authorization.core.exceptions.authorization.RegionNotFoundException;
+import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
+import org.nsu.authorization.core.exceptions.authorization.EmailVerificationFailException;
+import org.nsu.authorization.core.exceptions.authorization.VerificationCodeGenerationFailException;
+
 
 @ControllerAdvice
 public class AuthorizationExceptionHandler {
@@ -49,6 +59,11 @@ public class AuthorizationExceptionHandler {
     @ExceptionHandler(UserCreationFailException.class)
     public ResponseEntity<AbstractNegativeResponse> HandleUserCreationFailException(UserCreationFailException e) {
         return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user: " + e.getMessage());
+    }
+
+    @ExceptionHandler(EmailVerificationFailException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleEmailVerificationFailException(EmailVerificationFailException e) {
+        return simplePersonResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     /**

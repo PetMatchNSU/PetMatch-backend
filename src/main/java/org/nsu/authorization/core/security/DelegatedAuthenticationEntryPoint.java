@@ -26,8 +26,7 @@ public class DelegatedAuthenticationEntryPoint implements AuthenticationEntryPoi
     }
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
 
         // Delegate the exception to Spring MVC's error infrastructure.
         // This prevents the response from being committed prematurely.

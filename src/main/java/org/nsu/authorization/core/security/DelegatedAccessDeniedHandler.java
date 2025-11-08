@@ -24,8 +24,7 @@ public class DelegatedAccessDeniedHandler implements AccessDeniedHandler {
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException)
-            throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) {
 
         // Delegate the AccessDeniedException to the Spring MVC error infrastructure.
         // This ensures the response is not committed prematurely and returns a 403 Forbidden.
