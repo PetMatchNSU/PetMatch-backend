@@ -33,3 +33,6 @@ otel:
 
 minio:
   bucket-name: test-bucket
+
+REDIS_DEFAULT_VERIFICATION_CODE_TTL: 10
+REDIS_DEFAULT_TTL: 10

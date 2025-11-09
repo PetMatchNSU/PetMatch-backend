@@ -3,6 +3,7 @@ package org.nsu.files;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.nsu.PetMatch;
 import org.nsu.animal.entity.Animal;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardFileType;
@@ -17,6 +18,7 @@ import org.nsu.animal.repository.PlacementGoalRepository;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.authorization.core.utils.JWTUtil;
+import org.nsu.files.controller.FileController;
 import org.nsu.files.dto.FileDescriptor;
 import org.nsu.files.dto.MetadataDTO;
 import org.nsu.files.entity.FileType;
@@ -45,6 +47,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 
@@ -59,7 +62,11 @@ import java.util.Base64;
 import java.util.List;
 
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest()
+@TestPropertySource(properties = {
+        "spring.main.allow-bean-definition-overriding=true",
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration"
+})
 @AutoConfigureMockMvc
 public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
 
