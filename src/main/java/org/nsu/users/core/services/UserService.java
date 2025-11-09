@@ -36,7 +36,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final RegionRepository regionRepository;
     private final PasswordEncoder passwordEncoder;
-    private final org.nsu.authorization.core.repositories.StatusRepository statusRepository;
+    private final org.nsu.users.core.repositories.StatusRepository statusRepository;
     private final ContactTypeRepository contactTypeRepository;
 
     public User addNewUser(RegistrationRequest request) {
