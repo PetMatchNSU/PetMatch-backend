@@ -44,7 +44,7 @@ fi
 echo "Using compose service: $COMPOSE_SERVICE_NAME"
 
 echo "Export environment variables for the given environment..."
-export $(cat .env.$ENVIRONMENT | grep -v '^#' | xargs)
+source .env.$ENVIRONMENT
 
 echo "Using compose file: $DOCKER_COMPOSE_FILE"
 
