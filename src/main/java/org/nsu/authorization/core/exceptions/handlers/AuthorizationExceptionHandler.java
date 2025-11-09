@@ -3,13 +3,24 @@ package org.nsu.authorization.core.exceptions.handlers;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import common.dto.responses.negative.AbstractNegativeResponse;
 import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
-import org.nsu.authorization.core.exceptions.authorization.*;
+import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
+import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
+import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
+import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
+import org.nsu.authorization.core.exceptions.authorization.RegionNotFoundException;
+import org.nsu.authorization.core.exceptions.authorization.UserCreationFailException;
+import org.nsu.authorization.core.exceptions.authorization.EmailVerificationFailException;
+import org.nsu.authorization.core.exceptions.authorization.VerificationCodeGenerationFailException;
+
 
 @ControllerAdvice
 public class AuthorizationExceptionHandler {
@@ -18,11 +29,6 @@ public class AuthorizationExceptionHandler {
         return ResponseEntity
                 .status(httpStatus)
                 .body(new PersonErrorResponse(message, System.currentTimeMillis()));
-    }
-
-    @ExceptionHandler(PersonNotFoundException.class)
-    public ResponseEntity<AbstractNegativeResponse> handlePersonNotFoundException(PersonNotFoundException e) {
-        return simplePersonResponse(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(PersonHasNotVerifiedEmailException.class)
@@ -35,14 +41,29 @@ public class AuthorizationExceptionHandler {
         return simplePersonResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<AbstractNegativeResponse> HandleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        return simplePersonResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(RegionNotFoundException.class)
+    public ResponseEntity<AbstractNegativeResponse> HandleRegionNotFoundException(RegionNotFoundException e) {
+        return simplePersonResponse(HttpStatus.CONFLICT, "Failed to find region in db: " + e.getMessage());
+    }
+
+    @ExceptionHandler(MailException.class)
+    public ResponseEntity<AbstractNegativeResponse> HandleMailException(MailException e) {
+        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send mail: " + e.getMessage());
+    }
+
+    @ExceptionHandler(UserCreationFailException.class)
+    public ResponseEntity<AbstractNegativeResponse> HandleUserCreationFailException(UserCreationFailException e) {
+        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user: " + e.getMessage());
+    }
+
     @ExceptionHandler(EmailVerificationFailException.class)
     public ResponseEntity<AbstractNegativeResponse> handleEmailVerificationFailException(EmailVerificationFailException e) {
         return simplePersonResponse(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-
-    @ExceptionHandler(VerificationCodeGenerationFailException.class)
-    public ResponseEntity<AbstractNegativeResponse> handleVerificationCodeGenerationFailException(VerificationCodeGenerationFailException e) {
-        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     /**
@@ -70,5 +91,10 @@ public class AuthorizationExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<AbstractNegativeResponse> handleAccessDeniedException(AccessDeniedException e) {
         return simplePersonResponse(HttpStatus.FORBIDDEN, "Access Denied");
+    }
+
+    @ExceptionHandler(VerificationCodeGenerationFailException.class)
+    public ResponseEntity<AbstractNegativeResponse> handleVerificationCodeGenerationFailException(VerificationCodeGenerationFailException e) {
+        return simplePersonResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 }

@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/login").permitAll()
                         .requestMatchers("/api/v1/user/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/city", "/api/v1/city/**").permitAll()
+                        .requestMatchers("/api/v1/user/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)

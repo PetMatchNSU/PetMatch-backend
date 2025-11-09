@@ -19,19 +19,19 @@ import org.springframework.security.core.GrantedAuthority;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Authority implements GrantedAuthority {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(unique = true, nullable = false, length = 64)
-    private String name;
+	@Column(unique = true, nullable = false, length = 64)
+	private String name;
 
-    @Column(unique = true, nullable = false, length = 256)
-    private String description;
+	@Column(unique = true, nullable = false, length = 256)
+	private String description;
 
-    @Override
-    public String getAuthority() {
-        // This is the method the JWT fix relies on to get the String value
-        return this.name;
-    }
+	@Override
+	public String getAuthority() {
+		// This is the method the JWT fix relies on to get the String value
+		return this.name;
+	}
 }

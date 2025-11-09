@@ -17,6 +17,7 @@ import org.nsu.users.entity.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.nsu.users.core.services.UserService;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -63,7 +64,7 @@ class UserServiceTest {
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         PersonDetails personDetails = mock(PersonDetails.class);
-        
+
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(personDetails);
         when(personDetails.getUserId()).thenReturn(userId);
@@ -103,17 +104,17 @@ class UserServiceTest {
     @Test
     void getUserProfile_ShouldThrowPersonNotFoundException_WhenUserNotExists() {
         Long userId = 999L;
-        
+
         // Mock Security Context
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         PersonDetails personDetails = mock(PersonDetails.class);
-        
+
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(personDetails);
         when(personDetails.getUserId()).thenReturn(userId);
         SecurityContextHolder.setContext(securityContext);
-        
+
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getUserProfile())
