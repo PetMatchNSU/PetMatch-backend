@@ -43,9 +43,6 @@ fi
 
 echo "Using compose service: $COMPOSE_SERVICE_NAME"
 
-echo "Export environment variables for the given environment..."
-source .env.$ENVIRONMENT
-
 echo "Using compose file: $DOCKER_COMPOSE_FILE"
 
 # Pull latest image
@@ -54,15 +51,15 @@ docker pull "$FULL_IMAGE_NAME" || echo "Tagged image not found, using local imag
 
 # Stop only the target service (keep infrastructure running)
 echo "⏹️ Stopping $COMPOSE_SERVICE_NAME service..."
-docker-compose -f "$DOCKER_COMPOSE_FILE" stop "$COMPOSE_SERVICE_NAME" || true
+docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.$ENVIRONMENT stop "$COMPOSE_SERVICE_NAME" || true
 
 # Remove old service container
 echo "🗑️ Removing old $COMPOSE_SERVICE_NAME container..."
-docker-compose -f "$DOCKER_COMPOSE_FILE" rm -f "$COMPOSE_SERVICE_NAME" || true
+docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.$ENVIRONMENT rm -f "$COMPOSE_SERVICE_NAME" || true
 
 # Start the service
 echo "▶️ Starting $COMPOSE_SERVICE_NAME service..."
-docker-compose -f "$DOCKER_COMPOSE_FILE" up -d "$COMPOSE_SERVICE_NAME"
+docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.$ENVIRONMENT up -d "$COMPOSE_SERVICE_NAME"
 
 # Wait for health check
 echo "⏳ Waiting for $COMPOSE_SERVICE_NAME to be healthy..."
@@ -70,7 +67,7 @@ timeout=60
 counter=0
 while [ $counter -lt $timeout ]; do
     if [[ "$SERVICE_NAME" == "petmatch-backend" ]]; then
-      if docker-compose -f "$DOCKER_COMPOSE_FILE" ps "$COMPOSE_SERVICE_NAME" | grep -q "healthy"; then
+      if docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.$ENVIRONMENT ps "$COMPOSE_SERVICE_NAME" | grep -q "healthy"; then
           echo "✅ $COMPOSE_SERVICE_NAME is healthy!"
           break
       fi
@@ -78,7 +75,7 @@ while [ $counter -lt $timeout ]; do
       sleep 2
       counter=$((counter + 2))
     elif [[ "$SERVICE_NAME" == "petmatch-frontend" ]]; then
-      if docker-compose -f "$DOCKER_COMPOSE_FILE" logs "$COMPOSE_SERVICE_NAME" | grep -q "vite preview"; then
+      if docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.$ENVIRONMENT logs "$COMPOSE_SERVICE_NAME" | grep -q "vite preview"; then
           echo "✅ $COMPOSE_SERVICE_NAME is healthy!"
           break
       fi
@@ -95,7 +92,7 @@ done
 if [ $counter -ge $timeout ]; then
     echo "❌ $COMPOSE_SERVICE_NAME failed to become healthy within $timeout seconds"
     echo "📋 Service logs:"
-    docker-compose -f "$DOCKER_COMPOSE_FILE" logs "$COMPOSE_SERVICE_NAME"
+    docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.$ENVIRONMENT logs "$COMPOSE_SERVICE_NAME"
     exit 1
 fi
 
@@ -105,4 +102,4 @@ docker image prune -f
 
 echo "🎉 Deployment completed successfully!"
 echo "📊 Service status:"
-docker-compose -f "$DOCKER_COMPOSE_FILE" ps "$COMPOSE_SERVICE_NAME"
+docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.$ENVIRONMENT ps "$COMPOSE_SERVICE_NAME"
