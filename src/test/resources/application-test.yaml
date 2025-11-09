@@ -4,6 +4,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  mail:
+    host: localhost
+    port: 1025
+    username: "example@user.com"
+    password: ""
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
 
 jwt:
   secret-access: testsecret
@@ -36,3 +44,4 @@ minio:
 
 REDIS_DEFAULT_VERIFICATION_CODE_TTL: 10
 REDIS_DEFAULT_TTL: 10
+  

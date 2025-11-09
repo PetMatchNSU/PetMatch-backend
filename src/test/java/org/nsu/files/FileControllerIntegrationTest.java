@@ -16,7 +16,10 @@ import org.nsu.animal.repository.AnimalRepository;
 import org.nsu.animal.repository.AnimalCardStatusRepository;
 import org.nsu.animal.repository.PlacementGoalRepository;
 import org.nsu.users.core.repositories.UserRepository;
+import org.nsu.authorization.core.controllers.EmailVerificationController;
 import org.nsu.authorization.core.security.PersonDetails;
+import org.nsu.authorization.core.services.EmailVerificationSenderService;
+import org.nsu.authorization.core.services.EmailVerificationService;
 import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.files.controller.FileController;
 import org.nsu.files.dto.FileDescriptor;
@@ -33,6 +36,8 @@ import org.nsu.users.core.repositories.StatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
@@ -63,10 +68,6 @@ import java.util.List;
 
 @ActiveProfiles("test")
 @SpringBootTest()
-@TestPropertySource(properties = {
-        "spring.main.allow-bean-definition-overriding=true",
-        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration"
-})
 @AutoConfigureMockMvc
 public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
 
