@@ -19,7 +19,7 @@ public class TestDataFactory {
     public static Status createTestStatus() {
         Status status = new Status();
         status.setId(1L);
-        status.setName("Active");
+        status.setName("ACTIVE");
         return status;
     }
 

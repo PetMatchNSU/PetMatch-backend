@@ -10,14 +10,14 @@ import org.nsu.admin.services.StatusCommentService;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.testutils.TestDataFactory;
+import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.mappers.UserMapper;
 import org.nsu.users.core.repositories.UserRepository;
-import org.nsu.users.core.dto.responses.positive.UserResponse;
-import org.nsu.users.entity.*;
+import org.nsu.users.entity.Contact;
+import org.nsu.users.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.nsu.users.core.services.UserService;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -78,7 +78,7 @@ class UserServiceTest {
                 "M",
                 "Moscow Region",
                 "Moscow",
-                "Active",
+                "ACTIVE",
                 null,
                 List.of(new UserResponse.BondTimeDto(
                         OffsetDateTime.now().with(LocalTime.of(9, 0)),
