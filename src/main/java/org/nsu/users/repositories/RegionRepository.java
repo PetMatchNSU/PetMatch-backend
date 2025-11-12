@@ -15,5 +15,5 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
            "   or lower(r.city) like lower(concat('%', :query, '%'))")
     List<Region> searchByRegionOrCity(@Param("query") String query);
 
-    Optional<Region> findByRegion(String region);
+    Optional<Region> findByRegionAndCity(String region, String city);
 }

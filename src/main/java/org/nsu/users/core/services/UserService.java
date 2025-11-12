@@ -59,7 +59,7 @@ public class UserService {
 
         user.setPassword(hashedPassword);
 
-        user.setRegion(regionRepository.findByRegion(request.getRegion())
+        user.setRegion(regionRepository.findByRegionAndCity(request.getRegion(), request.getCity())
                 .orElseThrow(() -> new UserCreationFailException("Failed to find region in the database")));
 
         user.setStatus(statusRepository.findByName("ACTIVE")
