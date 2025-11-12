@@ -3,10 +3,11 @@
 <configuration>
 
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+    <conversionRule conversionWord="compressedException" converterClass="org.nsu.config.logback.CompressedStackTraceConverter" />
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}", "trace_id": "%X{trace_id}", "span_id":"%X{span_id}", "level":"%level", "thread":"%thread", "logger":"%logger{36}", "message":"%msg", "exception":"%ex"}%n</pattern>
+            <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}", "trace_id": "%X{traceId}", "span_id":"%X{spanId}", "level":"%level", "thread":"%thread", "logger":"%logger{36}", "message":"%msg", "exception":"%compressedException"}%n</pattern>
         </encoder>
     </appender>
 
