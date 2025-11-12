@@ -31,7 +31,7 @@ import org.nsu.users.entity.Gender;
 import org.nsu.users.entity.Region;
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
-import org.nsu.users.core.repositories.RegionRepository;
+import org.nsu.users.repositories.RegionRepository;
 import org.nsu.users.core.repositories.StatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
