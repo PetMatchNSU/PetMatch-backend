@@ -62,10 +62,10 @@ public class UserService {
         user.setRegion(regionRepository.findByRegion(request.getRegion())
                 .orElseThrow(() -> new UserCreationFailException("Failed to find region in the database")));
 
-        user.setStatus(statusRepository.findByName("Active")
+        user.setStatus(statusRepository.findByName("ACTIVE")
                 .orElseThrow(
                         () -> new UserCreationFailException(
-                                "Default user status ('Active') is missing from the database")));
+                                "Default user status ('ACTIVE') is missing from the database")));
 
         List<BondTime> bondTimeEntities = request.getBondTime().stream()
                 .map(bondTimeDto -> {
