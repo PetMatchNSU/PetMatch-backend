@@ -181,8 +181,4 @@ public class FileService {
         return new MetadataDTO(descriptors);
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 5d5fd58 (fix)
 }
