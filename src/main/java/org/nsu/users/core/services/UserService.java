@@ -16,6 +16,7 @@ import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.mappers.UserMapper;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.entity.*;
+import org.nsu.users.repositories.RegionRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +34,7 @@ public class UserService {
     private final ContactService contactService;
     private final StatusCommentService statusCommentService;
     private final UserMapper userMapper;
-    private final org.nsu.authorization.core.repositories.RegionRepository regionRepository;
+    private final RegionRepository regionRepository;
     private final PasswordEncoder passwordEncoder;
     private final org.nsu.authorization.core.repositories.StatusRepository statusRepository;
     private final ContactTypeRepository contactTypeRepository;

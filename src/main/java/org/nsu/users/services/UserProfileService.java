@@ -1,6 +1,7 @@
 package org.nsu.users.services;
 
 import lombok.RequiredArgsConstructor;
+import org.nsu.users.core.repositories.ContactTypeRepository;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
 import org.nsu.users.entity.*;
@@ -9,10 +10,8 @@ import org.nsu.users.exceptions.RegionNotFoundException;
 import org.nsu.users.exceptions.ContactTypeNotFoundException;
 import org.nsu.users.mappers.BondTimeMapper;
 import org.nsu.users.mappers.ContactMapper;
-import org.nsu.users.repositories.ContactTypeRepository;
 import org.nsu.users.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;

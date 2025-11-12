@@ -3,6 +3,7 @@ package org.nsu.authorization.core.security;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class DelegatedAccessDeniedHandler implements AccessDeniedHandler {
 
@@ -28,6 +30,7 @@ public class DelegatedAccessDeniedHandler implements AccessDeniedHandler {
 
         // Delegate the AccessDeniedException to the Spring MVC error infrastructure.
         // This ensures the response is not committed prematurely and returns a 403 Forbidden.
+        log.warn("Access denied for request {}", request.getRequestURI(), accessDeniedException);
         resolver.resolveException(request, response, null, accessDeniedException);
     }
 }

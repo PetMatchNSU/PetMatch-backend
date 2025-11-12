@@ -1,10 +1,9 @@
 package org.nsu.users.services;
 
 import lombok.RequiredArgsConstructor;
+import org.nsu.users.core.repositories.ContactTypeRepository;
 import org.nsu.users.dto.responses.ContactTypeResponse;
-import org.nsu.users.entity.ContactType;
 import org.nsu.users.mappers.ContactTypeMapper;
-import org.nsu.users.repositories.ContactTypeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

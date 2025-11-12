@@ -6,12 +6,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.nsu.testutils.TestDataFactory;
+import org.nsu.users.core.repositories.ContactTypeRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
 import org.nsu.users.dto.requests.GenderRequest;
 import org.nsu.users.entity.*;
 import org.nsu.users.mappers.BondTimeMapper;
 import org.nsu.users.mappers.ContactMapper;
-import org.nsu.users.repositories.ContactTypeRepository;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.repositories.RegionRepository;
 

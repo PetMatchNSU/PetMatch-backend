@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RegionRepository extends JpaRepository<Region, Long> {
 
@@ -13,4 +14,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
            "where lower(r.region) like lower(concat('%', :query, '%')) " +
            "   or lower(r.city) like lower(concat('%', :query, '%'))")
     List<Region> searchByRegionOrCity(@Param("query") String query);
+
+    Optional<Region> findByRegion(String region);
 }
