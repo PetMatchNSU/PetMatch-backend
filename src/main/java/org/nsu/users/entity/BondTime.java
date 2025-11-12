@@ -35,6 +35,6 @@ public class BondTime {
     private LocalTime endContactTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_user")
+    @JoinColumn(name = "id_user", nullable = false)
     private User user;
 }
