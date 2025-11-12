@@ -36,6 +36,10 @@ minio:
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
   bucket-name: ${MINIO_BUCKET_NAME}
+file-validation:
+  photo-formats: [JPEG, PNG]
+  doc-formats: [PDF]
+  max-size-bytes: 5242880
 management:
   endpoints:
     web:

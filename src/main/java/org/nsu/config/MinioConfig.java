@@ -1,27 +1,21 @@
 package org.nsu.config;
 
 import io.minio.MinioClient;
-import org.springframework.beans.factory.annotation.Value;
+import org.nsu.files.config.MinIOConfigProperties;
+import org.nsu.files.config.FileValidationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@EnableConfigurationProperties({MinIOConfigProperties.class, FileValidationProperties.class})
 public class MinioConfig {
 
-    @Value("${minio.endpoint}")
-    private String endpoint;
-
-    @Value("${minio.access-key}")
-    private String accessKey;
-
-    @Value("${minio.secret-key}")
-    private String secretKey;
-
     @Bean
-    public MinioClient minioClient() {
+    public MinioClient minioClient(MinIOConfigProperties properties) {
         return MinioClient.builder()
-                .endpoint(endpoint)
-                .credentials(accessKey, secretKey)
+                .endpoint(properties.endpoint())
+                .credentials(properties.accessKey(), properties.secretKey())
                 .build();
     }
 }

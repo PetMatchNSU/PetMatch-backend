@@ -17,10 +17,10 @@
             <column name="id" type="BIGSERIAL">
                 <constraints nullable="false" unique="true" primaryKey="true"/>
             </column>
-            <column name="start" type="TIME" remarks="Время начала (локальное время)">
+            <column name="start_time" type="TIME" remarks="Время начала (локальное время)">
                 <constraints nullable="false"/>
             </column>
-            <column name="end" type="TIME" remarks="Время окончания (локальное время)">
+            <column name="end_time" type="TIME" remarks="Время окончания (локальное время)">
                 <constraints nullable="false"/>
             </column>
             <column name="id_user" type="BIGINT" remarks="Пользователь">
