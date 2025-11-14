@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.users.core.repositories.UserRepository;
+import org.nsu.users.entity.Authority;
 import org.nsu.users.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -114,13 +115,13 @@ public class JWTUtil {
 
         return JWT.create()
                 .withSubject("Person details")
-                .withClaim("userID", user.getId())
+                .withClaim("userID", user.getId().toString())
                 .withClaim("email", user.getEmail())
                 .withClaim("firstName", user.getFirstName())
                 .withClaim("surname", user.getSecondName())
                 .withClaim("patronymic", user.getLastName())
                 .withClaim("authorities",
-                        user.getAuthorities().stream().map(authority -> authority.getAuthority()).toList())
+                        user.getAuthorities().stream().map(Authority::getAuthority).toList())
                 .withIssuer("spring-app")
                 .withExpiresAt(expirationDate)
                 .sign(algorithm);
