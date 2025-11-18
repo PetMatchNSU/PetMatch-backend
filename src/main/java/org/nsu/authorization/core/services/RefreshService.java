@@ -17,16 +17,16 @@ public class RefreshService {
 
     public RefreshResponse refreshTokens(String refreshToken) {
 
-        long id;
+        String email;
 
         try {
-            id = Long.parseLong(jwtUtil.extractClaim(refreshToken, JWTTypes.REFRESH_TOKEN, "userID"));
+            email = jwtUtil.extractClaim(refreshToken, JWTTypes.REFRESH_TOKEN, "email");
         } catch (JWTVerificationException e) {
             throw new JWTIsExpiredException(JWTTypes.REFRESH_TOKEN);
         }
 
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(id, null);
+                new UsernamePasswordAuthenticationToken(email, null);
 
         String newAccessToken = jwtUtil.generateAccessToken(authenticationToken);
         String newRefreshToken = jwtUtil.generateRefreshToken(authenticationToken);
