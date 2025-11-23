@@ -1,11 +1,9 @@
 package org.nsu.common.dto.responses;
 
-import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.nsu.common.utils.TracingUtils;
 
 @Getter
 @Setter
@@ -28,17 +26,9 @@ public class ApiErrorResponse {
     }
 
     public static ApiErrorResponse create(String message, Tracer tracer) {
-        ApiErrorResponse error = new ApiErrorResponse(message);
+        String traceId = TracingUtils.getCurrentTraceId(tracer);
+        String spanId = TracingUtils.getCurrentSpanId(tracer);
         
-        if (tracer != null) {
-            Span currentSpan = tracer.nextSpan().start();
-            if (currentSpan != null) {
-                error.setTraceId(currentSpan.context().traceId());
-                error.setSpanId(currentSpan.context().spanId());
-                currentSpan.end();
-            }
-        }
-        
-        return error;
+        return new ApiErrorResponse(traceId, spanId, message, System.currentTimeMillis());
     }
 }
