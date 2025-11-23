@@ -15,6 +15,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.Length;
 import org.nsu.users.entity.Gender;
 import org.nsu.users.utils.ValidationPatterns;
+import org.nsu.users.validation.ValidBondTimeIntervals;
 
 @Getter
 @Setter
@@ -57,6 +58,7 @@ public class RegistrationRequest {
 
     @NotNull(message = "Bond time array must be provided")
     @Size(min = 1, max = 4, message = "Bond time intervals must be between 1 and 4")
+    @ValidBondTimeIntervals
     @Valid
     @Schema(description = "Массив времени для связи")
     private List<BondTime> bondTime;

@@ -13,6 +13,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.nsu.users.utils.ValidationPatterns;
+import org.nsu.users.validation.ValidBondTimeIntervals;
 
 @Getter
 @Setter
@@ -43,6 +44,7 @@ public class UpdateUserRequest {
 
     @Valid
     @Size(max = 4, message = "Maximum 4 bond time intervals allowed")
+    @ValidBondTimeIntervals
     @Schema(description = "Время доступности для связи" )
     private List<BondTimeDto> bondTime;
 
