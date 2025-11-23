@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 import org.nsu.users.entity.Gender;
+import org.nsu.users.utils.ValidationPatterns;
 
 @Getter
 @Setter
@@ -28,13 +30,16 @@ public class RegistrationRequest {
     private String password;
 
     @NotBlank(message = "First name should not be empty")
+    @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "First name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Имя", example = "Иван")
     private String firstName;
 
     @NotBlank(message = "Second name should not be empty")
+    @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "Second name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Фамилия", example = "Иванов")
     private String secondName;
 
+    @Pattern(regexp = ValidationPatterns.NAME_OPTIONAL, message = "Last name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Отчество", example = "Иванович")
     private String lastName;
 

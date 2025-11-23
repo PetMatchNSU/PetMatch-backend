@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,13 +20,16 @@ import org.nsu.users.utils.ValidationPatterns;
 public class UpdateUserRequest {
 
     @NotBlank
+    @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "First name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Имя пользователя", example = "Иван")
     private String firstName;
 
     @NotBlank
+    @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "Second name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Фамилия пользователя", example = "Иванов")
     private String secondName;
 
+    @Pattern(regexp = ValidationPatterns.NAME_OPTIONAL, message = "Last name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Отчество пользователя", example = "Иванович")
     private String lastName;
 
