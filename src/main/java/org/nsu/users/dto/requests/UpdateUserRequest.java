@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,7 +38,8 @@ public class UpdateUserRequest {
     private Long locationId;
 
     @Valid
-    @Schema(description = "Время доступности для связи")
+    @Size(max = 4, message = "Maximum 4 bond time intervals allowed")
+    @Schema(description = "Время доступности для связи" )
     private List<BondTimeDto> bondTime;
 
     @Valid

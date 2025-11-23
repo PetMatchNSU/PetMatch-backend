@@ -51,7 +51,7 @@ public class RegistrationRequest {
     private String city;
 
     @NotNull(message = "Bond time array must be provided")
-    @Size(min = 1, message = "At least one bond time interval is required")
+    @Size(min = 1, max = 4, message = "Bond time intervals must be between 1 and 4")
     @Valid
     @Schema(description = "Массив времени для связи")
     private List<BondTime> bondTime;

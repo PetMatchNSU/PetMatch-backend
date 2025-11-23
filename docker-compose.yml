@@ -150,7 +150,7 @@ services:
       JWT_SECRET_REFRESH: secret
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
       JAVA_OPTS: "-XX:+UseG1GC -XX:+UseContainerSupport"
-      REDIS_HOST: http://petmatch-redis:6379
+      REDIS_HOST: petmatch-redis
       REDIS_PASSWORD: secret
       REDIS_DEFAULT_VERIFICATION_CODE_TTL: 30
       REDIS_DEFAULT_TTL: 30
