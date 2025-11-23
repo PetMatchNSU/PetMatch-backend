@@ -43,6 +43,7 @@ public class UpdateUserRequest {
     private List<BondTimeDto> bondTime;
 
     @Valid
+    @Size(max = 10, message = "Maximum 10 contact methods allowed")
     @Schema(description = "Контактная информация")
     private List<ContactInfoDto> contactInfo;
 

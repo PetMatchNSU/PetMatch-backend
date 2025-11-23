@@ -57,7 +57,7 @@ public class RegistrationRequest {
     private List<BondTime> bondTime;
 
     @NotNull(message = "Contact info array must be provided")
-    @Size(min = 1, message = "At least one contact method is required")
+    @Size(min = 1, max = 10, message = "Contact info must be between 1 and 10")
     @Valid
     @Schema(description = "Массив способов связи")
     private List<ContactInfo> contactInfo;
