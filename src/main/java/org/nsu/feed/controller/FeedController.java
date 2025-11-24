@@ -1,5 +1,6 @@
 package org.nsu.feed.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.nsu.feed.dto.requests.animalList.AnimalListRequest;
 import org.nsu.feed.dto.responses.animalList.AnimalListResponse;
 import org.nsu.feed.service.AnimalListService;
@@ -12,14 +13,21 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1/animals")
+@RequiredArgsConstructor
 public class FeedController {
 
-    private AnimalListService animalListService;
+    private final AnimalListService animalListService;
 
     @Operation(summary = "Просмотр ленты с животными", description = "Функционал позволяет пользователям просматривать каталог карточек животных (с возможностью пагинации) и фильтровать их по различным атрибутам (вид, пол, цель размещения и т.д.).")
     @PostMapping(value = "/list")
     public AnimalListResponse listAnimals(@RequestBody AnimalListRequest dto) {
         return animalListService.listAnimals(dto);
+    }
+
+    @Operation(summary = "Просмотр информации о животных", description = "Запрос для получения списка видов животных, целью размещения карточки")
+    @PostMapping(value = "/info")
+    public void getAnimalInfo() {
+        
     }
 
 }
