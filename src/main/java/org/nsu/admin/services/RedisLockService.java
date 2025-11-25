@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nsu.admin.dto.AdminModerationDto;
 import org.nsu.admin.dto.UserLockModel;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +18,14 @@ public class RedisLockService {
 
     private final RedisTemplate<Object, Object> redisTemplate;
 
-    private static final String LOCK_KEY_PREFIX = "moderation:lock:user:";
+    @Value("${app.lock.key-prefix}")
+    private String lockKeyPrefix;
 
-    // TTL for lock expiration in minutes
-    private static final int LOCK_TTL_MINUTES = 30;
+    @Value("${app.lock.ttl-minutes}")
+    private int lockTtlMinutes;
 
     public boolean setLock(Long userId, Long moderatorId) {
-        String key = LOCK_KEY_PREFIX + userId;
+        String key = lockKeyPrefix + userId;
 
         UserLockModel existingLock = getLock(userId);
         if (existingLock != null) {
@@ -34,17 +36,17 @@ public class RedisLockService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expiresAt = now.plusMinutes(LOCK_TTL_MINUTES);
+        LocalDateTime expiresAt = now.plusMinutes(lockTtlMinutes);
 
         UserLockModel lockInfo = new UserLockModel(userId, moderatorId, now, expiresAt);
 
-        redisTemplate.opsForValue().set(key, lockInfo, LOCK_TTL_MINUTES, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(key, lockInfo, lockTtlMinutes, TimeUnit.MINUTES);
         log.info("Lock set/updated for user {} by moderator {}", userId, moderatorId);
         return true;
     }
 
     public UserLockModel getLock(Long userId) {
-        String key = LOCK_KEY_PREFIX + userId;
+        String key = lockKeyPrefix + userId;
         Object value = redisTemplate.opsForValue().get(key);
         if (value instanceof UserLockModel) {
             return (UserLockModel) value;
@@ -62,7 +64,7 @@ public class RedisLockService {
     }
 
     public boolean releaseLock(Long userId) {
-        String key = LOCK_KEY_PREFIX + userId;
+        String key = lockKeyPrefix + userId;
         Boolean deleted = redisTemplate.delete(key);
         if (Boolean.TRUE.equals(deleted)) {
             log.info("Lock released for user {}", userId);
