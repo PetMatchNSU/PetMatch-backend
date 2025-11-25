@@ -24,11 +24,13 @@ public interface AnimalCardRepository extends JpaRepository<AnimalCard, Long>, J
     @Query("SELECT ac FROM AnimalCard ac WHERE " +
            "(:statuses IS NULL OR ac.status.name IN :statuses) AND " +
            "(:goals IS NULL OR ac.goal.goal IN :goals) AND " +
-           "(:createdAt IS NULL OR DATE(ac.created) = :createdAt) AND " +
-           "(:updatedAt IS NULL OR DATE(ac.updated) = :updatedAt)")
+           "(:createdAt IS NULL OR ac.created >= :createdAt) AND " +
+           "(:updatedAt IS NULL OR ac.updated >= :updatedAt) ")
     Page<AnimalCard> findByFilters(@Param("statuses") java.util.List<String> statuses,
                                    @Param("goals") java.util.List<String> goals,
                                    @Param("createdAt") LocalDate createdAt,
                                    @Param("updatedAt") LocalDate updatedAt,
                                    Pageable pageable);
+
+    Page<AnimalCard> findAll(Pageable pageable);
 }

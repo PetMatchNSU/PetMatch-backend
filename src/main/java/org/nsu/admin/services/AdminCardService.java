@@ -60,14 +60,20 @@ public class AdminCardService {
             Sort.by(Sort.Direction.ASC, "created")
         );
 
-        if (request.getFilters() != null) {
-            statuses = request.getFilters().getStatuses();
-            goals = request.getFilters().getGoals();
-            createdAt = request.getFilters().getCreatedAt();
-            updatedAt = request.getFilters().getUpdatedAt();
-        }
+        // Extract filters from request
+        AdminCardFilters filters = request.getFilters();
+        if (filters == null || (filters.getStatuses() == null && filters.getGoals() == null &&
+                                filters.getCreatedAt() == null && filters.getUpdatedAt() == null)) {
+            // No filters - get all cards
+            cardPage = animalCardRepository.findAll(pageable);
+        } else {
+            statuses = filters.getStatuses();
+            goals = filters.getGoals();
+            createdAt = filters.getCreatedAt();
+            updatedAt = filters.getUpdatedAt();
 
-        cardPage = animalCardRepository.findByFilters(statuses, goals, createdAt, updatedAt, pageable);
+            cardPage = animalCardRepository.findByFilters(statuses, goals, createdAt, updatedAt, pageable);
+        }
 
         cardDtos = cardPage.getContent().stream()
             .map(this::convertToAdminCardDto)
