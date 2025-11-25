@@ -7,6 +7,7 @@ import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.repositories.StatusCommentRepository;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.repositories.UserRepository;
+import org.nsu.users.core.repositories.StatusRepository;
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final StatusCommentRepository statusCommentRepository;
     private final RedisLockService redisLockService;
+    private final StatusRepository statusRepository;
 
     public AdminUserListResponse getUsersList(AdminUserListRequest request) {
         // Variables
@@ -120,14 +122,15 @@ public class AdminUserService {
         }
 
         // Update user status
-        newStatus = new Status();
-        newStatus.setName(targetStatus);
+        newStatus = statusRepository.findByName(targetStatus)
+            .orElseThrow(() -> new RuntimeException("Status not found: " + targetStatus));
         user.setStatus(newStatus);
         userRepository.save(user);
 
         // Create status comment if provided
         if (reason != null && !reason.trim().isEmpty()) {
             comment = new StatusComment();
+            comment.setStatus(newStatus);
             comment.setUser(user);
             comment.setComment(reason.trim());
             comment.setDate(Timestamp.valueOf(LocalDateTime.now()));
