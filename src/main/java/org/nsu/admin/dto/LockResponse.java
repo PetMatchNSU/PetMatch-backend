@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Response for user lock operation")
-public class UserLockResponse {
+@Schema(description = "Response for lock operation")
+public class LockResponse {
 
     @Schema(description = "Whether the lock was successfully acquired")
     private boolean isLockAcquired;

@@ -3,6 +3,7 @@ package org.nsu.admin.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nsu.admin.dto.*;
+import org.nsu.admin.dto.LockType;
 import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.repositories.StatusCommentRepository;
 import org.nsu.authorization.core.security.PersonDetails;
@@ -98,7 +99,7 @@ public class AdminUserService {
         boolean result;
 
         moderatorId = getCurrentModeratorId();
-        result = redisLockService.setLock(userId, moderatorId);
+        result = redisLockService.setLock(userId, moderatorId, LockType.USER);
         log.info("Moderator {} tried to lock user {} for moderation: {}", moderatorId, userId, result ? "success" : "failed - user already locked");
         return result;
     }
@@ -107,7 +108,7 @@ public class AdminUserService {
     public void setUserStatus(Long userId, String targetStatus, String reason) {
         User user;
         Long moderatorId;
-        UserLockModel lock;
+        LockModel lock;
         Status newStatus;
         StatusComment comment;
 
@@ -116,7 +117,7 @@ public class AdminUserService {
 
         // Check if moderator owns the lock
         moderatorId = getCurrentModeratorId();
-        lock = redisLockService.getLock(userId);
+        lock = redisLockService.getLock(userId, LockType.USER);
         if (lock == null || !lock.getModeratorId().equals(moderatorId)) {
             throw new RuntimeException("Moderator does not own the lock for user: " + userId);
         }
@@ -138,7 +139,7 @@ public class AdminUserService {
         }
 
         // Release lock after status change
-        redisLockService.releaseLock(userId);
+        redisLockService.releaseLock(userId, LockType.USER);
 
         log.info("User {} status changed to {} by moderator {}", userId, targetStatus, moderatorId);
     }
@@ -146,7 +147,7 @@ public class AdminUserService {
     private AdminUserDto convertToAdminUserDto(User user) {
         AdminModerationDto moderation;
 
-        moderation = redisLockService.getLockOld(user.getId());
+        moderation = redisLockService.getLockOld(user.getId(), LockType.USER);
 
         return new AdminUserDto(
             user.getId(),

@@ -3,7 +3,8 @@ package org.nsu.admin.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nsu.admin.dto.AdminModerationDto;
-import org.nsu.admin.dto.UserLockModel;
+import org.nsu.admin.dto.LockModel;
+import org.nsu.admin.dto.LockType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -18,59 +19,67 @@ public class RedisLockService {
 
     private final RedisTemplate<Object, Object> redisTemplate;
 
-    @Value("${app.lock.key-prefix}")
-    private String lockKeyPrefix;
+    private final org.springframework.core.env.Environment env;
 
-    @Value("${app.lock.ttl-minutes}")
-    private int lockTtlMinutes;
+    private String getKeyPrefix(String type) {
+        return env.getProperty("app.lock." + type + ".key-prefix");
+    }
 
-    public boolean setLock(Long userId, Long moderatorId) {
-        String key = lockKeyPrefix + userId;
+    private int getTtlMinutes(String type) {
+        return env.getProperty("app.lock." + type + ".ttl-minutes", Integer.class, 5);
+    }
 
-        UserLockModel existingLock = getLock(userId);
+    public boolean setLock(Long id, Long moderatorId, LockType lockType) {
+        String type = lockType.name().toLowerCase();
+        String key = getKeyPrefix(type) + id;
+
+        LockModel existingLock = getLock(id, lockType);
         if (existingLock != null) {
             if (!existingLock.getModeratorId().equals(moderatorId)) {
-                log.warn("Failed to set lock for user {} - already locked by another moderator", userId);
+                log.warn("Failed to set lock for {} - already locked by another moderator", id);
                 return false;
             }
         }
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expiresAt = now.plusMinutes(lockTtlMinutes);
+        int ttlMinutes = getTtlMinutes(type);
+        LocalDateTime expiresAt = now.plusMinutes(ttlMinutes);
 
-        UserLockModel lockInfo = new UserLockModel(userId, moderatorId, now, expiresAt);
+        LockModel lockInfo = new LockModel(id, moderatorId, now, expiresAt);
 
-        redisTemplate.opsForValue().set(key, lockInfo, lockTtlMinutes, TimeUnit.MINUTES);
-        log.info("Lock set/updated for user {} by moderator {}", userId, moderatorId);
+        redisTemplate.opsForValue().set(key, lockInfo, ttlMinutes, TimeUnit.MINUTES);
+        log.info("Lock set/updated for {} by moderator {}", id, moderatorId);
         return true;
     }
 
-    public UserLockModel getLock(Long userId) {
-        String key = lockKeyPrefix + userId;
+    public LockModel getLock(Long id, LockType lockType) {
+        String type = lockType.name().toLowerCase();
+        String key = getKeyPrefix(type) + id;
         Object value = redisTemplate.opsForValue().get(key);
-        if (value instanceof UserLockModel) {
-            return (UserLockModel) value;
+        if (value instanceof LockModel) {
+            return (LockModel) value;
         }
         return null;
     }
 
-    // For backward compatibility - convert UserLockModel to AdminModerationDto
-    public AdminModerationDto getLockOld(Long userId) {
-        UserLockModel lock = getLock(userId);
+    // For backward compatibility - convert LockModel to AdminModerationDto
+    public AdminModerationDto getLockOld(Long id, LockType lockType) {
+        LockModel lock = getLock(id, lockType);
         if (lock != null) {
             return new AdminModerationDto(lock.getModeratorId(), lock.getLockedAt());
         }
         return null;
     }
 
-    public boolean releaseLock(Long userId) {
-        String key = lockKeyPrefix + userId;
+    public boolean releaseLock(Long id, LockType lockType) {
+        String type = lockType.name().toLowerCase();
+        String key = getKeyPrefix(type) + id;
         Boolean deleted = redisTemplate.delete(key);
         if (Boolean.TRUE.equals(deleted)) {
-            log.info("Lock released for user {}", userId);
+            log.info("Lock released for {}", id);
             return true;
         } else {
-            log.warn("Failed to release lock for user {} - lock not found", userId);
+            log.warn("Failed to release lock for {} - lock not found", id);
             return false;
         }
     }

@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserLockModel {
+public class LockModel {
 
-    private Long userId;
+    private Long id;
     private Long moderatorId;
     private LocalDateTime lockedAt;
     private LocalDateTime expiresAt;

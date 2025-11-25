@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.nsu.admin.dto.*;
+import org.nsu.admin.dto.AdminUserListRequest;
+import org.nsu.admin.dto.AdminUserListResponse;
+import org.nsu.admin.dto.LockResponse;
 import org.nsu.admin.services.AdminUserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,11 +41,11 @@ public class AdminUserController {
         @ApiResponse(responseCode = "200", description = "Lock status returned"),
         @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public UserLockResponse lockUser(
+    public LockResponse lockUser(
             @Parameter(description = "User ID to lock") @PathVariable Long userId) {
 
         boolean locked = adminUserService.lockUserForModeration(userId);
-        return new UserLockResponse(locked);
+        return new LockResponse(locked);
     }
 
     @PostMapping("/{userId}/status")

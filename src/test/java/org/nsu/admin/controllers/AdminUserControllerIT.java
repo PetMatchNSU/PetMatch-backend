@@ -7,7 +7,8 @@ import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.admin.services.RedisLockService;
 import org.nsu.admin.repositories.StatusCommentRepository;
-import org.nsu.admin.dto.UserLockModel;
+import org.nsu.admin.dto.LockModel;
+import org.nsu.admin.dto.LockType;
 import org.nsu.testutils.AbstractIntegrityTest;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.core.repositories.StatusRepository;
@@ -154,9 +155,9 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         regularUser = userRepository.save(regularUserTemp);
 
         // Mock RedisLockService for tests
-        when(redisLockService.setLock(any(Long.class), any(Long.class))).thenReturn(true);
-        when(redisLockService.getLock(any(Long.class))).thenReturn(null);
-        when(redisLockService.releaseLock(any(Long.class))).thenReturn(true);
+        when(redisLockService.setLock(any(Long.class), any(Long.class), eq(LockType.USER))).thenReturn(true);
+        when(redisLockService.getLock(any(Long.class), eq(LockType.USER))).thenReturn(null);
+        when(redisLockService.releaseLock(any(Long.class), eq(LockType.USER))).thenReturn(true);
     }
 
     @Test
@@ -198,7 +199,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
                 .andExpect(status().isOk());
 
         // Mock getLock for the locked user
-        when(redisLockService.getLock(eq(regularUser.getId()))).thenReturn(new UserLockModel(regularUser.getId(), moderatorUser.getId(), LocalDateTime.now(), LocalDateTime.now().plusMinutes(30)));
+        when(redisLockService.getLock(eq(regularUser.getId()), eq(LockType.USER))).thenReturn(new LockModel(regularUser.getId(), moderatorUser.getId(), LocalDateTime.now(), LocalDateTime.now().plusMinutes(30)));
 
         // Then set status
         mockMvc.perform(post("/api/v1/admin/users/{userId}/status", regularUser.getId())
