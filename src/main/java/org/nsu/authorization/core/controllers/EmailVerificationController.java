@@ -4,13 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.web.bind.annotation.RequestBody;
+import org.nsu.users.entity.User;
+import org.springframework.security.access.AccessDeniedException;
+import java.security.Principal;
 import org.nsu.authorization.core.dto.requests.EmailVerificationRequest;
 import org.nsu.authorization.core.services.EmailVerificationService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,7 +38,7 @@ public class EmailVerificationController {
     @Operation(
             summary = "Подтверждение email", // Summary for the operation
             description = "Подтверждает email пользователя с использованием кода, присланного после регистрации. Требует Bearer-токен.",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Код подтверждения из письма",
                     required = true,
                     content = @Content(
@@ -75,9 +77,11 @@ public class EmailVerificationController {
                     )
             }
     )
-    public void verifyEmail(@Valid @RequestBody EmailVerificationRequest dto, @AuthenticationPrincipal Jwt jwt) {
-
-        service.verifyEmail(dto, jwt);
+    public void verifyEmail(@Valid @RequestBody EmailVerificationRequest dto, Principal principal) {
+        if (principal == null) {
+            throw new AccessDeniedException("Failed to authenticate user: Principal is null");
+        }
+        service.verifyEmail(dto, principal.getName());
 
     }
 }
