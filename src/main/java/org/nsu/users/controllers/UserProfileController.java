@@ -13,6 +13,11 @@ import org.nsu.users.services.ContactTypeService;
 import org.nsu.users.services.UserProfileService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.nsu.users.dto.responses.UserAnimalListResponse;
+import org.nsu.users.dto.requests.UserAnimalListRequest;
+import org.nsu.users.services.UserAnimalListService;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ public class UserProfileController {
 
     private final UserProfileService userProfileService;
     private final ContactTypeService contactTypeService;
+    private final UserAnimalListService userAnimalListService;
 
     @PutMapping
     @Operation(summary = "Обновление профиля пользователя", description = "Обновление данных пользователя")
@@ -33,8 +39,7 @@ public class UserProfileController {
     })
     public void update(
             @AuthenticationPrincipal PersonDetails principal,
-            @Valid @RequestBody UpdateUserRequest dto
-    ) {
+            @Valid @RequestBody UpdateUserRequest dto) {
         userProfileService.updateProfile(principal.getUsername(), dto);
     }
 
@@ -47,4 +52,10 @@ public class UserProfileController {
     public ContactTypeResponse contactTypes() {
         return contactTypeService.getAllContactTypes();
     }
+
+    @GetMapping("/animals/list")
+    public UserAnimalListResponse animalList(@RequestBody UserAnimalListRequest dto) {
+        return userAnimalListService.getUserAnimalList(dto);
+    }
+
 }
