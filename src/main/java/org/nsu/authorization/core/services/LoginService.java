@@ -7,7 +7,6 @@ import org.nsu.authorization.core.dto.responses.positive.LoginResponse;
 import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.authorization.core.security.PersonDetails;
-import org.nsu.authorization.core.utils.JWTUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ public class LoginService {
 
     private final AuthenticationManager authenticationManager;
     private final PersonDetailsService personDetailsService;
-    private final JWTUtil jwtUtil;
+    private final JWTService jwtService;
 
     public LoginResponse login(@Valid @RequestBody LoginRequest dto) {
 
@@ -38,8 +37,8 @@ public class LoginService {
             throw new PersonNotFoundException("Email or password is incorrect");
         }
 
-        String accessToken = jwtUtil.generateAccessToken(authenticationToken);
-        String refreshToken = jwtUtil.generateRefreshToken(authenticationToken);
+        String accessToken = jwtService.generateAccessToken(authenticationToken);
+        String refreshToken = jwtService.generateRefreshToken(authenticationToken);
 
         return new LoginResponse(
                 accessToken,

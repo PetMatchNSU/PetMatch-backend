@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
 import org.nsu.authorization.core.dto.responses.positive.RegistrationResponse;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
-import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.users.core.services.UserService;
 import org.nsu.users.entity.Gender;
 import org.nsu.users.entity.User;
@@ -28,7 +27,7 @@ class RegistrationServiceTest {
     @Mock
     private EmailVerificationSenderService emailVerificationSenderService;
     @Mock
-    private JWTUtil jwtUtil;
+    private JWTService jwtService;
     @Mock
     private VerificationCodeCachingService verificationCodeCachingService;
 
@@ -66,8 +65,8 @@ class RegistrationServiceTest {
 
         String accessToken = "fake-access-token";
         String refreshToken = "fake-refresh-token";
-        when(jwtUtil.generateAccessToken(any(UsernamePasswordAuthenticationToken.class))).thenReturn(accessToken);
-        when(jwtUtil.generateRefreshToken(any(UsernamePasswordAuthenticationToken.class))).thenReturn(refreshToken);
+        when(jwtService.generateAccessToken(any(UsernamePasswordAuthenticationToken.class))).thenReturn(accessToken);
+        when(jwtService.generateRefreshToken(any(UsernamePasswordAuthenticationToken.class))).thenReturn(refreshToken);
 
         RegistrationResponse response = registrationService.register(registrationRequest);
 
@@ -80,8 +79,8 @@ class RegistrationServiceTest {
         verify(userService).addNewUser(registrationRequest);
         verify(verificationCodeCachingService).generateAndCacheCode(expectedCacheKey);
         verify(emailVerificationSenderService).send("test@example.com", testCode);
-        verify(jwtUtil).generateAccessToken(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtil).generateRefreshToken(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtService).generateAccessToken(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtService).generateRefreshToken(any(UsernamePasswordAuthenticationToken.class));
     }
 
     @Test
@@ -95,6 +94,6 @@ class RegistrationServiceTest {
         verify(userService, never()).addNewUser(any());
         verify(verificationCodeCachingService, never()).generateAndCacheCode(anyString());
         verify(emailVerificationSenderService, never()).send(anyString(), anyString());
-        verify(jwtUtil, never()).generateAccessToken(any());
+        verify(jwtService, never()).generateAccessToken(any());
     }
 }
