@@ -31,15 +31,18 @@ public class RegistrationRequest {
     private String password;
 
     @NotBlank(message = "First name should not be empty")
+    @Size(max = 64, message = "First name must not exceed 64 characters")
     @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "First name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Имя", example = "Иван")
     private String firstName;
 
     @NotBlank(message = "Second name should not be empty")
+    @Size(max = 64, message = "Second name must not exceed 64 characters")
     @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "Second name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Фамилия", example = "Иванов")
     private String secondName;
 
+    @Size(max = 64, message = "Last name must not exceed 64 characters")
     @Pattern(regexp = ValidationPatterns.NAME_OPTIONAL, message = "Last name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Отчество", example = "Иванович")
     private String lastName;

@@ -47,13 +47,13 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "first_name", nullable = false, length = 30)
+    @Column(name = "first_name", nullable = false, length = 64)
     private String firstName;
 
-    @Column(name = "second_name", nullable = false, length = 30)
+    @Column(name = "second_name", nullable = false, length = 64)
     private String secondName;
 
-    @Column(name = "last_name", length = 30)
+    @Column(name = "last_name", length = 64)
     private String lastName;
 
     @ManyToOne(fetch = FetchType.EAGER)

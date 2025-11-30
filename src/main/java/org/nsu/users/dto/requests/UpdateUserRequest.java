@@ -21,15 +21,18 @@ import org.nsu.users.validation.ValidBondTimeIntervals;
 public class UpdateUserRequest {
 
     @NotBlank
+    @Size(max = 64, message = "First name must not exceed 64 characters")
     @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "First name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Имя пользователя", example = "Иван")
     private String firstName;
 
     @NotBlank
+    @Size(max = 64, message = "Second name must not exceed 64 characters")
     @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "Second name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Фамилия пользователя", example = "Иванов")
     private String secondName;
 
+    @Size(max = 64, message = "Last name must not exceed 64 characters")
     @Pattern(regexp = ValidationPatterns.NAME_OPTIONAL, message = "Last name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Отчество пользователя", example = "Иванович")
     private String lastName;
