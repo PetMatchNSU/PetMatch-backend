@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.nsu.animal.entity.AnimalGender;
+import org.nsu.users.dto.responses.util.ReviewStatus;
+import org.nsu.users.dto.responses.util.Goal;
 
 @Getter
 @AllArgsConstructor
@@ -31,7 +33,7 @@ public class UserAnimalListResponse {
         private String speciesName;
 
         @Schema(description = "цель размещения объявления", example = "SELL")
-        private String goal;
+        private Goal goal;
 
         @Schema(description = "текстовое название породы (если есть)", example = "Абиссинская")
         private String breed;
@@ -46,7 +48,7 @@ public class UserAnimalListResponse {
         private Long mainPhotoId;
 
         @Schema(description = "статус объявления, возможные варианты ON_CHECKING/OK/BLOCKED", example = "BLOCKED")
-        private String reviewStatus;
+        private ReviewStatus reviewStatus;
 
         @Schema(description = "комментарий от проверяющего админа", example = "Некорректная главная фотография")
         private String reviewComment;

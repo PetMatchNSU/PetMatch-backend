@@ -54,8 +54,8 @@ public class UserProfileController {
     }
 
     @GetMapping("/animals/list")
-    public UserAnimalListResponse animalList(@RequestBody UserAnimalListRequest dto) {
-        return userAnimalListService.getUserAnimalList(dto);
+    public UserAnimalListResponse animalList(@AuthenticationPrincipal PersonDetails principal) {
+        return userAnimalListService.getUserAnimalList(principal.getUserId());
     }
 
 }
