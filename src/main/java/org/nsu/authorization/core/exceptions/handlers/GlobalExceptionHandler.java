@@ -3,6 +3,7 @@ package org.nsu.authorization.core.exceptions.handlers;
 import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.common.dto.responses.ApiErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     private final Tracer tracer;
+
+    @ExceptionHandler(PersonNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePersonNotFoundException(PersonNotFoundException ex) {
+        log.warn("Person not found: {}", ex.getMessage());
+        
+        ApiErrorResponse error = ApiErrorResponse.create("Неверный email или пароль", tracer);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
