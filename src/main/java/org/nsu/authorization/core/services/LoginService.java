@@ -10,6 +10,7 @@ import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.authorization.core.utils.JWTUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -21,21 +22,26 @@ public class LoginService {
     private final PersonDetailsService personDetailsService;
     private final JWTUtil jwtUtil;
 
+    private static final String INVALID_CREDENTIALS_MESSAGE = "Неверный email или пароль";
+
     public LoginResponse login(@Valid @RequestBody LoginRequest dto) {
 
-        PersonDetails personDetails = personDetailsService.loadUserByUsername(dto.getEmail());
+        PersonDetails personDetails;
+        try {
+            personDetails = personDetailsService.loadUserByUsername(dto.getEmail());
+        } catch (PersonNotFoundException | UsernameNotFoundException e) {
+            throw new PersonNotFoundException(INVALID_CREDENTIALS_MESSAGE);
+        }
 
         if (!personDetails.getIsVerifiedEmail()) throw new PersonHasNotVerifiedEmailException("Email is not verified");
 
-        // Аутентификация прошла успешно
-        
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(personDetails.getUsername(), dto.getPassword());
 
         try {
             authenticationManager.authenticate(authenticationToken);
         } catch (Exception e) {
-            throw new PersonNotFoundException("Email or password is incorrect");
+            throw new PersonNotFoundException(INVALID_CREDENTIALS_MESSAGE);
         }
 
         String accessToken = jwtUtil.generateAccessToken(authenticationToken);
