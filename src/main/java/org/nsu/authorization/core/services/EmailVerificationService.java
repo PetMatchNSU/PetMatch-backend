@@ -25,44 +25,25 @@ public class EmailVerificationService {
      * Verifies an email using a code, based on the authenticated user from the JWT.
      *
      * @param dto The request DTO containing the verification code.
-     * @param jwt The parsed JWT token provided by Spring Security.
+     * @param email The user email address, that will be used to email.
      */
-    public void verifyEmail(EmailVerificationRequest dto, Jwt jwt) {
+    public void verifyEmail(EmailVerificationRequest dto, String email) {
 
-        String userId;
-        String emailDst;
-        try {
-            userId = jwt.getClaimAsString(JwtClaimKey.USER_ID);
-            emailDst = jwt.getClaimAsString(JwtClaimKey.USER_EMAIL);
-        } catch (Exception e) {
-            throw new EmailVerificationFailException("Failed to extract claims from token: " + e.getMessage(), e);
-        }
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EmailVerificationFailException("User not found with email: " + email));
 
-        if (userId == null || emailDst == null) {
-            throw new EmailVerificationFailException(
-                    "Failed to verify email: Token is missing user ID or email claims.");
-        }
-
-        if (!NumberUtils.isParsable(userId)) {
-            throw new EmailVerificationFailException("Failed to verify email: user id must only contain digits.");
-        }
+        String userId = String.valueOf(user.getId());
 
         String cachedCode = verificationCodeCachingService.getCode(userId);
 
         if (cachedCode == null) { // if the code is expired, generate a new one and send it
             cachedCode = verificationCodeCachingService.generateAndCacheCode(userId);
-            emailVerificationSenderService.send(emailDst, cachedCode);
+            emailVerificationSenderService.send(email, cachedCode);
             throw new EmailVerificationFailException("Неверный код или срок действия истёк. Мы выслали новое письмо для подтверждения почты");
         }
 
         // check if the code matches the one from the cache
         if (Objects.equals(cachedCode, dto.getCode())) {
-            User user;
-            try {
-                user = userRepository.getReferenceById(Long.parseLong(userId));
-            } catch (EntityNotFoundException e) {
-                throw new EmailVerificationFailException("Failed to verify email: " + e.getMessage(), e);
-            }
             user.setEmailVerified(true);
             userRepository.save(user);
             return;

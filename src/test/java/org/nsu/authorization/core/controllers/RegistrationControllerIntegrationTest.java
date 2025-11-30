@@ -11,7 +11,7 @@ import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsExce
 import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
 import org.nsu.authorization.core.services.PersonDetailsService;
 import org.nsu.authorization.core.services.RegistrationService;
-import org.nsu.authorization.core.utils.JWTUtil;
+import org.nsu.authorization.core.services.JWTService;
 import org.nsu.users.entity.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -59,9 +59,6 @@ class RegistrationControllerIntegrationTest {
 
     @MockBean
     private RegistrationService registrationService;
-
-    @MockBean
-    private JWTUtil jwtUtil;
 
     @MockBean
     private PersonDetailsService personDetailsService;

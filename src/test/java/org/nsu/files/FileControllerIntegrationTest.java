@@ -3,7 +3,6 @@ package org.nsu.files;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.nsu.PetMatch;
 import org.nsu.animal.entity.Animal;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardFileType;
@@ -16,12 +15,8 @@ import org.nsu.animal.repository.AnimalRepository;
 import org.nsu.animal.repository.AnimalCardStatusRepository;
 import org.nsu.animal.repository.PlacementGoalRepository;
 import org.nsu.users.core.repositories.UserRepository;
-import org.nsu.authorization.core.controllers.EmailVerificationController;
 import org.nsu.authorization.core.security.PersonDetails;
-import org.nsu.authorization.core.services.EmailVerificationSenderService;
-import org.nsu.authorization.core.services.EmailVerificationService;
-import org.nsu.authorization.core.utils.JWTUtil;
-import org.nsu.files.controller.FileController;
+import org.nsu.authorization.core.services.JWTService;
 import org.nsu.files.dto.FileDescriptor;
 import org.nsu.files.dto.MetadataDTO;
 import org.nsu.files.entity.FileType;
@@ -36,28 +31,19 @@ import org.nsu.users.core.repositories.StatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.http.MediaType;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -70,9 +56,6 @@ import java.util.List;
 @SpringBootTest()
 @AutoConfigureMockMvc
 public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
-
-    @MockitoBean
-    private JWTUtil jwtUtil;
 
     @Autowired
     private MockMvc mockMvc;

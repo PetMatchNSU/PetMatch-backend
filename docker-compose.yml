@@ -146,8 +146,8 @@ services:
       POSTGRES_DB: petmatch
       POSTGRES_USER: petmatch
       POSTGRES_PASSWORD: secret
-      JWT_SECRET_ACCESS: secret
-      JWT_SECRET_REFRESH: secret
+      JWT_SECRET_ACCESS: f0210f36555fdbe73b701458876f657b14b09870b5fb2608ea21a6f4ef44e004
+      JWT_SECRET_REFRESH: ToSDlXMK0jFRrllnZEJ9qEw7gT0K5mdyKdCF3gvOMK4=
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
       JAVA_OPTS: "-XX:+UseG1GC -XX:+UseContainerSupport"
       REDIS_HOST: petmatch-redis

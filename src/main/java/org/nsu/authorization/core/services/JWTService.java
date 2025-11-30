@@ -1,40 +1,36 @@
-package org.nsu.authorization.core.utils;
+package org.nsu.authorization.core.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
+import org.nsu.authorization.core.utils.JWTTypes;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.entity.Authority;
 import org.nsu.users.entity.User;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
-import lombok.RequiredArgsConstructor;
 
-import jakarta.annotation.PostConstruct;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
 
-@Component
-@RequiredArgsConstructor
-public class JWTUtil {
+public abstract class JWTService {
 
 	private final UserRepository userRepository;
 
 	private Algorithm accessAlgorithm;
 	private Algorithm refreshAlgorithm;
 
-	@PostConstruct
-	public void initializeAlgorithmsFromEnv() {
-		char[] accessChars = readEnvAsChars("JWT_SECRET_ACCESS");
-		char[] refreshChars = readEnvAsChars("JWT_SECRET_REFRESH");
+	protected JWTService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
+	protected void initializeAlgorithms(char[] accessChars, char[] refreshChars) {
 		byte[] accessKey = null;
 		byte[] refreshKey = null;
 
@@ -42,17 +38,17 @@ public class JWTUtil {
 			accessKey = decodeSecret(accessChars);
 			refreshKey = decodeSecret(refreshChars);
 
-            this.accessAlgorithm = Algorithm.HMAC256(accessKey);
-            this.refreshAlgorithm = Algorithm.HMAC256(refreshKey);
-        } finally {
-            if (accessKey != null)
-                Arrays.fill(accessKey, (byte) 0);
-            if (refreshKey != null)
-                Arrays.fill(refreshKey, (byte) 0);
-            Arrays.fill(accessChars, '\0');
-            Arrays.fill(refreshChars, '\0');
-        }
-    }
+			this.accessAlgorithm = Algorithm.HMAC256(accessKey);
+			this.refreshAlgorithm = Algorithm.HMAC256(refreshKey);
+		} finally {
+			if (accessKey != null)
+				Arrays.fill(accessKey, (byte) 0);
+			if (refreshKey != null)
+				Arrays.fill(refreshKey, (byte) 0);
+			Arrays.fill(accessChars, '\0');
+			Arrays.fill(refreshChars, '\0');
+		}
+	}
 
 	private char[] readEnvAsChars(String name) {
 		String value = System.getenv(name);
@@ -81,16 +77,16 @@ public class JWTUtil {
 		}
 	}
 
-    private boolean isLikelyHex(char[] encoded) {
-        if ((encoded.length & 1) != 0)
-            return false;
-        for (char c : encoded) {
-            boolean isHex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
-            if (!isHex)
-                return false;
-        }
-        return true;
-    }
+	private boolean isLikelyHex(char[] encoded) {
+		if ((encoded.length & 1) != 0)
+			return false;
+		for (char c : encoded) {
+			boolean isHex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+			if (!isHex)
+				return false;
+		}
+		return true;
+	}
 
 	private byte[] hexToBytes(char[] hex) {
 		int len = hex.length;
@@ -113,25 +109,25 @@ public class JWTUtil {
 
 	private String generateJWT(User user, Date expirationDate, Algorithm algorithm) {
 
-        return JWT.create()
-                .withSubject("Person details")
-                .withClaim("userID", user.getId().toString())
-                .withClaim("email", user.getEmail())
-                .withClaim("firstName", user.getFirstName())
-                .withClaim("surname", user.getSecondName())
-                .withClaim("patronymic", user.getLastName())
-                .withClaim("authorities",
-                        user.getAuthorities().stream().map(Authority::getAuthority).toList())
-                .withIssuer("spring-app")
-                .withExpiresAt(expirationDate)
-                .sign(algorithm);
-    }
+		return JWT.create()
+				.withSubject("Person details")
+				.withClaim("userID", user.getId().toString())
+				.withClaim("email", user.getEmail())
+				.withClaim("firstName", user.getFirstName())
+				.withClaim("surname", user.getSecondName())
+				.withClaim("patronymic", user.getLastName())
+				.withClaim("authorities",
+						user.getAuthorities().stream().map(Authority::getAuthority).toList())
+				.withIssuer("spring-app")
+				.withExpiresAt(expirationDate)
+				.sign(algorithm);
+	}
 
 	public String generateAccessToken(Authentication authentication) {
 		Date expirationDate = Date.from(ZonedDateTime.now().plusHours(1).toInstant());
 
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
-                String.format("Person with email %s not found", authentication.getName())));
+		User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
+				String.format("Person with email %s not found", authentication.getName())));
 
 		return generateJWT(user, expirationDate, accessAlgorithm);
 	}
@@ -139,8 +135,8 @@ public class JWTUtil {
 	public String generateRefreshToken(Authentication authentication) {
 		Date expirationDate = Date.from(ZonedDateTime.now().plusDays(7).toInstant());
 
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
-                String.format("Person with email %s not found", authentication.getName())));
+		User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new PersonNotFoundException(
+				String.format("Person with email %s not found", authentication.getName())));
 
 		return generateJWT(user, expirationDate, refreshAlgorithm);
 	}
