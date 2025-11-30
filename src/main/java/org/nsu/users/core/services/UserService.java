@@ -11,6 +11,7 @@ import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.services.StatusCommentService;
 import org.nsu.authorization.core.dto.requests.registrationRequest.RegistrationRequest;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
+import org.nsu.authorization.core.exceptions.authorization.RegionNotFoundException;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.core.mappers.UserMapper;
@@ -60,7 +61,7 @@ public class UserService {
         user.setPassword(hashedPassword);
 
         user.setRegion(regionRepository.findByRegionAndCity(request.getRegion(), request.getCity())
-                .orElseThrow(() -> new UserCreationFailException("Failed to find region in the database")));
+                .orElseThrow(() -> new RegionNotFoundException(request.getRegion() + ", " + request.getCity())));
 
         user.setStatus(statusRepository.findByName("ACTIVE")
                 .orElseThrow(
