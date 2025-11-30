@@ -4,6 +4,7 @@ import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nsu.common.dto.responses.ApiErrorResponse;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,14 @@ public class GlobalExceptionHandler {
         
         ApiErrorResponse error = ApiErrorResponse.create(message, tracer);
         return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataAccessException(DataAccessException ex) {
+        log.error("Database error: {}", ex.getMessage());
+        
+        ApiErrorResponse error = ApiErrorResponse.create("Database error. Please try again later.", tracer);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
