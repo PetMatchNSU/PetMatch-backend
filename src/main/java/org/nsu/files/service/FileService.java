@@ -5,11 +5,22 @@ import org.nsu.files.dto.FileDescriptor;
 import org.nsu.files.dto.MetadataDTO;
 import org.nsu.files.dto.FilterDTO;
 import org.nsu.files.dto.DeleteRequest;
+import org.nsu.files.dto.FileUploadResponse;
+import org.nsu.files.dto.FileUploadDescriptor;
 import org.nsu.files.event.FileUploadEvent;
 import org.nsu.files.repository.FileRepository;
+import org.nsu.files.repository.FileTypeRepository;
 import org.nsu.animal.repository.AnimalCardFileRepository;
+import org.nsu.animal.repository.AnimalCardRepository;
+import org.nsu.animal.repository.AnimalCardFileTypeRepository;
 import org.nsu.files.storage.StorageService;
 import org.nsu.files.util.FileUtils;
+import org.nsu.files.entity.File;
+import org.nsu.files.entity.FileType;
+import org.nsu.animal.entity.AnimalCard;
+import org.nsu.animal.entity.AnimalCardFile;
+import org.nsu.animal.entity.AnimalCardFileType;
+import org.nsu.files.config.MinIOConfigProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -37,11 +48,15 @@ public class FileService {
     private final FileValidationProperties validationProperties;
     private final ApplicationEventPublisher eventPublisher;
     private final FileRepository fileRepository;
+    private final FileTypeRepository fileTypeRepository;
     private final AnimalCardFileRepository animalCardFileRepository;
+    private final AnimalCardRepository animalCardRepository;
+    private final AnimalCardFileTypeRepository animalCardFileTypeRepository;
     private final StorageService storageService;
+    private final MinIOConfigProperties minioProperties;
     private final ObjectMapper objectMapper;
 
-    public MetadataDTO uploadFiles(MultipartFile[] files, String metadataJson, Long adId) throws JsonProcessingException {
+    public FileUploadResponse uploadFiles(MultipartFile[] files, String metadataJson, Long adId) throws JsonProcessingException {
         MetadataDTO metadata = objectMapper.readValue(metadataJson, MetadataDTO.class);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
@@ -49,37 +64,39 @@ public class FileService {
         if (files.length != metadata.descriptors().size()) {
             throw new IllegalArgumentException("Number of files does not match number of descriptors");
         }
-        List<FileDescriptor> descriptors = validateFiles(List.of(files), metadata.descriptors());
+        List<FileUploadDescriptor> descriptors = validateFiles(List.of(files), metadata.descriptors(), adId);
         eventPublisher.publishEvent(new FileUploadEvent(this, List.of(files), metadata, userId, adId));
-        return new MetadataDTO(descriptors);
+        return new FileUploadResponse(descriptors);
     }
 
-    private List<FileDescriptor> validateFiles(List<MultipartFile> files, List<FileDescriptor> descriptors) {
+    private List<FileUploadDescriptor> validateFiles(List<MultipartFile> files, List<FileDescriptor> inputDescriptors, Long adId) {
+        List<FileUploadDescriptor> result = new ArrayList<>();
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
-            FileDescriptor descriptor = descriptors.get(i);
+            FileDescriptor descriptor = inputDescriptors.get(i);
+            String status;
 
             if (file.getSize() > validationProperties.maxSizeBytes()) {
-                descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
-                continue;
-            }
-
-            try {
-                String mimeType = FileUtils.detectMimeType(file.getBytes());
-                String extension = FileUtils.getFileExtensionFromMimeType(mimeType);
-                List<String> allowedFormats = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? validationProperties.photoFormats() : validationProperties.docFormats();
-                if (!allowedFormats.contains(extension.toUpperCase())) {
-                    descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
-                    continue;
+                status = "not_valid";
+            } else {
+                try {
+                    String mimeType = FileUtils.detectMimeType(file.getBytes());
+                    String extension = FileUtils.getFileExtensionFromMimeType(mimeType);
+                    List<String> allowedFormats = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? validationProperties.photoFormats() : validationProperties.docFormats();
+                    if (!allowedFormats.contains(extension.toUpperCase())) {
+                        status = "not_valid";
+                    } else {
+                        status = "ok";
+                    }
+                } catch (Exception e) {
+                    status = "internal_error";
                 }
-            } catch (Exception e) {
-                descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
-                continue;
             }
 
-            descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.OK, null, null, null, null));
+            String filename = descriptor.originalFilename() != null ? descriptor.originalFilename() : file.getOriginalFilename();
+            result.add(new FileUploadDescriptor(filename, status, null, String.valueOf(adId)));
         }
-        return descriptors;
+        return result;
     }
 
     public MetadataDTO getFiles(String query) {

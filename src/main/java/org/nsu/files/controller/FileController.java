@@ -20,10 +20,10 @@ public class FileController {
 
     @Operation(summary = "Upload files", description = "Upload files with metadata and ad ID")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public MetadataDTO uploadFiles(
+    public FileUploadResponse uploadFiles(
             @RequestPart("files") MultipartFile[] files,
-            @RequestPart("metadata") String metadataJson,
-            @RequestPart("adId") Long adId) throws JsonProcessingException {
+            @RequestParam("metadata") String metadataJson,
+            @RequestParam("adId") Long adId) throws JsonProcessingException {
         return fileService.uploadFiles(files, metadataJson, adId);
     }
 

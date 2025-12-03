@@ -34,6 +34,6 @@ public class File {
     @JoinColumn(name = "id_type", nullable = false)
     private FileType type;
 
-    @Column(name = "link", nullable = false, length = 36)
+    @Column(name = "link", nullable = false, length = 255)
     private String link;
 }
