@@ -53,8 +53,8 @@ public class User {
     @Column(name = "second_name", nullable = false, length = 64)
     private String secondName;
 
-    @Column(name = "last_name", length = 64)
-    private String lastName;
+    @Column(name = "middle_name", length = 64)
+    private String middleName;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_status", nullable = false)

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.users.core.repositories.ContactTypeRepository;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
+import org.nsu.users.dto.responses.UserProfileResponse;
 import org.nsu.users.entity.*;
 import org.nsu.users.exceptions.ProfileNotFoundException;
 import org.nsu.users.exceptions.RegionNotFoundException;
@@ -13,6 +14,7 @@ import org.nsu.users.mappers.ContactMapper;
 import org.nsu.users.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -29,13 +31,48 @@ public class UserProfileService {
     private final BondTimeMapper bondTimeMapper;
     private final ContactMapper contactMapper;
 
+    public UserProfileResponse getProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ProfileNotFoundException(email));
+
+        String fullName = buildFullName(user.getSecondName(), user.getFirstName(), user.getMiddleName());
+
+        List<UserProfileResponse.BondTimeDto> bondTimeDtos = user.getBondTimes().stream()
+                .map(bt -> new UserProfileResponse.BondTimeDto(bt.getStartContactTime(), bt.getEndContactTime()))
+                .collect(Collectors.toList());
+
+        List<UserProfileResponse.ContactInfoDto> contactDtos = user.getContacts().stream()
+                .map(c -> new UserProfileResponse.ContactInfoDto(c.getType().getName(), c.getLink(), c.getIsVisible()))
+                .collect(Collectors.toList());
+
+        return UserProfileResponse.builder()
+                .fullName(fullName)
+                .gender(user.getGender().name())
+                .region(user.getRegion().getRegion())
+                .city(user.getRegion().getCity())
+                .bondTime(bondTimeDtos)
+                .contactInfo(contactDtos)
+                .reviewStatus(user.getStatus().getName())
+                .reviewComment(null)
+                .build();
+    }
+
+    private String buildFullName(String secondName, String firstName, String middleName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(secondName).append(" ").append(firstName);
+        if (StringUtils.hasText(middleName)) {
+            sb.append(" ").append(middleName);
+        }
+        return sb.toString();
+    }
+
     public void updateProfile(String email, UpdateUserRequest dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ProfileNotFoundException(email));
 
         user.setFirstName(dto.getFirstName());
         user.setSecondName(dto.getSecondName());
-        user.setLastName(dto.getLastName());
+        user.setMiddleName(dto.getMiddleName());
         if (dto.getGender() != null) {
             user.setGender(Gender.valueOf(dto.getGender().name()));
         }

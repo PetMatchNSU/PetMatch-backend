@@ -1,37 +1,25 @@
-package org.nsu.users.core.dto.responses.positive;
+package org.nsu.users.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
-@Setter
+@Builder
 @AllArgsConstructor
 @Schema(description = "Ответ с данными профиля пользователя")
-public class UserResponse {
+public class UserProfileResponse {
 
     @Nonnull
-    @Schema(description = "Имя пользователя", example = "Иван")
-    private final String firstName;
-
-    @Nonnull
-    @Schema(description = "Фамилия пользователя", example = "Иванов")
-    private final String secondName;
-
-    @Nullable
-    @Schema(description = "Отчество пользователя", example = "Иванович")
-    private final String middleName;
-
-    @Nonnull
-    @Schema(description = "Email пользователя", example = "test@mail.ru")
-    private final String email;
+    @Schema(description = "Полное ФИО пользователя", example = "Иванов Иван Иванович")
+    private final String fullName;
 
     @Nonnull
     @Schema(description = "Пол пользователя", example = "M", allowableValues = {"M", "F"})
@@ -46,14 +34,6 @@ public class UserResponse {
     private final String city;
 
     @Nonnull
-    @Schema(description = "Статус профиля", example = "OK", allowableValues = {"ON_CHECKING", "OK", "BLOCKED"})
-    private final String reviewStatus;
-
-    @Nullable
-    @Schema(description = "Комментарий администратора")
-    private final String reviewComment;
-
-    @Nonnull
     @Schema(description = "Время доступности для связи")
     private final List<BondTimeDto> bondTime;
 
@@ -61,8 +41,15 @@ public class UserResponse {
     @Schema(description = "Контактная информация")
     private final List<ContactInfoDto> contactInfo;
 
+    @Nonnull
+    @Schema(description = "Статус профиля", example = "OK", allowableValues = {"ON_CHECKING", "OK", "BLOCKED"})
+    private final String reviewStatus;
+
+    @Nullable
+    @Schema(description = "Комментарий администратора")
+    private final String reviewComment;
+
     @Getter
-    @Setter
     @AllArgsConstructor
     @Schema(description = "Время доступности для связи")
     public static class BondTimeDto {
@@ -70,16 +57,15 @@ public class UserResponse {
         @Nonnull
         @JsonProperty("bondTimeStart")
         @Schema(description = "Время начала доступности", example = "10:00")
-        private final OffsetDateTime bondTimeStart;
+        private final LocalTime bondTimeStart;
 
         @Nonnull
         @JsonProperty("bondTimeEnd")
         @Schema(description = "Время конца доступности", example = "12:00")
-        private final OffsetDateTime bondTimeEnd;
+        private final LocalTime bondTimeEnd;
     }
 
     @Getter
-    @Setter
     @AllArgsConstructor
     @Schema(description = "Контактная информация")
     public static class ContactInfoDto {

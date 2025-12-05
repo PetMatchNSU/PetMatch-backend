@@ -32,10 +32,10 @@ public class UpdateUserRequest {
     @Schema(description = "Фамилия пользователя", example = "Иванов")
     private String secondName;
 
-    @Size(max = 64, message = "Last name must not exceed 64 characters")
-    @Pattern(regexp = ValidationPatterns.NAME_OPTIONAL, message = "Last name can only contain letters, spaces, hyphens and apostrophes")
+    @Size(max = 64, message = "Middle name must not exceed 64 characters")
+    @Pattern(regexp = ValidationPatterns.NAME_OPTIONAL, message = "Middle name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Отчество пользователя", example = "Иванович")
-    private String lastName;
+    private String middleName;
 
     @NotNull
     @Schema(description = "Пол (M/F)", example = "M")

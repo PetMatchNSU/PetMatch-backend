@@ -77,7 +77,7 @@ class RegistrationControllerIT {
         validRequest.setPassword("password123");
         validRequest.setFirstName("John");
         validRequest.setSecondName("Doe");
-        validRequest.setLastName("Smith");
+        validRequest.setMiddleName("Smith");
         validRequest.setGender(Gender.M);
         validRequest.setRegion("Novosibirsk");
         validRequest.setCity("Novosibirsk");
@@ -270,9 +270,9 @@ class RegistrationControllerIT {
         }
 
         @Test
-        @DisplayName("Bug 2025-11-19: lastName with digits should return 400")
-        void register_whenLastNameContainsDigits_shouldReturn400() throws Exception {
-            validRequest.setLastName("Тестер123");
+        @DisplayName("Bug 2025-11-19: MiddleName with digits should return 400")
+        void register_whenMiddleNameContainsDigits_shouldReturn400() throws Exception {
+            validRequest.setMiddleName("Тестер123");
 
             mockMvc.perform(post("/api/v1/user/register")
                             .contentType(MediaType.APPLICATION_JSON)

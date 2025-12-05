@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Переименование колонки last_name в middle_name (отчество) -->
+    <changeSet id="16417" author="wiseConst">
+        <renameColumn tableName="t_users" 
+                      oldColumnName="last_name" 
+                      newColumnName="middle_name" 
+                      columnDataType="VARCHAR(64)"/>
+    </changeSet>
+
+</databaseChangeLog>

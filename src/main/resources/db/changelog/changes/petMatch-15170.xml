@@ -113,11 +113,11 @@
             <column name="id_region" type="BIGINT" remarks="Регион проживания">
                 <constraints nullable="false"/>
             </column>
-            <column name="first_name" type="VARCHAR(30)">
+            <column name="first_name" type="VARCHAR(64)">
                 <constraints nullable="false"/>
             </column>
-            <column name="second_name" type="VARCHAR(30)"/>
-            <column name="last_name" type="VARCHAR(30)"/>
+            <column name="second_name" type="VARCHAR(64)"/>
+            <column name="last_name" type="VARCHAR(64)"/>
         </createTable>
     </changeSet>
 

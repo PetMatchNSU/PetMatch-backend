@@ -75,7 +75,7 @@ public class TestDataFactory {
         user.setPassword("password");
         user.setFirstName("Ivan");
         user.setSecondName("Petrov");
-        user.setLastName("Sidorovich");
+        user.setMiddleName("Sidorovich");
         user.setStatus(status);
         user.setGender(Gender.M);
         user.setRegion(region);
@@ -102,7 +102,7 @@ public class TestDataFactory {
         user.setPassword("password");
         user.setFirstName("Ivan");
         user.setSecondName("Petrov");
-        user.setLastName("Sidorovich");
+        user.setMiddleName("Sidorovich");
         user.setStatus(status);
         user.setGender(Gender.M);
         user.setRegion(region);

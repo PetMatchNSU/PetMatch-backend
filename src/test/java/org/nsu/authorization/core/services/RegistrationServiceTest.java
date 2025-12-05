@@ -44,7 +44,7 @@ class RegistrationServiceTest {
         registrationRequest.setPassword("password123");
         registrationRequest.setFirstName("Test");
         registrationRequest.setSecondName("User");
-        registrationRequest.setLastName("McTest");
+        registrationRequest.setMiddleName("McTest");
         registrationRequest.setGender(Gender.M);
         registrationRequest.setRegion("Test Region");
 

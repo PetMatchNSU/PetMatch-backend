@@ -54,7 +54,7 @@ class UserProfileServiceTest {
         UpdateUserRequest dto = new UpdateUserRequest();
         dto.setFirstName("A");
         dto.setSecondName("B");
-        dto.setLastName("C");
+        dto.setMiddleName("C");
         dto.setGender(GenderRequest.M);
         dto.setRegion("Новосибирская область");
         dto.setCity("Новосибирск");
@@ -100,7 +100,7 @@ class UserProfileServiceTest {
         UpdateUserRequest dto = new UpdateUserRequest();
         dto.setFirstName("A");
         dto.setSecondName("B");
-        dto.setLastName("C");
+        dto.setMiddleName("C");
         dto.setGender(GenderRequest.M);
         dto.setRegion("Новосибирская область");
         dto.setCity("Новосибирск");
