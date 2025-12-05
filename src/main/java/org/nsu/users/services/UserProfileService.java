@@ -40,8 +40,8 @@ public class UserProfileService {
             user.setGender(Gender.valueOf(dto.getGender().name()));
         }
 
-        Region region = regionRepository.findById(dto.getLocationId())
-                .orElseThrow(() -> new RegionNotFoundException(dto.getLocationId()));
+        Region region = regionRepository.findByRegionAndCity(dto.getRegion(), dto.getCity())
+                .orElseThrow(() -> new RegionNotFoundException(dto.getRegion(), dto.getCity()));
         user.setRegion(region);
 
         Map<String, ContactType> typesMap = contactTypeRepository.findAll()

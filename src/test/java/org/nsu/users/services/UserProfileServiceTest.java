@@ -56,7 +56,8 @@ class UserProfileServiceTest {
         dto.setSecondName("B");
         dto.setLastName("C");
         dto.setGender(GenderRequest.M);
-        dto.setLocationId(1L);
+        dto.setRegion("Новосибирская область");
+        dto.setCity("Новосибирск");
 
         UpdateUserRequest.BondTimeDto b = new UpdateUserRequest.BondTimeDto();
         b.setBondTimeStart(LocalTime.of(10, 0));
@@ -70,7 +71,8 @@ class UserProfileServiceTest {
         dto.setContactInfo(List.of(ci));
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(regionRepository.findById(1L)).thenReturn(Optional.of(TestDataFactory.createTestRegion()));
+        when(regionRepository.findByRegionAndCity("Новосибирская область", "Новосибирск"))
+                .thenReturn(Optional.of(TestDataFactory.createTestRegion()));
         ContactType ct = TestDataFactory.createTestContactType();
         when(contactTypeRepository.findAll()).thenReturn(List.of(ct));
 
@@ -100,7 +102,8 @@ class UserProfileServiceTest {
         dto.setSecondName("B");
         dto.setLastName("C");
         dto.setGender(GenderRequest.M);
-        dto.setLocationId(1L);
+        dto.setRegion("Новосибирская область");
+        dto.setCity("Новосибирск");
 
         UpdateUserRequest.ContactInfoDto ci = new UpdateUserRequest.ContactInfoDto();
         ci.setType("Unknown");
@@ -109,7 +112,8 @@ class UserProfileServiceTest {
         dto.setContactInfo(List.of(ci));
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(regionRepository.findById(1L)).thenReturn(Optional.of(TestDataFactory.createTestRegion()));
+        when(regionRepository.findByRegionAndCity("Новосибирская область", "Новосибирск"))
+                .thenReturn(Optional.of(TestDataFactory.createTestRegion()));
         when(contactTypeRepository.findAll()).thenReturn(List.of());
 
         assertThrows(ContactTypeNotFoundException.class, () -> userProfileService.updateProfile("test@example.com", dto));

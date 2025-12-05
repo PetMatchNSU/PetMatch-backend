@@ -41,14 +41,18 @@ public class UpdateUserRequest {
     @Schema(description = "Пол (M/F)", example = "M")
     private GenderRequest gender;
 
-    @NotNull
-    @Schema(description = "ID региона", example = "12345")
-    private Long locationId;
+    @NotBlank
+    @Schema(description = "Регион проживания пользователя", example = "Новосибирская область")
+    private String region;
+
+    @NotBlank
+    @Schema(description = "Город проживания пользователя", example = "Новосибирск")
+    private String city;
 
     @Valid
     @Size(max = 4, message = "Maximum 4 bond time intervals allowed")
     @ValidBondTimeIntervals
-    @Schema(description = "Время доступности для связи" )
+    @Schema(description = "Время доступности для связи")
     private List<BondTimeDto> bondTime;
 
     @Valid
