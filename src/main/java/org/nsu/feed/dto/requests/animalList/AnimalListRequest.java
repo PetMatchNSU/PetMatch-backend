@@ -1,7 +1,6 @@
 package org.nsu.feed.dto.requests.animalList;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,9 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AnimalListRequest {
-    @Valid
-    @Schema(description = "Фильтры запроса")
-    private Filter filter;
 
     @NotNull
     @Schema(description = "Информация о страницах")

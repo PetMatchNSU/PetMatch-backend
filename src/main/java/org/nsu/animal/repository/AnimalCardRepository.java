@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AnimalCardRepository extends JpaRepository<AnimalCard, Long>, JpaSpecificationExecutor<AnimalCard> {
+
+	org.springframework.data.domain.Page<AnimalCard> findAllByStatus_NameIgnoreCase(String statusName, org.springframework.data.domain.Pageable pageable);
 }

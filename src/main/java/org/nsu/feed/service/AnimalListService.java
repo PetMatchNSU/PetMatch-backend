@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AnimalListService {
-    private final AnimalCardRetrieverService animalCardRetriteverService;
+    private final AnimalCardRetrieverService animalCardRetrieverService;
 
     public AnimalListResponse listAnimals(AnimalListRequest dto) {
         AnimalListResponse response = new AnimalListResponse();
@@ -22,7 +22,7 @@ public class AnimalListService {
                 pageLimit = dto.getPagination().getLimit();
         }
 
-        var pageResult = animalCardRetriteverService.getList(dto.getFilter(), page, pageLimit);
+        var pageResult = animalCardRetrieverService.getList(page, pageLimit);
         response.setAnimalList(pageResult.getContent());
 
         AnimalListResponse.Pagination pagination = new AnimalListResponse.Pagination();

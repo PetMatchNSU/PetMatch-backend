@@ -1,7 +1,6 @@
 package org.nsu.feed.dto.responses.animalList;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +32,7 @@ public class AnimalCard {
     @Schema(description = "гендер животного М/F", example = "M")
     private AnimalGender gender;
 
-    @Schema(description = "дата рождения животного в формате '2023-11-15' ГГГГ-ММ-ДД", example = "2023-11-15")
+    @Schema(description = "дата рождения животного в формате '2023-11-15' ГГГГ-ММ-ДД", example = "2023-11-15", format = "date")
     private LocalDate birthday;
 
     @Schema(description = "Информация о регионе и городе")
@@ -42,6 +41,6 @@ public class AnimalCard {
     @Schema(description = "идентификатор главного фото", example = "1324325")
     private Long mainPhotoId;
 
-    @Schema(description = "дата и время создания карточки", example = "2023-11-15T12:00:00Z")
-    private ZonedDateTime createdAt;
+    @Schema(description = "дата и время создания карточки", example = "2023-11-15T12:00:00Z", format = "date-time")
+    private LocalDate createdAt;
 }
