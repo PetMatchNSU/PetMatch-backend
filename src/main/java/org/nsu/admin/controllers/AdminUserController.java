@@ -11,6 +11,7 @@ import org.nsu.admin.dto.AdminUserListRequest;
 import org.nsu.admin.dto.AdminUserListResponse;
 import org.nsu.admin.dto.LockResponse;
 import org.nsu.admin.services.AdminUserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +23,7 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
 
     @PostMapping
+    @PreAuthorize("hasRole('MODERATOR')")
     @Operation(summary = "Get users list with filters and pagination",
                description = "Retrieve paginated list of users with status and email filters")
     @ApiResponses(value = {
@@ -35,6 +37,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/{userId}/lock")
+    @PreAuthorize("hasRole('MODERATOR')")
     @Operation(summary = "Lock user for moderation",
                description = "Lock a user to prevent concurrent access during moderation")
     @ApiResponses(value = {
@@ -49,6 +52,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/{userId}/status")
+    @PreAuthorize("hasRole('MODERATOR')")
     @Operation(summary = "Set user status",
                description = "Change user status and optionally add comment")
     @ApiResponses(value = {

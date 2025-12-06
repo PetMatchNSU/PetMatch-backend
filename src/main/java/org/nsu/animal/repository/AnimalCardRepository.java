@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Repository
 public interface AnimalCardRepository extends JpaRepository<AnimalCard, Long>, JpaSpecificationExecutor<AnimalCard> {
@@ -28,8 +28,8 @@ public interface AnimalCardRepository extends JpaRepository<AnimalCard, Long>, J
            "(:updatedAt IS NULL OR ac.updated >= :updatedAt) ")
     Page<AnimalCard> findByFilters(@Param("statuses") java.util.List<String> statuses,
                                    @Param("goals") java.util.List<String> goals,
-                                   @Param("createdAt") LocalDate createdAt,
-                                   @Param("updatedAt") LocalDate updatedAt,
+                                   @Param("createdAt") LocalDateTime createdAt,
+                                   @Param("updatedAt") LocalDateTime updatedAt,
                                    Pageable pageable);
 
     Page<AnimalCard> findAll(Pageable pageable);

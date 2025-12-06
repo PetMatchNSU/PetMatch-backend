@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.nsu.admin.dto.*;
 import org.nsu.admin.dto.LockType;
 import org.nsu.admin.entity.StatusComment;
+import org.nsu.admin.mappers.AdminUserMapper;
 import org.nsu.admin.repositories.StatusCommentRepository;
-import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.core.repositories.StatusRepository;
 import org.nsu.users.entity.Status;
@@ -15,30 +15,35 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AdminUserService {
+public class AdminUserService extends AdminServiceBase {
+
+    private static final int DEFAULT_OFFSET = 0;
+    private static final int DEFAULT_LIMIT = 20;
 
     private final UserRepository userRepository;
     private final StatusCommentRepository statusCommentRepository;
     private final RedisLockService redisLockService;
     private final StatusRepository statusRepository;
+    private final AdminUserMapper adminUserMapper;
 
     public AdminUserListResponse getUsersList(AdminUserListRequest request) {
         // Variables
-        int offset = 0;
-        int limit = 20;
+        int offset = DEFAULT_OFFSET;
+        int limit = DEFAULT_LIMIT;
         Pageable pageable;
         List<String> statuses = null;
         String emailToken = null;
@@ -48,14 +53,19 @@ public class AdminUserService {
 
         // Set defaults if pagination is null
         if (request.getPagination() != null) {
-            offset = request.getPagination().getOffset() != null ? request.getPagination().getOffset() : 0;
-            limit = request.getPagination().getLimit() != null ? request.getPagination().getLimit() : 20;
+            offset = Optional.ofNullable(request.getPagination().getOffset()).orElse(DEFAULT_OFFSET);
+            limit = Optional.ofNullable(request.getPagination().getLimit()).orElse(DEFAULT_LIMIT);
+        }
+
+        // Prevent division by zero
+        if (limit <= 0) {
+            limit = DEFAULT_LIMIT;
         }
 
         pageable = PageRequest.of(
             offset / limit,
             limit,
-            Sort.by(Sort.Direction.DESC, "id")
+            Sort.by(Sort.Direction.DESC, User.Fields.id)
         );
 
         if (request.getFilters() != null) {
@@ -63,28 +73,17 @@ public class AdminUserService {
             emailToken = request.getFilters().getEmailToken();
         }
 
-        if (statuses != null && !statuses.isEmpty()) {
-            List<Status> statusEntities = statuses.stream()
-                .map(statusName -> {
-                    Status status = new Status();
-                    status.setName(statusName);
-                    return status;
-                })
-                .collect(Collectors.toList());
-
-            if (emailToken != null && !emailToken.trim().isEmpty()) {
-                userPage = userRepository.findByStatusInAndEmailContainingIgnoreCase(
-                    statusEntities, emailToken.trim(), pageable);
-            } else {
-                userPage = userRepository.findByStatusIn(statusEntities, pageable);
-            }
-        } else {
-            if (emailToken != null && !emailToken.trim().isEmpty()) {
-                userPage = userRepository.findByEmailContainingIgnoreCase(emailToken.trim(), pageable);
-            } else {
-                userPage = userRepository.findAll(pageable);
-            }
+        // Normalize filters: treat empty list as null
+        if (CollectionUtils.isEmpty(statuses)) {
+            statuses = null;
         }
+        if (StringUtils.hasText(emailToken)) {
+            emailToken = emailToken.trim();
+        } else {
+            emailToken = null;
+        }
+
+        userPage = userRepository.findByFilters(statuses, emailToken, pageable);
 
         userDtos = userPage.getContent().stream()
             .map(this::convertToAdminUserDto)
@@ -129,12 +128,12 @@ public class AdminUserService {
         userRepository.save(user);
 
         // Create status comment if provided
-        if (reason != null && !reason.trim().isEmpty()) {
+        if (StringUtils.hasText(reason)) {
             comment = new StatusComment();
             comment.setStatus(newStatus);
             comment.setUser(user);
             comment.setComment(reason.trim());
-            comment.setDate(Timestamp.valueOf(LocalDateTime.now()));
+            comment.setDate(Timestamp.from(Instant.now()));
             statusCommentRepository.save(comment);
         }
 
@@ -145,30 +144,7 @@ public class AdminUserService {
     }
 
     private AdminUserDto convertToAdminUserDto(User user) {
-        AdminModerationDto moderation;
-
-        moderation = redisLockService.getLockOld(user.getId(), LockType.USER);
-
-        return new AdminUserDto(
-            user.getId(),
-            user.getStatus().getName(),
-            user.getFirstName(),
-            user.getSecondName(),
-            user.getLastName(),
-            user.getEmail(),
-            moderation
-        );
-    }
-
-    private Long getCurrentModeratorId() {
-        Authentication authentication;
-        PersonDetails personDetails;
-
-        authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof PersonDetails) {
-            personDetails = (PersonDetails) authentication.getPrincipal();
-            return personDetails.getUserId();
-        }
-        throw new RuntimeException("Unable to get current moderator ID from security context");
+        AdminModerationDto moderation = redisLockService.getLockOld(user.getId(), LockType.USER);
+        return adminUserMapper.toDto(user, moderation);
     }
 }

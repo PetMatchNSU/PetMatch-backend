@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nsu.authorization.core.security.PersonDetails;
-import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.admin.services.RedisLockService;
 import org.nsu.admin.repositories.StatusCommentRepository;
 import org.nsu.admin.dto.LockModel;
@@ -45,9 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @ContextConfiguration(initializers = AdminUserControllerIT.RedisInitializer.class)
 public class AdminUserControllerIT extends AbstractIntegrityTest {
-
-    @MockitoBean
-    private JWTUtil jwtUtil;
 
     @MockitoBean
     private RedisLockService redisLockService;

@@ -36,10 +36,10 @@ public class AdminUserListRequest {
     @AllArgsConstructor
     @Schema(description = "Pagination object")
     public static class Pagination {
-        @Schema(description = "Page offset", defaultValue = "0")
-        private Integer offset = 0;
+        @Schema(description = "Page offset")
+        private Integer offset;
 
-        @Schema(description = "Page size", defaultValue = "20")
-        private Integer limit = 20;
+        @Schema(description = "Page size")
+        private Integer limit;
     }
 }
