@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration,"
                 + "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
 })
-class LoginControllerIT {
+class LoginControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

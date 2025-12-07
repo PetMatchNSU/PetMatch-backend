@@ -1,6 +1,8 @@
 package org.nsu.users.services;
 
 import lombok.RequiredArgsConstructor;
+import org.nsu.admin.entity.StatusComment;
+import org.nsu.admin.services.StatusCommentService;
 import org.nsu.users.core.repositories.ContactTypeRepository;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.dto.requests.UpdateUserRequest;
@@ -28,6 +30,7 @@ public class UserProfileService {
     private final UserRepository userRepository;
     private final RegionRepository regionRepository;
     private final ContactTypeRepository contactTypeRepository;
+    private final StatusCommentService statusCommentService;
     private final BondTimeMapper bondTimeMapper;
     private final ContactMapper contactMapper;
 
@@ -45,15 +48,19 @@ public class UserProfileService {
                 .map(c -> new UserProfileResponse.ContactInfoDto(c.getType().getName(), c.getLink(), c.getIsVisible()))
                 .collect(Collectors.toList());
 
+        String reviewComment = statusCommentService.getLatestCommentByUser(user)
+                .map(StatusComment::getComment)
+                .orElse(null);
+
         return UserProfileResponse.builder()
                 .fullName(fullName)
-                .gender(user.getGender().name())
+                .gender(user.getGender())
                 .region(user.getRegion().getRegion())
                 .city(user.getRegion().getCity())
                 .bondTime(bondTimeDtos)
                 .contactInfo(contactDtos)
                 .reviewStatus(user.getStatus().getName())
-                .reviewComment(null)
+                .reviewComment(reviewComment)
                 .build();
     }
 

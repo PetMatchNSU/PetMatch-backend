@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.nsu.users.entity.Gender;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,8 +23,8 @@ public class UserProfileResponse {
     private final String fullName;
 
     @Nonnull
-    @Schema(description = "Пол пользователя", example = "M", allowableValues = {"M", "F"})
-    private final String gender;
+    @Schema(description = "Пол пользователя", example = "M")
+    private final Gender gender;
 
     @Nonnull
     @Schema(description = "Название региона", example = "Новосибирская область")

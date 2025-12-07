@@ -2,11 +2,36 @@ package org.nsu.users.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.nsu.users.utils.BondTimeValidationUtil;
 
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Validator for bond time intervals.
+ * Uses BondTimeValidationUtil for actual validation logic.
+ */
 public class ValidBondTimeIntervalsValidator implements ConstraintValidator<ValidBondTimeIntervals, List<?>> {
+
+    private final BondTimeValidationUtil.TimeExtractor<Object> extractor = new BondTimeValidationUtil.TimeExtractor<>() {
+        @Override
+        public LocalTime getStart(Object obj) {
+            return getTimeByMethod(obj, "getBondTimeStart");
+        }
+
+        @Override
+        public LocalTime getEnd(Object obj) {
+            return getTimeByMethod(obj, "getBondTimeEnd");
+        }
+
+        private LocalTime getTimeByMethod(Object obj, String methodName) {
+            try {
+                return (LocalTime) obj.getClass().getMethod(methodName).invoke(obj);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    };
 
     @Override
     public void initialize(ValidBondTimeIntervals constraintAnnotation) {
@@ -25,18 +50,13 @@ public class ValidBondTimeIntervalsValidator implements ConstraintValidator<Vali
         for (int i = 0; i < bondTimes.size(); i++) {
             Object bondTime = bondTimes.get(i);
             if (bondTime == null) {
-                continue; // Let @NotNull handle null values
+                continue;
             }
 
-            LocalTime start = getStartTime(bondTime);
-            LocalTime end = getEndTime(bondTime);
+            LocalTime start = extractor.getStart(bondTime);
+            LocalTime end = extractor.getEnd(bondTime);
             
-            if (start == null || end == null) {
-                continue; // Let @NotNull handle null values
-            }
-
-            // Check if start time is before end time
-            if (!start.isBefore(end)) {
+            if (!BondTimeValidationUtil.isValidInterval(start, end)) {
                 context.buildConstraintViolationWithTemplate("Start time must be before end time")
                         .addPropertyNode("bondTime")
                         .addPropertyNode("[" + i + "]")
@@ -45,79 +65,16 @@ public class ValidBondTimeIntervalsValidator implements ConstraintValidator<Vali
             }
         }
 
-        // Check for overlapping intervals
-        for (int i = 0; i < bondTimes.size(); i++) {
-            Object first = bondTimes.get(i);
-            if (first == null) {
-                continue;
-            }
-
-            LocalTime start1 = getStartTime(first);
-            LocalTime end1 = getEndTime(first);
-            
-            if (start1 == null || end1 == null) {
-                continue;
-            }
-
-            for (int j = i + 1; j < bondTimes.size(); j++) {
-                Object second = bondTimes.get(j);
-                if (second == null) {
-                    continue;
-                }
-
-                LocalTime start2 = getStartTime(second);
-                LocalTime end2 = getEndTime(second);
-                
-                if (start2 == null || end2 == null) {
-                    continue;
-                }
-
-                if (intervalsOverlap(start1, end1, start2, end2)) {
-                    context.buildConstraintViolationWithTemplate("Bond time intervals cannot overlap")
-                            .addPropertyNode("bondTime")
-                            .addConstraintViolation();
-                    return false;
-                }
-            }
+        // Check for overlapping intervals using utility method
+        @SuppressWarnings("unchecked")
+        List<Object> intervals = (List<Object>) bondTimes;
+        if (BondTimeValidationUtil.hasOverlappingIntervals(intervals, extractor)) {
+            context.buildConstraintViolationWithTemplate("Bond time intervals cannot overlap")
+                    .addPropertyNode("bondTime")
+                    .addConstraintViolation();
+            return false;
         }
 
         return true;
-    }
-
-    private LocalTime getStartTime(Object bondTime) {
-        try {
-            // Handle RegistrationRequest.BondTime
-            if (bondTime.getClass().getSimpleName().equals("BondTime")) {
-                return (LocalTime) bondTime.getClass().getMethod("getBondTimeStart").invoke(bondTime);
-            }
-            // Handle UpdateUserRequest.BondTimeDto
-            else if (bondTime.getClass().getSimpleName().equals("BondTimeDto")) {
-                return (LocalTime) bondTime.getClass().getMethod("getBondTimeStart").invoke(bondTime);
-            }
-        } catch (Exception e) {
-            // Fallback - return null to let other validations handle it
-        }
-        return null;
-    }
-
-    private LocalTime getEndTime(Object bondTime) {
-        try {
-            // Handle RegistrationRequest.BondTime
-            if (bondTime.getClass().getSimpleName().equals("BondTime")) {
-                return (LocalTime) bondTime.getClass().getMethod("getBondTimeEnd").invoke(bondTime);
-            }
-            // Handle UpdateUserRequest.BondTimeDto
-            else if (bondTime.getClass().getSimpleName().equals("BondTimeDto")) {
-                return (LocalTime) bondTime.getClass().getMethod("getBondTimeEnd").invoke(bondTime);
-            }
-        } catch (Exception e) {
-            // Fallback - return null to let other validations handle it
-        }
-        return null;
-    }
-
-    private boolean intervalsOverlap(LocalTime start1, LocalTime end1, LocalTime start2, LocalTime end2) {
-        // Two intervals overlap if: start1 < end2 AND start2 < end1
-        return start1.isBefore(end2) && start2.isBefore(end1);
     }
 }
