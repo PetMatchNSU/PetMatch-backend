@@ -11,6 +11,8 @@ import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.core.repositories.StatusRepository;
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,8 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +43,9 @@ public class AdminUserService extends AdminServiceBase {
     private final RedisLockService redisLockService;
     private final StatusRepository statusRepository;
     private final AdminUserMapper adminUserMapper;
+
+    @Autowired
+    private Environment environment;
 
     public AdminUserListResponse getUsersList(AdminUserListRequest request) {
         // Variables
@@ -133,7 +140,9 @@ public class AdminUserService extends AdminServiceBase {
             comment.setStatus(newStatus);
             comment.setUser(user);
             comment.setComment(reason.trim());
-            comment.setDate(Timestamp.from(Instant.now()));
+            ZoneId zone = ZoneId.of(environment.getProperty("app.timezone"));
+            LocalDateTime now = LocalDateTime.now(zone);
+            comment.setDate(Timestamp.valueOf(now));
             statusCommentRepository.save(comment);
         }
 
@@ -144,7 +153,9 @@ public class AdminUserService extends AdminServiceBase {
     }
 
     private AdminUserDto convertToAdminUserDto(User user) {
-        AdminModerationDto moderation = redisLockService.getLockOld(user.getId(), LockType.USER);
+        LockModel lock = redisLockService.getLock(user.getId(), LockType.USER);
+        AdminModerationDto moderation = lock != null ?
+            new AdminModerationDto(lock.getModeratorId(), lock.getLockedAt()) : null;
         return adminUserMapper.toDto(user, moderation);
     }
 }

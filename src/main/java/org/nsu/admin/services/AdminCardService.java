@@ -127,7 +127,9 @@ public class AdminCardService extends AdminServiceBase {
     }
 
     private AdminCardDto convertToAdminCardDto(AnimalCard card) {
-        AdminModerationDto moderation = redisLockService.getLockOld(card.getId(), LockType.CARD);
+        LockModel lock = redisLockService.getLock(card.getId(), LockType.CARD);
+        AdminModerationDto moderation = lock != null ?
+            new AdminModerationDto(lock.getModeratorId(), lock.getLockedAt()) : null;
         return adminCardMapper.toDto(card, moderation);
     }
 }
