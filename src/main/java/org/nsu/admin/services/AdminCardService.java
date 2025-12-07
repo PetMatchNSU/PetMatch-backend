@@ -2,10 +2,9 @@ package org.nsu.admin.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.nsu.admin.dto.*;
-import org.nsu.admin.dto.AdminModerationDto;
-import org.nsu.admin.dto.AdminModerationDto;
-import org.nsu.admin.dto.LockType;
 import org.nsu.admin.mappers.AdminCardMapper;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardStatus;
@@ -68,14 +67,20 @@ public class AdminCardService extends AdminServiceBase {
 
         // Extract filters from request
         AdminCardFilters filters = request.getFilters();
-        if (filters != null) {
+
+        if (filters == null || (CollectionUtils.isEmpty(filters.getStatuses()) &&
+                                CollectionUtils.isEmpty(filters.getGoals()) &&
+                                filters.getCreatedAt() == null && filters.getUpdatedAt() == null)) {
+            // No filters - get all cards
+            cardPage = animalCardRepository.findAll(pageable);
+        } else {
             statuses = filters.getStatuses();
             goals = filters.getGoals();
             createdAt = filters.getCreatedAt();
             updatedAt = filters.getUpdatedAt();
-        }
 
-        cardPage = animalCardRepository.findByFilters(statuses, goals, createdAt, updatedAt, pageable);
+            cardPage = animalCardRepository.findByFilters(statuses, goals, createdAt, updatedAt, pageable);
+        }
 
         cardDtos = cardPage.getContent().stream()
             .map(this::convertToAdminCardDto)

@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nsu.authorization.core.security.PersonDetails;
-import org.nsu.admin.services.RedisLockService;
-import org.nsu.admin.dto.LockModel;
-import org.nsu.admin.dto.LockType;
 import org.nsu.testutils.AbstractIntegrityTest;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.core.repositories.StatusRepository;
@@ -44,27 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest()
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@Testcontainers
-@ContextConfiguration(initializers = AdminCardControllerIT.RedisInitializer.class)
 public class AdminCardControllerIT extends AbstractIntegrityTest {
-
-    @MockitoBean
-    private RedisLockService redisLockService;
-
-    // --- Конфигурация Testcontainers для Redis ---
-    @Container
-    public static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7.0"))
-            .withExposedPorts(6379);
-
-    static class RedisInitializer implements org.springframework.context.ApplicationContextInitializer<org.springframework.context.ConfigurableApplicationContext> {
-        public void initialize(org.springframework.context.ConfigurableApplicationContext configurableApplicationContext) {
-            redis.start();
-            TestPropertyValues.of(
-                    "spring.data.redis.host=" + redis.getHost(),
-                    "spring.data.redis.port=" + redis.getMappedPort(6379)
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -198,10 +175,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
         card.setStatus(savedPendingStatus);
         testCard = animalCardRepository.save(card);
 
-        // Mock RedisLockService for tests
-        when(redisLockService.setLock(any(Long.class), any(Long.class), eq(LockType.CARD))).thenReturn(true);
-        when(redisLockService.getLock(any(Long.class), eq(LockType.CARD))).thenReturn(null);
-        when(redisLockService.releaseLock(any(Long.class), eq(LockType.CARD))).thenReturn(true);
+
     }
 
     @Test
@@ -232,20 +206,21 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testSetCardStatus_success() throws Exception {
-        // First lock the card
+        // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Lock
+        // Lock the card
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId()))
                 .andExpect(status().isOk());
 
-        // Mock getLock for the locked card
-        when(redisLockService.getLock(eq(testCard.getId()), eq(LockType.CARD))).thenReturn(new LockModel(testCard.getId(), moderatorUser.getId(), LocalDateTime.now(), LocalDateTime.now().plusMinutes(30)));
+        // Note: In a real integration test, Redis state persists between requests
+        // The test may fail if Redis doesn't maintain state between MockMvc calls
+        // This is expected behavior for integration testing with external services
 
-        // Then set status
+        // Set status (this will test if Redis lock state is maintained)
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", testCard.getId())
                 .param("targetStatus", "Approved")
                 .param("reason", "Test reason"))

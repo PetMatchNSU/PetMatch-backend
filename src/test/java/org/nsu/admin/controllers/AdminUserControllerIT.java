@@ -17,19 +17,16 @@ import org.nsu.users.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.boot.test.util.TestPropertyValues;
+
+
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
+
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -41,27 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest()
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@Testcontainers
-@ContextConfiguration(initializers = AdminUserControllerIT.RedisInitializer.class)
 public class AdminUserControllerIT extends AbstractIntegrityTest {
-
-    @MockitoBean
-    private RedisLockService redisLockService;
-
-    // --- Конфигурация Testcontainers для Redis ---
-    @Container
-    public static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7.0"))
-            .withExposedPorts(6379);
-
-    static class RedisInitializer implements org.springframework.context.ApplicationContextInitializer<org.springframework.context.ConfigurableApplicationContext> {
-        public void initialize(org.springframework.context.ConfigurableApplicationContext configurableApplicationContext) {
-            redis.start();
-            TestPropertyValues.of(
-                    "spring.data.redis.host=" + redis.getHost(),
-                    "spring.data.redis.port=" + redis.getMappedPort(6379)
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -150,11 +127,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         regularUserTemp.setAuthorities(Set.of(savedUserAuthority));
         regularUser = userRepository.save(regularUserTemp);
 
-        // Mock RedisLockService for tests
-        when(redisLockService.setLock(any(Long.class), any(Long.class), eq(LockType.USER))).thenReturn(true);
-        when(redisLockService.getLock(any(Long.class), eq(LockType.USER))).thenReturn(null);
-        when(redisLockService.releaseLock(any(Long.class), eq(LockType.USER))).thenReturn(true);
-    }
+   }
 
     @Test
     void testGetUsersList_success() throws Exception {
@@ -193,9 +166,6 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         // Lock
         mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId()))
                 .andExpect(status().isOk());
-
-        // Mock getLock for the locked user
-        when(redisLockService.getLock(eq(regularUser.getId()), eq(LockType.USER))).thenReturn(new LockModel(regularUser.getId(), moderatorUser.getId(), LocalDateTime.now(), LocalDateTime.now().plusMinutes(30)));
 
         // Then set status
         mockMvc.perform(post("/api/v1/admin/users/{userId}/status", regularUser.getId())

@@ -75,22 +75,29 @@ public class AdminUserService extends AdminServiceBase {
             Sort.by(Sort.Direction.DESC, User.Fields.id)
         );
 
-        if (request.getFilters() != null) {
-            statuses = request.getFilters().getStatuses();
-            emailToken = request.getFilters().getEmailToken();
-        }
-
-        // Normalize filters: treat empty list as null
-        if (CollectionUtils.isEmpty(statuses)) {
-            statuses = null;
-        }
-        if (StringUtils.hasText(emailToken)) {
-            emailToken = emailToken.trim();
+        if (request.getFilters() == null ||
+            (CollectionUtils.isEmpty(request.getFilters().getStatuses()) &&
+             !StringUtils.hasText(request.getFilters().getEmailToken()))) {
+            // No filters - get all users
+            userPage = userRepository.findAll(pageable);
         } else {
-            emailToken = null;
-        }
+            if (request.getFilters() != null) {
+                statuses = request.getFilters().getStatuses();
+                emailToken = request.getFilters().getEmailToken();
+            }
 
-        userPage = userRepository.findByFilters(statuses, emailToken, pageable);
+            // Normalize filters: treat empty list as null
+            if (CollectionUtils.isEmpty(statuses)) {
+                statuses = null;
+            }
+            if (StringUtils.hasText(emailToken)) {
+                emailToken = emailToken.trim();
+            } else {
+                emailToken = null;
+            }
+
+            userPage = userRepository.findByFilters(statuses, emailToken, pageable);
+        }
 
         userDtos = userPage.getContent().stream()
             .map(this::convertToAdminUserDto)
