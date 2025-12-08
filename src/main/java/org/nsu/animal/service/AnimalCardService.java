@@ -40,41 +40,67 @@ public class AnimalCardService {
     private final AnimalCardMapper animalCardMapper;
     private final AnimalCardFileRepository animalCardFileRepository;
 
-    @Transactional
     public void createAnimalCard(CreateAnimalCardRequest request) {
         User currentUser = getCurrentUser();
-        
         validateRequest(request);
         
+        Animal animal = getAnimalById(request.getSpeciesId());
+        PlacementGoal goal = findGoalByName(request.getGoal());
+        AnimalCardStatus status = getDefaultStatus();
+        
+        AnimalCard animalCard = buildAnimalCard(request, currentUser, animal, goal, status);
+        
+        saveAnimalCard(animalCard);
+    }
+    
+    private Animal getAnimalById(Long speciesId) {
+        return animalRepository.findById(speciesId)
+                .orElseThrow(() -> new IllegalArgumentException("Вид животного не найден"));
+    }
+    
+    private AnimalCardStatus getDefaultStatus() {
+        return animalCardStatusRepository.findByName("ON_CHECKING")
+                .orElseThrow(() -> new IllegalStateException("Статус 'ON_CHECKING' не найден в базе данных"));
+    }
+    
+    private AnimalCard buildAnimalCard(CreateAnimalCardRequest request, User currentUser,
+                                      Animal animal, PlacementGoal goal, AnimalCardStatus status) {
         AnimalCard animalCard = new AnimalCard();
         
         animalCard.setCardAuthor(currentUser);
-        
-        Animal animal = animalRepository.findById(request.getSpeciesId())
-                .orElseThrow(() -> new IllegalArgumentException("Вид животного не найден"));
         animalCard.setAnimal(animal);
+        animalCard.setGoal(goal);
+        animalCard.setStatus(status);
         
         animalCardMapper.updateAnimalCardFromRequest(request, animalCard);
         
-        if (Boolean.TRUE.equals(request.getHasBreed()) && request.getBreed() != null) {
-            animalCard.setBreed(request.getBreed());
-        }
+        setBreedIfPresent(animalCard, request.getBreed());
         
-        PlacementGoal goal = findGoalByName(request.getGoal());
-        animalCard.setGoal(goal);
-        
-        if ("SELL".equals(request.getGoal()) && request.getCost() != null) {
-            animalCard.setCost(request.getCost());
-        }
+        setCostIfSelling(animalCard, request.getGoal(), request.getCost());
         
         LocalDateTime now = LocalDateTime.now();
         animalCard.setCreated(now);
         animalCard.setUpdated(now);
         
-        AnimalCardStatus status = animalCardStatusRepository.findByName("ON_CHECKING")
-                .orElseThrow(() -> new IllegalStateException("Статус 'ON_CHECKING' не найден в базе данных"));
-        animalCard.setStatus(status);
-        
+        return animalCard;
+    }
+    
+    private void setBreedIfPresent(AnimalCard animalCard, String breed) {
+        if (breed != null && !breed.trim().isEmpty()) {
+            animalCard.setBreed(breed.trim());
+        } else {
+            animalCard.setBreed(null);
+        }
+    }
+    
+    private void setCostIfSelling(AnimalCard animalCard, String goal, java.math.BigDecimal cost) {
+        if ("SELL".equals(goal) && cost != null) {
+            animalCard.setCost(cost);
+        }
+    }
+    
+    @Transactional
+    private void saveAnimalCard(AnimalCard animalCard) {
         animalCardRepository.save(animalCard);
     }
     
@@ -88,11 +114,6 @@ public class AnimalCardService {
     }
     
     private void validateRequest(CreateAnimalCardRequest request) {
-        if (Boolean.TRUE.equals(request.getHasBreed()) &&
-            (request.getBreed() == null || request.getBreed().trim().isEmpty())) {
-            throw new IllegalArgumentException("Порода должна быть указана, если животное породистое");
-        }
-        
         if ("SELL".equals(request.getGoal()) && request.getCost() == null) {
             throw new IllegalArgumentException("Стоимость должна быть указана для продажи");
         }
@@ -122,42 +143,51 @@ public class AnimalCardService {
         return animalCardMapper.toResponse(animalCard, currentUser, files);
     }
 
-    @Transactional
     public void updateAnimalCard(Long animalId, UpdateAnimalCardRequest request) {
+        User currentUser = getCurrentUser();
+        validateUpdateRequest(request);
+        
+        Animal animal = getAnimalById(request.getSpeciesId());
+        PlacementGoal goal = findGoalByName(request.getGoal());
+        
+        updateAnimalCardInTransaction(animalId, request, currentUser, animal, goal);
+    }
+    
+    @Transactional
+    private void updateAnimalCardInTransaction(Long animalId, UpdateAnimalCardRequest request,
+                                             User currentUser, Animal animal, PlacementGoal goal) {
         AnimalCard animalCard = animalCardRepository.findById(animalId)
                 .orElseThrow(() -> new IllegalArgumentException("Карточка животного не найдена"));
 
-        User currentUser = getCurrentUser();
         if (!Objects.equals(animalCard.getCardAuthor().getId(), currentUser.getId())) {
             throw new IllegalArgumentException("Нет прав для редактирования этой карточки");
         }
 
-        validateUpdateRequest(request);
-
-        Animal animal = animalRepository.findById(request.getSpeciesId())
-                .orElseThrow(() -> new IllegalArgumentException("Вид животного не найден"));
+        updateAnimalCardData(animalCard, request, animal, goal);
+        
+        animalCardRepository.save(animalCard);
+    }
+    
+    private void updateAnimalCardData(AnimalCard animalCard, UpdateAnimalCardRequest request,
+                                    Animal animal, PlacementGoal goal) {
         animalCard.setAnimal(animal);
-
-        animalCardMapper.updateAnimalCardFromRequest(request, animalCard);
-
-        if (Boolean.TRUE.equals(request.getHasBreed()) && request.getBreed() != null) {
-            animalCard.setBreed(request.getBreed());
-        } else {
-            animalCard.setBreed(null);
-        }
-
-        PlacementGoal goal = findGoalByName(request.getGoal());
         animalCard.setGoal(goal);
-
-        if ("SELL".equals(request.getGoal()) && request.getCost() != null) {
-            animalCard.setCost(request.getCost());
+        
+        animalCardMapper.updateAnimalCardFromRequest(request, animalCard);
+        
+        setBreedIfPresent(animalCard, request.getBreed());
+        
+        updateCostForGoal(animalCard, request.getGoal(), request.getCost());
+        
+        animalCard.setUpdated(LocalDateTime.now());
+    }
+    
+    private void updateCostForGoal(AnimalCard animalCard, String goal, java.math.BigDecimal cost) {
+        if ("SELL".equals(goal) && cost != null) {
+            animalCard.setCost(cost);
         } else {
             animalCard.setCost(null);
         }
-
-        animalCard.setUpdated(LocalDateTime.now());
-
-        animalCardRepository.save(animalCard);
     }
 
     @Transactional
@@ -174,11 +204,6 @@ public class AnimalCardService {
     }
 
     private void validateUpdateRequest(UpdateAnimalCardRequest request) {
-        if (Boolean.TRUE.equals(request.getHasBreed()) &&
-            (request.getBreed() == null || request.getBreed().trim().isEmpty())) {
-            throw new IllegalArgumentException("Порода должна быть указана, если животное породистое");
-        }
-        
         if ("SELL".equals(request.getGoal()) && request.getCost() == null) {
             throw new IllegalArgumentException("Стоимость должна быть указана для продажи");
         }

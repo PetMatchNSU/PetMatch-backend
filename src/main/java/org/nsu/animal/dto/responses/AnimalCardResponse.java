@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.nsu.animal.dto.enums.Gender;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,17 +40,13 @@ public class AnimalCardResponse {
     @Schema(description = "Стоимость продажи", example = "15000")
     private BigDecimal cost;
 
-    @Nonnull
-    @Schema(description = "Флаг породистости", example = "true")
-    private Boolean hasBreed;
-
     @Nullable
     @Schema(description = "Название породы", example = "Британская короткошерстная")
     private String breed;
 
     @Nonnull
-    @Schema(description = "Пол животного", example = "M", allowableValues = {"M", "F"})
-    private String gender;
+    @Schema(description = "Пол животного", example = "M")
+    private Gender gender;
 
     @Nonnull
     @JsonFormat(pattern = "yyyy-MM-dd")

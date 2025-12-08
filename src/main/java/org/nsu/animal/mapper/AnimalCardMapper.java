@@ -27,8 +27,7 @@ public abstract class AnimalCardMapper {
     @Mapping(target = "canEdit", source = "animalCard", qualifiedByName = "mapCanEdit")
     @Mapping(target = "species", source = "animalCard.animal", qualifiedByName = "mapSpecies")
     @Mapping(target = "goal", source = "animalCard.goal.goal")
-    @Mapping(target = "hasBreed", source = "animalCard.breed", qualifiedByName = "mapHasBreed")
-    @Mapping(target = "gender", source = "animalCard.gender", qualifiedByName = "mapGender")
+    @Mapping(target = "gender", expression = "java(org.nsu.animal.dto.enums.Gender.valueOf(animalCard.getGender().name()))")
     @Mapping(target = "reviewStatus", source = "animalCard.status.name")
     @Mapping(target = "photos", ignore = true)
     @Mapping(target = "documents", ignore = true)
@@ -53,15 +52,6 @@ public abstract class AnimalCardMapper {
     }
 
 
-    @Named("mapHasBreed")
-    protected Boolean mapHasBreed(String breed) {
-        return breed != null;
-    }
-
-    @Named("mapGender")
-    protected String mapGender(org.nsu.animal.entity.AnimalGender gender) {
-        return gender.name();
-    }
 
     protected AnimalCardResponse.PhotosDto mapPhotos(List<AnimalCardFile> files) {
         Long mainPhotoId = files.stream()
