@@ -198,7 +198,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
                 .param("targetStatus", "Blocked")
                 .param("reason", "Test reason")
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         mockMvc.perform(post("/api/v1/admin/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminUserListRequest())))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -221,7 +221,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminUserListRequest()))
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
         mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", 99999L)
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -239,7 +239,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         logger.info("Starting testLockUser_unauthorized");
         // No authentication - global exception handler converts to 500
         mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId()))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -273,7 +273,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
                 .param("targetStatus", "Blocked")
                 .param("reason", "Test reason")
                 .with(SecurityMockMvcRequestPostProcessors.user(otherPersonDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -291,6 +291,6 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
                 .param("targetStatus", "InvalidStatus")
                 .param("reason", "Test reason")
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 }

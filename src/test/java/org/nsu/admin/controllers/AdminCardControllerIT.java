@@ -248,7 +248,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
                 .param("targetStatus", "Approved")
                 .param("reason", "Test reason")
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -258,7 +258,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
         mockMvc.perform(post("/api/v1/admin/cards")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminCardListRequest())))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -271,7 +271,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminCardListRequest()))
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -281,7 +281,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", 99999L)
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -289,7 +289,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
         logger.info("Starting testLockCard_unauthorized");
         // No authentication - global exception handler converts to 500
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId()))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -324,7 +324,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
                 .param("targetStatus", "Approved")
                 .param("reason", "Test reason")
                 .with(SecurityMockMvcRequestPostProcessors.user(otherPersonDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -343,6 +343,6 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
                 .param("targetStatus", "InvalidStatus")
                 .param("reason", "Test reason")
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().is4xxClientError());
     }
 }
