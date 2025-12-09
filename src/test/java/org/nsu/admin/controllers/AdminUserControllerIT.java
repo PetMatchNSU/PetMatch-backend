@@ -82,6 +82,9 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         // Clean up
         statusCommentRepository.deleteAll();
         userRepository.deleteAll();
+        statusRepository.deleteAll();
+        authorityRepository.deleteAll();
+        regionRepository.deleteAll();
         // Note: Don't delete authorities and statuses as they might be used by other tests
 
         // Create authorities
