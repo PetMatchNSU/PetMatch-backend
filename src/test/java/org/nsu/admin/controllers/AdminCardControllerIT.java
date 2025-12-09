@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -37,6 +38,7 @@ import java.util.Set;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 
 @SpringBootTest()
 @ActiveProfiles("test")
@@ -182,13 +184,11 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
     void testGetCardsList_success() throws Exception {
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         mockMvc.perform(post("/api/v1/admin/cards")
                 .contentType("application/json")
-                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminCardListRequest())))
+                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminCardListRequest()))
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
     }
 
@@ -196,34 +196,28 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
     void testLockCard_success() throws Exception {
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId()))
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId())
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
     }
 
     @Test
+    @Transactional
     void testSetCardStatus_success() throws Exception {
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Lock the card
-        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId()))
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId())
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
-
-        // Note: In a real integration test, Redis state persists between requests
-        // The test may fail if Redis doesn't maintain state between MockMvc calls
-        // This is expected behavior for integration testing with external services
 
         // Set status (this will test if Redis lock state is maintained)
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", testCard.getId())
                 .param("targetStatus", "Approved")
-                .param("reason", "Test reason"))
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
     }
 }

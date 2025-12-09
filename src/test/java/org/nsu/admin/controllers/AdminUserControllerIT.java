@@ -34,6 +34,7 @@ import java.util.Set;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 
 @SpringBootTest()
 @ActiveProfiles("test")
@@ -133,13 +134,11 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
     void testGetUsersList_success() throws Exception {
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         mockMvc.perform(post("/api/v1/admin/users")
                 .contentType("application/json")
-                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminUserListRequest())))
+                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminUserListRequest()))
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
     }
 
@@ -147,30 +146,27 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
     void testLockUser_success() throws Exception {
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId()))
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId())
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
     }
 
     @Test
     void testSetUserStatus_success() throws Exception {
-        // First lock the user
+        // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(personDetails, null, personDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Lock
-        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId()))
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId())
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
 
         // Then set status
         mockMvc.perform(post("/api/v1/admin/users/{userId}/status", regularUser.getId())
                 .param("targetStatus", "Blocked")
-                .param("reason", "Test reason"))
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
     }
 }

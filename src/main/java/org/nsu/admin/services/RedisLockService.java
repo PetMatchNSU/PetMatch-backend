@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RedisLockService {
 
-    private final RedisTemplate<Object, Object> redisTemplate;
+    private final RedisTemplate<String, LockModel> lockModelRedisTemplate;
 
     private final org.springframework.core.env.Environment env;
 
@@ -55,25 +55,24 @@ public class RedisLockService {
 
         LockModel lockInfo = new LockModel(id, moderatorId, now, expiresAt);
 
-        redisTemplate.opsForValue().set(key, lockInfo, ttl, TimeUnit.MINUTES);
+        lockModelRedisTemplate.opsForValue().set(key, lockInfo, ttl, TimeUnit.MINUTES);
         log.info("Lock set/updated for {} by moderator {}", id, moderatorId);
         return true;
     }
 
     public LockModel getLock(Long id, LockType lockType) {
         String key = keyPrefixes.get(lockType) + id;
-        Object value = redisTemplate.opsForValue().get(key);
-        if (value instanceof LockModel) {
-            return (LockModel) value;
-        }
-        return null;
+        log.debug("Getting lock for key: {}", key);
+        LockModel lockModel = lockModelRedisTemplate.opsForValue().get(key);
+        log.debug("Lock value retrieved: {}", lockModel);
+        return lockModel;
     }
 
 
 
     public boolean releaseLock(Long id, LockType lockType) {
         String key = keyPrefixes.get(lockType) + id;
-        Boolean deleted = redisTemplate.delete(key);
+        Boolean deleted = lockModelRedisTemplate.delete(key);
         if (Boolean.TRUE.equals(deleted)) {
             log.info("Lock released for {}", id);
             return true;

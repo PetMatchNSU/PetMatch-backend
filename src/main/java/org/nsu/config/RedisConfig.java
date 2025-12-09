@@ -2,6 +2,7 @@ package org.nsu.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.nsu.admin.dto.LockModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -13,16 +14,16 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<Object, Object> template = new RedisTemplate<>();
+    public RedisTemplate<String, LockModel> lockModelRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, LockModel> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Configure ObjectMapper with LocalDateTime support
+        // Configure ObjectMapper with LocalDateTime support for LockModel
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
-        // Use Jackson2JsonRedisSerializer for values
-        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
+        // Use typed Jackson2JsonRedisSerializer for LockModel values
+        Jackson2JsonRedisSerializer<LockModel> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, LockModel.class);
 
         // Set serializers
         template.setKeySerializer(new StringRedisSerializer());
