@@ -6,12 +6,11 @@ import org.nsu.animal.entity.AnimalCardFile;
 import org.nsu.animal.repository.AnimalCardFileRepository;
 import org.nsu.animal.repository.AnimalCardRepository;
 import org.nsu.users.dto.responses.UserAnimalListResponse;
-import org.nsu.users.dto.responses.util.Goal;
-import org.nsu.users.dto.responses.util.ReviewStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,10 +26,24 @@ public class UserAnimalListService {
 
         List<AnimalCard> cards = animalCardRepository.findByCardAuthorIdOrderByCreatedDesc(userId);
 
+        if (cards.isEmpty()) {
+            return new UserAnimalListResponse(Collections.emptyList());
+        }
+
+        List<Long> cardIds = cards.stream()
+                .map(AnimalCard::getId)
+                .collect(Collectors.toList());
+
+        List<AnimalCardFile> allFiles = animalCardFileRepository.findByAnimalCardIdIn(cardIds);
+
+        Map<Long, List<AnimalCardFile>> filesMap = allFiles.stream()
+                .collect(Collectors.groupingBy(file -> file.getAnimalCard().getId()));
+
         List<UserAnimalListResponse.Animal> animals = cards.stream().map(card -> {
-            List<AnimalCardFile> files = animalCardFileRepository.findByAnimalCardId(card.getId());
-            Long mainPhotoId = (files == null ? Collections.<AnimalCardFile>emptyList() : files).stream()
-                    .filter(acf -> acf.getFileType() != null 
+            List<AnimalCardFile> files = filesMap.getOrDefault(card.getId(), Collections.emptyList());
+
+            Long mainPhotoId = files.stream()
+                    .filter(acf -> acf.getFileType() != null
                             && PHOTO_FILE_TYPE.equalsIgnoreCase(acf.getFileType().getName())
                             && acf.getFile() != null)
                     .map(acf -> acf.getFile().getId())
@@ -38,8 +51,8 @@ public class UserAnimalListService {
                     .orElse(null);
 
             String speciesName = card.getAnimal() != null ? card.getAnimal().getName() : null;
-            Goal goal = card.getGoal() != null ? Goal.valueOf(card.getGoal().getGoal()) : null;
-            ReviewStatus reviewStatus = card.getStatus() != null ? ReviewStatus.valueOf(card.getStatus().getName()) : null;
+            String goal = card.getGoal() != null ? card.getGoal().getGoal() : null;
+            String reviewStatus = card.getStatus() != null ? card.getStatus().getName() : null;
 
             return new UserAnimalListResponse.Animal(
                     card.getId(),
@@ -51,8 +64,7 @@ public class UserAnimalListService {
                     card.getBirthdate(),
                     mainPhotoId,
                     reviewStatus,
-                    null
-            );
+                    null);
         }).collect(Collectors.toList());
 
         return new UserAnimalListResponse(animals);
