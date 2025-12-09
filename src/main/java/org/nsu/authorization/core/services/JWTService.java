@@ -115,7 +115,7 @@ public abstract class JWTService {
 				.withClaim("email", user.getEmail())
 				.withClaim("firstName", user.getFirstName())
 				.withClaim("surname", user.getSecondName())
-				.withClaim("patronymic", user.getLastName())
+				.withClaim("patronymic", user.getMiddleName())
 				.withClaim("authorities",
 						user.getAuthorities().stream().map(Authority::getAuthority).toList())
 				.withIssuer("spring-app")

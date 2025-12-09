@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.dto.requests.UpdateUserRequest;
 import org.nsu.users.dto.responses.ContactInfoResponse;
+import org.nsu.users.dto.responses.UserProfileResponse;
 import org.nsu.users.services.ContactInfoService;
 import org.nsu.users.services.UserProfileService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
@@ -27,6 +27,18 @@ public class UserProfileController {
 
     private final UserProfileService userProfileService;
     private final ContactInfoService contactInfoService;
+
+    @GetMapping
+    @Operation(summary = "Просмотр данных пользователя", description = "Получение данных профиля текущего пользователя")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Данные профиля"),
+            @ApiResponse(responseCode = "401", description = "Неавторизован"),
+            @ApiResponse(responseCode = "403", description = "Email не подтверждён"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден")
+    })
+    public UserProfileResponse getProfile(@AuthenticationPrincipal PersonDetails principal) {
+        return userProfileService.getProfile(principal.getUsername());
+    }
 
     @PutMapping
     @Operation(summary = "Обновление профиля пользователя", description = "Обновление данных пользователя")

@@ -33,7 +33,7 @@ post:
             secondName:
               type: string
               example: Тестович
-            lastName:
+            middleName:
               type: string
               example: Тестер
             gender:

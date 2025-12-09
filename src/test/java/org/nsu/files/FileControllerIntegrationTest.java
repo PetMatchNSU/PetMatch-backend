@@ -122,7 +122,7 @@ public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
         user.setEmail("test@example.com");
         user.setFirstName("Test");
         user.setSecondName("User");
-        user.setLastName("Testovich");
+        user.setMiddleName("Testovich");
         user.setPassword("password");
         user.setGender(Gender.M);
         user.setEmailVerified(true);

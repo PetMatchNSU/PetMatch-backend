@@ -63,7 +63,7 @@ class UserMapperTest {
         assertThat(result).isNotNull();
         assertThat(result.getFirstName()).isEqualTo(testUser.getFirstName());
         assertThat(result.getSecondName()).isEqualTo(testUser.getSecondName());
-        assertThat(result.getLastName()).isEqualTo(testUser.getLastName());
+        assertThat(result.getMiddleName()).isEqualTo(testUser.getMiddleName());
         assertThat(result.getEmail()).isEqualTo(testUser.getEmail());
         assertThat(result.getGender()).isEqualTo(testUser.getGender().name());
         assertThat(result.getRegion()).isEqualTo(testUser.getRegion().getRegion());
