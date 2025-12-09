@@ -94,6 +94,11 @@ public class AdminCardService extends AdminServiceBase {
         Long moderatorId;
         boolean result;
 
+        // Check if card exists
+        if (!animalCardRepository.existsById(cardId)) {
+            throw new RuntimeException("Card not found: " + cardId);
+        }
+
         moderatorId = getCurrentModeratorId();
         result = redisLockService.setLock(cardId, moderatorId, LockType.CARD);
         log.info("Moderator {} tried to lock card {} for moderation: {}", moderatorId, cardId, result ? "success" : "failed - card already locked");

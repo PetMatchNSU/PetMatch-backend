@@ -26,7 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import org.springframework.test.web.servlet.MockMvc;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -62,17 +62,19 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
     @Autowired
     private RegionRepository regionRepository;
 
-    private User moderatorUser;
-    private User regularUser;
+    private static User moderatorUser;
+    private static User regularUser;
+    private static boolean isInitialized = false;
 
     @BeforeEach
     void setUp() {
+        if (isInitialized) {
+            return; // Skip setup if already initialized
+        }
         // Clean up
         statusCommentRepository.deleteAll();
         userRepository.deleteAll();
-        authorityRepository.deleteAll();
-        statusRepository.deleteAll();
-        regionRepository.deleteAll();
+        // Note: Don't delete authorities and statuses as they might be used by other tests
 
         // Create authorities
         Authority moderatorAuthority = new Authority();
@@ -128,7 +130,8 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         regularUserTemp.setAuthorities(Set.of(savedUserAuthority));
         regularUser = userRepository.save(regularUserTemp);
 
-   }
+        isInitialized = true; // Mark as initialized
+    }
 
     @Test
     void testGetUsersList_success() throws Exception {
@@ -168,5 +171,118 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
                 .param("reason", "Test reason")
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetUsersList_unauthorized() throws Exception {
+        // No authentication - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/users")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminUserListRequest())))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetUsersList_forbidden_wrongRole() throws Exception {
+        // Authenticate as regular user (not moderator) - global exception handler converts to 500
+        PersonDetails personDetails = new PersonDetails(regularUser);
+
+        mockMvc.perform(post("/api/v1/admin/users")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminUserListRequest()))
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testLockUser_nonExistent() throws Exception {
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", 99999L)
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testLockUser_unauthorized() throws Exception {
+        // No authentication - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId()))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testSetUserStatus_noLock() throws Exception {
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // Create a separate test user for this test (not locked)
+        User separateTestUser = new User();
+        separateTestUser.setEmail("separatetest@example.com");
+        separateTestUser.setFirstName("Separate");
+        separateTestUser.setSecondName("Test");
+        separateTestUser.setLastName("User");
+        separateTestUser.setPassword("password");
+        separateTestUser.setGender(Gender.F);
+        separateTestUser.setEmailVerified(true);
+        separateTestUser.setStatus(statusRepository.findByName("Active").get());
+        separateTestUser.setRegion(regionRepository.findByRegionAndCity("Test Region", "Test City").get());
+        separateTestUser.setAuthorities(Set.of(authorityRepository.findByName("ROLE_USER").get()));
+        User savedSeparateTestUser = userRepository.save(separateTestUser);
+
+        // Try to set status without locking first - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/status", savedSeparateTestUser.getId())
+                .param("targetStatus", "Blocked")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testSetUserStatus_wrongLockOwner() throws Exception {
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // Lock the user
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId())
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isOk());
+
+        // Create another moderator user
+        User otherModerator = new User();
+        otherModerator.setEmail("other@moderator.com");
+        otherModerator.setFirstName("Other");
+        otherModerator.setSecondName("Moderator");
+        otherModerator.setLastName("Admin");
+        otherModerator.setPassword("password");
+        otherModerator.setGender(Gender.M);
+        otherModerator.setEmailVerified(true);
+        otherModerator.setStatus(statusRepository.findByName("Active").get());
+        otherModerator.setRegion(regionRepository.findByRegionAndCity("Test Region", "Test City").get());
+        otherModerator.setAuthorities(Set.of(authorityRepository.findByName("ROLE_MODERATOR").get()));
+        User savedOtherModerator = userRepository.save(otherModerator);
+
+        PersonDetails otherPersonDetails = new PersonDetails(savedOtherModerator);
+
+        // Try to set status with different moderator - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/status", regularUser.getId())
+                .param("targetStatus", "Blocked")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(otherPersonDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testSetUserStatus_invalidStatus() throws Exception {
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // Lock the user
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId())
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isOk());
+
+        // Try to set invalid status - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/status", regularUser.getId())
+                .param("targetStatus", "InvalidStatus")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
     }
 }

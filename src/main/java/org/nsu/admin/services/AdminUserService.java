@@ -111,6 +111,11 @@ public class AdminUserService extends AdminServiceBase {
         Long moderatorId;
         boolean result;
 
+        // Check if user exists
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found: " + userId);
+        }
+
         moderatorId = getCurrentModeratorId();
         result = redisLockService.setLock(userId, moderatorId, LockType.USER);
         log.info("Moderator {} tried to lock user {} for moderation: {}", moderatorId, userId, result ? "success" : "failed - user already locked");

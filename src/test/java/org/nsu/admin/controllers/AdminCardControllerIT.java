@@ -3,6 +3,7 @@ package org.nsu.admin.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.nsu.admin.services.RedisLockService;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.testutils.AbstractIntegrityTest;
 import org.nsu.users.core.repositories.UserRepository;
@@ -75,19 +76,23 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
     @Autowired
     private RegionRepository regionRepository;
 
-    private User moderatorUser;
-    private User regularUser;
-    private AnimalCard testCard;
+    private static User moderatorUser;
+    private static User regularUser;
+    private static AnimalCard testCard;
+    private static boolean isInitialized = false;
 
     @BeforeEach
     void setUp() {
+        if (isInitialized) {
+            return; // Skip setup if already initialized
+        }
         // Clean up
         animalCardRepository.deleteAll();
         animalRepository.deleteAll();
         placementGoalRepository.deleteAll();
         animalCardStatusRepository.deleteAll();
         userRepository.deleteAll();
-        authorityRepository.deleteAll();
+        // Note: Don't delete authorities as they might be used by other tests
 
         // Create authorities
         Authority moderatorAuthority = new Authority();
@@ -177,7 +182,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
         card.setStatus(savedPendingStatus);
         testCard = animalCardRepository.save(card);
 
-
+        isInitialized = true; // Mark as initialized
     }
 
     @Test
@@ -204,8 +209,94 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
     @Test
     @Transactional
-    void testSetCardStatus_success() throws Exception {
+    void testSetCardStatus_success_after_lock() throws Exception {
         // Authenticate as moderator
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // First lock the card
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId())
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isOk());
+
+        // Then set status (this should work since we own the lock)
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", testCard.getId())
+                .param("targetStatus", "Approved")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetCardsList_unauthorized() throws Exception {
+        // No authentication - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/cards")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminCardListRequest())))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetCardsList_forbidden_wrongRole() throws Exception {
+        // Authenticate as regular user (not moderator) - global exception handler converts to 500
+        PersonDetails personDetails = new PersonDetails(regularUser);
+
+        mockMvc.perform(post("/api/v1/admin/cards")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(new org.nsu.admin.dto.AdminCardListRequest()))
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testLockCard_nonExistent() throws Exception {
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", 99999L)
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testLockCard_unauthorized() throws Exception {
+        // No authentication - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId()))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testSetCardStatus_noLock() throws Exception {
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // Create testCard1
+        AnimalCard testCard1 = new AnimalCard();
+        testCard1.setCardAuthor(regularUser);
+        testCard1.setName("Test Card 1");
+        testCard1.setAnimal(animalRepository.findAll().get(0));
+        testCard1.setBreed("Test Breed");
+        testCard1.setGender(AnimalGender.M);
+        testCard1.setBirthdate(LocalDate.now().minusYears(5));
+        testCard1.setWeight(BigDecimal.valueOf(25.5));
+        testCard1.setColor("Black");
+        testCard1.setGeneticDiseases("None");
+        testCard1.setDescription("Test card 1 description");
+        testCard1.setGoal(placementGoalRepository.findAll().get(0));
+        testCard1.setCost(BigDecimal.valueOf(10000.00));
+        testCard1.setCreated(LocalDateTime.now());
+        testCard1.setUpdated(LocalDateTime.now());
+        testCard1.setStatus(animalCardStatusRepository.findByName("Pending").get());
+        AnimalCard savedTestCard1 = animalCardRepository.save(testCard1);
+
+        // Try to set status without locking first - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", savedTestCard1.getId())
+                .param("targetStatus", "Approved")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @Transactional
+    void testSetCardStatus_wrongLockOwner() throws Exception {
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
         // Lock the card
@@ -213,11 +304,45 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
 
-        // Set status (this will test if Redis lock state is maintained)
+        // Create another moderator user
+        User otherModerator = new User();
+        otherModerator.setEmail("other@moderator.com");
+        otherModerator.setFirstName("Other");
+        otherModerator.setSecondName("Moderator");
+        otherModerator.setLastName("Admin");
+        otherModerator.setPassword("password");
+        otherModerator.setGender(Gender.M);
+        otherModerator.setEmailVerified(true);
+        otherModerator.setStatus(statusRepository.findByName("Active").get());
+        otherModerator.setRegion(regionRepository.findByRegionAndCity("Test Region", "Test City").get());
+        otherModerator.setAuthorities(Set.of(authorityRepository.findByName("ROLE_MODERATOR").get()));
+        User savedOtherModerator = userRepository.save(otherModerator);
+
+        PersonDetails otherPersonDetails = new PersonDetails(savedOtherModerator);
+
+        // Try to set status with different moderator - global exception handler converts to 500
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", testCard.getId())
                 .param("targetStatus", "Approved")
                 .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(otherPersonDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @Transactional
+    void testSetCardStatus_invalidStatus() throws Exception {
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // Lock the card
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId())
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
                 .andExpect(status().isOk());
+
+        // Try to set invalid status - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", testCard.getId())
+                .param("targetStatus", "InvalidStatus")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
     }
 }
