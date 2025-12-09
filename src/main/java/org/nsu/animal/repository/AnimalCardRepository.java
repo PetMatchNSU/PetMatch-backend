@@ -4,9 +4,11 @@ import org.nsu.animal.entity.AnimalCard;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface AnimalCardRepository extends JpaRepository<AnimalCard, Long>, JpaSpecificationExecutor<AnimalCard> {
 
-	org.springframework.data.domain.Page<AnimalCard> findAllByStatus_NameIgnoreCase(String statusName, org.springframework.data.domain.Pageable pageable);
+	Page<AnimalCard> findAllByStatus_NameIgnoreCase(String statusName, Pageable pageable);
 }

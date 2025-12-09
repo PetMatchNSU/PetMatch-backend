@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.nsu.animal.entity.AnimalGender;
 import org.nsu.feed.dto.util.Location;
 
 @Getter
 @Setter
-public class AnimalCard {
+public class AnimalCardDto {
     @Schema(description = "идентификатор питомца", example = "1111")
     private Long animalId;
 
@@ -32,7 +32,8 @@ public class AnimalCard {
     @Schema(description = "гендер животного М/F", example = "M")
     private AnimalGender gender;
 
-    @Schema(description = "дата рождения животного в формате '2023-11-15' ГГГГ-ММ-ДД", example = "2023-11-15", format = "date")
+    @Schema(description = "дата рождения животного в формате '2023-11-15' ГГГГ-ММ-ДД", example = "2023-11-15")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
     @Schema(description = "Информация о регионе и городе")
@@ -42,5 +43,6 @@ public class AnimalCard {
     private Long mainPhotoId;
 
     @Schema(description = "дата и время создания карточки", example = "2023-11-15T12:00:00Z", format = "date-time")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDate createdAt;
 }

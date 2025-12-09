@@ -1,7 +1,10 @@
 package org.nsu.feed.service;
 
 import lombok.RequiredArgsConstructor;
-import org.nsu.feed.dto.requests.animalList.AnimalListRequest;
+
+import java.util.Optional;
+
+import org.nsu.feed.dto.requests.AnimalListRequest;
 import org.nsu.feed.dto.responses.animalList.AnimalListResponse;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +16,12 @@ public class AnimalListService {
     public AnimalListResponse listAnimals(AnimalListRequest dto) {
         AnimalListResponse response = new AnimalListResponse();
 
-        long page = 1L;
-        long pageLimit = 20L;
-        if (dto.getPagination() != null) {
-            if (dto.getPagination().getPage() != null)
-                page = dto.getPagination().getPage();
-            if (dto.getPagination().getLimit() != null)
-                pageLimit = dto.getPagination().getLimit();
-        }
+        long page = Optional.ofNullable(dto.getPagination())
+                .map(AnimalListRequest.Pagination::getPage)
+                .orElse(1L);
+        long pageLimit = Optional.ofNullable(dto.getPagination())
+                .map(AnimalListRequest.Pagination::getLimit)
+                .orElse(20L);
 
         var pageResult = animalCardRetrieverService.getList(page, pageLimit);
         response.setAnimalList(pageResult.getContent());

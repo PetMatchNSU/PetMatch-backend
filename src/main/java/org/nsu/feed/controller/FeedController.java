@@ -1,7 +1,8 @@
 package org.nsu.feed.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.nsu.feed.dto.requests.animalList.AnimalListRequest;
+
+import org.nsu.feed.dto.requests.AnimalListRequest;
 import org.nsu.feed.dto.responses.AnimalInfoResponse;
 import org.nsu.feed.dto.responses.animalList.AnimalListResponse;
 import org.nsu.feed.service.AnimalListService;

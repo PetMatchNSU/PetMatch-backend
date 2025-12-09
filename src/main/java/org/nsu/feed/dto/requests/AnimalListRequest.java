@@ -1,4 +1,4 @@
-package org.nsu.feed.dto.requests.animalList;
+package org.nsu.feed.dto.requests;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -17,9 +17,9 @@ public class AnimalListRequest {
     @Setter
     public static class Pagination {
         @Schema(description = "Текущая страница?", example = "1")
-        private Long page;
+        private Long page = 1L;
 
         @Schema(description = "Лимит страница для загрузки?")
-        private Long limit;
+        private Long limit = 20L;
     }
 }

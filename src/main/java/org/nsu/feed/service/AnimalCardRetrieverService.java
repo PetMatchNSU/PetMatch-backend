@@ -19,14 +19,14 @@ public class AnimalCardRetrieverService {
     private final AnimalCardRepository animalCardRepository;
     private final org.nsu.feed.mappers.AnimalCardMapper animalCardMapper;
 
-    public Page<org.nsu.feed.dto.responses.animalList.AnimalCard> getList(long page, long pageLimit) {
+    public Page<org.nsu.feed.dto.responses.animalList.AnimalCardDto> getList(long page, long pageLimit) {
         int p = (int) Math.max(1, page) - 1;
         int l = (int) Math.max(1, pageLimit);
         Pageable pageable = PageRequest.of(p, l, Sort.by(Sort.Direction.DESC, "created"));
 
         Page<AnimalCard> cards = animalCardRepository.findAllByStatus_NameIgnoreCase("PUBLISHED", pageable);
 
-        List<org.nsu.feed.dto.responses.animalList.AnimalCard> dtoList = cards.getContent().stream()
+        List<org.nsu.feed.dto.responses.animalList.AnimalCardDto> dtoList = cards.getContent().stream()
             .map(ac -> animalCardMapper.toDto(ac))
             .collect(Collectors.toList());
 

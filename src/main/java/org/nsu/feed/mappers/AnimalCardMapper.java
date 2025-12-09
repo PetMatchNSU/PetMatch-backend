@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.feed.dto.util.Location;
+import org.nsu.feed.dto.responses.animalList.AnimalCardDto;
 
 @Mapper(componentModel = "spring")
 public interface AnimalCardMapper {
@@ -16,7 +17,7 @@ public interface AnimalCardMapper {
     @Mapping(target = "location", expression = "java(mapLocation(ac))")
     @Mapping(target = "createdAt", expression = "java(ac.getCreated() != null ? ac.getCreated().toLocalDate() : null)")
     @Mapping(target = "mainPhotoId", ignore = true)
-    org.nsu.feed.dto.responses.animalList.AnimalCard toDto(AnimalCard ac);
+    AnimalCardDto toDto(AnimalCard ac);
 
     default Location mapLocation(AnimalCard ac) {
         Location loc = new Location();
