@@ -113,7 +113,7 @@ public class AdminCardService extends AdminServiceBase {
         AnimalCardStatus newCardStatus;
 
         card = animalCardRepository.findById(cardId)
-            .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
+            .orElseThrow(() -> new RuntimeException("Card not found1: " + cardId));
 
         // Check if moderator owns the lock
         moderatorId = getCurrentModeratorId();

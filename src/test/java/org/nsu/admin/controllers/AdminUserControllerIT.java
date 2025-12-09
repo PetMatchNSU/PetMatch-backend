@@ -80,12 +80,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
             return; // Skip setup if already initialized
         }
         // Clean up
-        statusCommentRepository.deleteAll();
-        userRepository.deleteAll();
-        statusRepository.deleteAll();
-        authorityRepository.deleteAll();
-        regionRepository.deleteAll();
-        // Note: Don't delete authorities and statuses as they might be used by other tests
+        truncateAllTables();
 
         // Create authorities
         Authority moderatorAuthority = new Authority();

@@ -87,20 +87,14 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
     private static User moderatorUser;
     private static User regularUser;
     private static AnimalCard testCard;
-    private static boolean isInitialized = false;
+    static boolean isInitialized = false;
 
     @BeforeEach
     void setUp() {
         if (isInitialized) {
             return; // Skip setup if already initialized
         }
-        // Clean up
-        animalCardRepository.deleteAll();
-        animalRepository.deleteAll();
-        placementGoalRepository.deleteAll();
-        animalCardStatusRepository.deleteAll();
-        userRepository.deleteAll();
-        // Note: Don't delete authorities as they might be used by other tests
+        truncateAllTables();
 
         // Create authorities
         Authority moderatorAuthority = new Authority();
