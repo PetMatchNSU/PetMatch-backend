@@ -18,5 +18,5 @@ public class AdminCardOwnerDto {
     private String secondName;
 
     @Schema(description = "Owner last name")
-    private String lastName;
+    private String middleName;
 }

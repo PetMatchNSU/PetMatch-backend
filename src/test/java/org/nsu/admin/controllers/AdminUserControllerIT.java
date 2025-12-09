@@ -118,7 +118,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         moderatorUserTemp.setEmail("moderator@example.com");
         moderatorUserTemp.setFirstName("Moderator");
         moderatorUserTemp.setSecondName("User");
-        moderatorUserTemp.setLastName("Admin");
+        moderatorUserTemp.setMiddleName("Admin");
         moderatorUserTemp.setPassword("password");
         moderatorUserTemp.setGender(Gender.M);
         moderatorUserTemp.setEmailVerified(true);
@@ -132,7 +132,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         regularUserTemp.setEmail("regular@example.com");
         regularUserTemp.setFirstName("Regular");
         regularUserTemp.setSecondName("User");
-        regularUserTemp.setLastName("Test");
+        regularUserTemp.setMiddleName("Test");
         regularUserTemp.setPassword("password");
         regularUserTemp.setGender(Gender.F);
         regularUserTemp.setEmailVerified(true);
@@ -257,7 +257,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
         otherModerator.setEmail("other@moderator.com");
         otherModerator.setFirstName("Other");
         otherModerator.setSecondName("Moderator");
-        otherModerator.setLastName("Admin");
+        otherModerator.setMiddleName("Admin");
         otherModerator.setPassword("password");
         otherModerator.setGender(Gender.M);
         otherModerator.setEmailVerified(true);

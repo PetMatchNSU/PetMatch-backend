@@ -13,7 +13,7 @@ public interface AdminUserMapper {
     @Mapping(target = "status", source = "user.status.name")
     @Mapping(target = "firstName", source = "user.firstName")
     @Mapping(target = "secondName", source = "user.secondName")
-    @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "middleName", source = "user.middleName")
     @Mapping(target = "email", source = "user.email")
     @Mapping(target = "moderation", source = "moderation")
     AdminUserDto toDto(User user, AdminModerationDto moderation);

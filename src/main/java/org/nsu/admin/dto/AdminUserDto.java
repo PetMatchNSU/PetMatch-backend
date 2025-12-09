@@ -24,7 +24,7 @@ public class AdminUserDto {
     private String secondName;
 
     @Schema(description = "User last name")
-    private String lastName;
+    private String middleName;
 
     @Schema(description = "User email")
     private String email;

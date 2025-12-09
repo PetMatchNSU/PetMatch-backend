@@ -26,7 +26,7 @@ public interface AdminCardMapper {
             card.getCardAuthor().getId(),
             card.getCardAuthor().getFirstName(),
             card.getCardAuthor().getSecondName(),
-            card.getCardAuthor().getLastName()
+            card.getCardAuthor().middleName()
         );
     }
 }
