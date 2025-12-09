@@ -8,14 +8,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.dto.requests.UpdateUserRequest;
-import org.nsu.users.dto.responses.ContactTypeResponse;
-import org.nsu.users.services.ContactTypeService;
+import org.nsu.users.dto.responses.ContactInfoResponse;
+import org.nsu.users.services.ContactInfoService;
 import org.nsu.users.services.UserProfileService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.nsu.users.dto.responses.UserAnimalListResponse;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.nsu.users.services.UserAnimalListService;
+import org.nsu.users.dto.responses.UserAnimalListResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,8 +27,8 @@ import org.nsu.users.services.UserAnimalListService;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
-    private final ContactTypeService contactTypeService;
     private final UserAnimalListService userAnimalListService;
+    private final ContactInfoService contactInfoService;
 
     @PutMapping
     @Operation(summary = "Обновление профиля пользователя", description = "Обновление данных пользователя")
@@ -42,13 +45,13 @@ public class UserProfileController {
     }
 
     @GetMapping("/contacts")
-    @Operation(summary = "Получение списка типов контактов", description = "Получение списка доступных типов контактов")
+    @Operation(summary = "Получение списка контактов", description = "Получение списка контактов, которые будут отображаться другим пользователям в запросе случки/покупки - для редактирования профиля, чтобы получить все возможные списки контактов")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Список типов контактов"),
+            @ApiResponse(responseCode = "200", description = "Список контактов"),
             @ApiResponse(responseCode = "401", description = "Неавторизован")
     })
-    public ContactTypeResponse contactTypes() {
-        return contactTypeService.getAllContactTypes();
+    public ContactInfoResponse contactInfo(@AuthenticationPrincipal PersonDetails principal) {
+        return contactInfoService.getContactInfo(principal.getUserId());
     }
 
     @GetMapping("/animals/list")

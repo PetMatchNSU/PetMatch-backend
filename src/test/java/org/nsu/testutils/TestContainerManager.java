@@ -1,11 +1,11 @@
 package org.nsu.testutils;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 public class TestContainerManager {
@@ -15,5 +15,9 @@ public class TestContainerManager {
 
     @Container
     public static MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2025-04-22T22-12-26Z");
+
+    @Container
+    public static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7.0"))
+            .withExposedPorts(6379);
 
 }

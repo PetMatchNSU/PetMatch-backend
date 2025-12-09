@@ -1,29 +1,16 @@
 package org.nsu.files;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.nsu.authorization.core.controllers.EmailVerificationController;
-import org.nsu.authorization.core.services.EmailVerificationSenderService;
-import org.nsu.authorization.core.services.EmailVerificationService;
-import org.nsu.authorization.core.utils.JWTUtil;
-import org.nsu.files.dto.FilterDTO;
+import org.nsu.authorization.core.services.JWTService;
 import org.nsu.files.dto.MetadataDTO;
 import org.nsu.files.service.FileService;
 import org.nsu.testutils.AbstractIntegrityTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,9 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest()
 @AutoConfigureMockMvc
 public class FileServiceTest extends AbstractIntegrityTest {
-
-    @MockitoBean
-    private JWTUtil jwtUtil;
 
     @Autowired
     private FileService fileService;

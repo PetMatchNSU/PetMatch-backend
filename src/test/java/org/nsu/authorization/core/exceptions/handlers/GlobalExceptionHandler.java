@@ -1,6 +1,8 @@
 package org.nsu.authorization.core.exceptions.handlers;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.nsu.authorization.core.dto.responses.negative.ErrorResponse;
+import org.nsu.authorization.core.exceptions.authorization.EmailVerificationFailException;
 import org.nsu.authorization.core.exceptions.authorization.UserAlreadyExistsException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,28 @@ public class GlobalExceptionHandler {
                 System.currentTimeMillis());
 
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(EmailVerificationFailException.class)
+    public ResponseEntity<ErrorResponse> handleEmailVerificationFailException(EmailVerificationFailException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                System.currentTimeMillis());
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                System.currentTimeMillis());
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataAccessResourceFailureException.class)

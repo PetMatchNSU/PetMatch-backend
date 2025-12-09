@@ -5,10 +5,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.services.PersonDetailsService;
 import org.nsu.authorization.core.utils.JWTTypes;
-import org.nsu.authorization.core.utils.JWTUtil;
+import org.nsu.authorization.core.services.JWTService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,16 +26,16 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final JWTUtil jwtUtil;
+    private final JWTService jwtService;
     private final PersonDetailsService personDetailsService;
 
     @Qualifier("handlerExceptionResolver")
     private final HandlerExceptionResolver resolver;
 
-    public JWTFilter(JWTUtil jwtUtil,
+    public JWTFilter(JWTService jwtService,
                      PersonDetailsService personDetailsService,
                      @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        this.jwtUtil = jwtUtil;
+        this.jwtService = jwtService;
         this.personDetailsService = personDetailsService;
         this.resolver = resolver;
     }
@@ -57,7 +56,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid JWT Token (Blank)");
             }
 
-            long id = Long.parseLong(jwtUtil.extractClaim(JWTToken, JWTTypes.ACCESS_TOKEN, "userID"));
+            long id = Long.parseLong(jwtService.extractClaim(JWTToken, JWTTypes.ACCESS_TOKEN, "userID"));
             UserDetails userDetails = personDetailsService.loadUserById(id);
 
             UsernamePasswordAuthenticationToken authentication =
