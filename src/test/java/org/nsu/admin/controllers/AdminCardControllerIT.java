@@ -2,7 +2,10 @@ package org.nsu.admin.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.nsu.admin.services.RedisLockService;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.testutils.AbstractIntegrityTest;
@@ -40,11 +43,16 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SpringBootTest()
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@TestMethodOrder(OrderAnnotation.class) // because the testSetCardStatus_noLock test must be first
 public class AdminCardControllerIT extends AbstractIntegrityTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminCardControllerIT.class);
 
     @Autowired
     private MockMvc mockMvc;
@@ -187,6 +195,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testGetCardsList_success() throws Exception {
+        logger.info("Starting testGetCardsList_success");
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
@@ -199,6 +208,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testLockCard_success() throws Exception {
+        logger.info("Starting testLockCard_success");
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
@@ -210,6 +220,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
     @Test
     @Transactional
     void testSetCardStatus_success_after_lock() throws Exception {
+        logger.info("Starting testSetCardStatus_success_after_lock");
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
@@ -227,7 +238,22 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
     }
 
     @Test
+    @Order(1)
+    void testSetCardStatus_noLock() throws Exception {
+        logger.info("Starting testSetCardStatus_noLock");
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // Try to set status without locking first - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", testCard.getId())
+                .param("targetStatus", "Approved")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     void testGetCardsList_unauthorized() throws Exception {
+        logger.info("Starting testGetCardsList_unauthorized");
         // No authentication - global exception handler converts to 500
         mockMvc.perform(post("/api/v1/admin/cards")
                 .contentType("application/json")
@@ -237,6 +263,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testGetCardsList_forbidden_wrongRole() throws Exception {
+        logger.info("Starting testGetCardsList_forbidden_wrongRole");
         // Authenticate as regular user (not moderator) - global exception handler converts to 500
         PersonDetails personDetails = new PersonDetails(regularUser);
 
@@ -249,6 +276,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testLockCard_nonExistent() throws Exception {
+        logger.info("Starting testLockCard_nonExistent");
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", 99999L)
@@ -258,45 +286,16 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testLockCard_unauthorized() throws Exception {
+        logger.info("Starting testLockCard_unauthorized");
         // No authentication - global exception handler converts to 500
         mockMvc.perform(post("/api/v1/admin/cards/{cardId}/lock", testCard.getId()))
                 .andExpect(status().isInternalServerError());
     }
 
     @Test
-    void testSetCardStatus_noLock() throws Exception {
-        PersonDetails personDetails = new PersonDetails(moderatorUser);
-
-        // Create testCard1
-        AnimalCard testCard1 = new AnimalCard();
-        testCard1.setCardAuthor(regularUser);
-        testCard1.setName("Test Card 1");
-        testCard1.setAnimal(animalRepository.findAll().get(0));
-        testCard1.setBreed("Test Breed");
-        testCard1.setGender(AnimalGender.M);
-        testCard1.setBirthdate(LocalDate.now().minusYears(5));
-        testCard1.setWeight(BigDecimal.valueOf(25.5));
-        testCard1.setColor("Black");
-        testCard1.setGeneticDiseases("None");
-        testCard1.setDescription("Test card 1 description");
-        testCard1.setGoal(placementGoalRepository.findAll().get(0));
-        testCard1.setCost(BigDecimal.valueOf(10000.00));
-        testCard1.setCreated(LocalDateTime.now());
-        testCard1.setUpdated(LocalDateTime.now());
-        testCard1.setStatus(animalCardStatusRepository.findByName("Pending").get());
-        AnimalCard savedTestCard1 = animalCardRepository.save(testCard1);
-
-        // Try to set status without locking first - global exception handler converts to 500
-        mockMvc.perform(post("/api/v1/admin/cards/{cardId}/status", savedTestCard1.getId())
-                .param("targetStatus", "Approved")
-                .param("reason", "Test reason")
-                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
     @Transactional
     void testSetCardStatus_wrongLockOwner() throws Exception {
+        logger.info("Starting testSetCardStatus_wrongLockOwner");
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
         // Lock the card
@@ -331,6 +330,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
     @Test
     @Transactional
     void testSetCardStatus_invalidStatus() throws Exception {
+        logger.info("Starting testSetCardStatus_invalidStatus");
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
         // Lock the card

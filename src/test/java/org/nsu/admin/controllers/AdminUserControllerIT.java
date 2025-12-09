@@ -2,7 +2,10 @@ package org.nsu.admin.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.admin.services.RedisLockService;
 import org.nsu.admin.repositories.StatusCommentRepository;
@@ -35,11 +38,16 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SpringBootTest()
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@TestMethodOrder(OrderAnnotation.class) // because the testSetCardStatus_noLock test must be first
 public class AdminUserControllerIT extends AbstractIntegrityTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminUserControllerIT.class);
 
     @Autowired
     private MockMvc mockMvc;
@@ -135,6 +143,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testGetUsersList_success() throws Exception {
+        logger.info("Starting testGetUsersList_success");
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
@@ -147,6 +156,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testLockUser_success() throws Exception {
+        logger.info("Starting testLockUser_success");
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
@@ -157,6 +167,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testSetUserStatus_success() throws Exception {
+        logger.info("Starting testSetUserStatus_success");
         // Authenticate as moderator
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
@@ -174,7 +185,22 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
     }
 
     @Test
+    @Order(1)
+    void testSetUserStatus_noLock() throws Exception {
+        logger.info("Starting testSetUserStatus_noLock");
+        PersonDetails personDetails = new PersonDetails(moderatorUser);
+
+        // Try to set status without locking first - global exception handler converts to 500
+        mockMvc.perform(post("/api/v1/admin/users/{userId}/status", regularUser.getId())
+                .param("targetStatus", "Blocked")
+                .param("reason", "Test reason")
+                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     void testGetUsersList_unauthorized() throws Exception {
+        logger.info("Starting testGetUsersList_unauthorized");
         // No authentication - global exception handler converts to 500
         mockMvc.perform(post("/api/v1/admin/users")
                 .contentType("application/json")
@@ -184,6 +210,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testGetUsersList_forbidden_wrongRole() throws Exception {
+        logger.info("Starting testGetUsersList_forbidden_wrongRole");
         // Authenticate as regular user (not moderator) - global exception handler converts to 500
         PersonDetails personDetails = new PersonDetails(regularUser);
 
@@ -196,6 +223,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testLockUser_nonExistent() throws Exception {
+        logger.info("Starting testLockUser_nonExistent");
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
         mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", 99999L)
@@ -205,39 +233,15 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testLockUser_unauthorized() throws Exception {
+        logger.info("Starting testLockUser_unauthorized");
         // No authentication - global exception handler converts to 500
         mockMvc.perform(post("/api/v1/admin/users/{userId}/lock", regularUser.getId()))
                 .andExpect(status().isInternalServerError());
     }
 
     @Test
-    void testSetUserStatus_noLock() throws Exception {
-        PersonDetails personDetails = new PersonDetails(moderatorUser);
-
-        // Create a separate test user for this test (not locked)
-        User separateTestUser = new User();
-        separateTestUser.setEmail("separatetest@example.com");
-        separateTestUser.setFirstName("Separate");
-        separateTestUser.setSecondName("Test");
-        separateTestUser.setLastName("User");
-        separateTestUser.setPassword("password");
-        separateTestUser.setGender(Gender.F);
-        separateTestUser.setEmailVerified(true);
-        separateTestUser.setStatus(statusRepository.findByName("Active").get());
-        separateTestUser.setRegion(regionRepository.findByRegionAndCity("Test Region", "Test City").get());
-        separateTestUser.setAuthorities(Set.of(authorityRepository.findByName("ROLE_USER").get()));
-        User savedSeparateTestUser = userRepository.save(separateTestUser);
-
-        // Try to set status without locking first - global exception handler converts to 500
-        mockMvc.perform(post("/api/v1/admin/users/{userId}/status", savedSeparateTestUser.getId())
-                .param("targetStatus", "Blocked")
-                .param("reason", "Test reason")
-                .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
     void testSetUserStatus_wrongLockOwner() throws Exception {
+        logger.info("Starting testSetUserStatus_wrongLockOwner");
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
         // Lock the user
@@ -271,6 +275,7 @@ public class AdminUserControllerIT extends AbstractIntegrityTest {
 
     @Test
     void testSetUserStatus_invalidStatus() throws Exception {
+        logger.info("Starting testSetUserStatus_invalidStatus");
         PersonDetails personDetails = new PersonDetails(moderatorUser);
 
         // Lock the user

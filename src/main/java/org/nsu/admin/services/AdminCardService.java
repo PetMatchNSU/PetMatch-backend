@@ -107,38 +107,33 @@ public class AdminCardService extends AdminServiceBase {
 
     @Transactional
     public void setCardStatus(Long cardId, String targetStatus, String reason) {
-        try {
-            AnimalCard card;
-            Long moderatorId;
-            LockModel lock;
-            AnimalCardStatus newCardStatus;
+        AnimalCard card;
+        Long moderatorId;
+        LockModel lock;
+        AnimalCardStatus newCardStatus;
 
-            card = animalCardRepository.findById(cardId)
-                .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
+        card = animalCardRepository.findById(cardId)
+            .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
 
-            // Check if moderator owns the lock
-            moderatorId = getCurrentModeratorId();
-            lock = redisLockService.getLock(cardId, LockType.CARD);
-            if (lock == null || !lock.getModeratorId().equals(moderatorId)) {
-                throw new RuntimeException("Moderator does not own the lock for card: " + cardId);
-            }
-
-            // Update card status
-            newCardStatus = animalCardStatusRepository.findByName(targetStatus)
-                .orElseThrow(() -> new RuntimeException("Status not found: " + targetStatus));
-            card.setStatus(newCardStatus);
-            animalCardRepository.save(card);
-
-            // Conflict: StatusComment содержит поле типа Status, но такой вариант подходит для пользователя, а животные имеют поле AnimalCardStatus
-
-            // Release lock after status change
-            redisLockService.releaseLock(cardId, LockType.CARD);
-
-            log.info("Card {} status changed to {} by moderator {}", cardId, targetStatus, moderatorId);
-        } catch (Exception e) {
-            log.error("Error in setCardStatus for card {}: {}", cardId, e.getMessage(), e);
-            throw e;
+        // Check if moderator owns the lock
+        moderatorId = getCurrentModeratorId();
+        lock = redisLockService.getLock(cardId, LockType.CARD);
+        if (lock == null || !lock.getModeratorId().equals(moderatorId)) {
+            throw new RuntimeException("Moderator does not own the lock for card: " + cardId);
         }
+
+        // Update card status
+        newCardStatus = animalCardStatusRepository.findByName(targetStatus)
+            .orElseThrow(() -> new RuntimeException("Status not found: " + targetStatus));
+        card.setStatus(newCardStatus);
+        animalCardRepository.save(card);
+
+        // Conflict: StatusComment содержит поле типа Status, но такой вариант подходит для пользователя, а животные имеют поле AnimalCardStatus
+
+        // Release lock after status change
+        redisLockService.releaseLock(cardId, LockType.CARD);
+
+        log.info("Card {} status changed to {} by moderator {}", cardId, targetStatus, moderatorId);
     }
 
     private AdminCardDto convertToAdminCardDto(AnimalCard card) {
