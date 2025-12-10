@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,8 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 import org.nsu.users.entity.Gender;
+import org.nsu.users.utils.ValidationPatterns;
+import org.nsu.users.validation.ValidBondTimeIntervals;
 
 @Getter
 @Setter
@@ -28,15 +31,21 @@ public class RegistrationRequest {
     private String password;
 
     @NotBlank(message = "First name should not be empty")
+    @Size(max = 64, message = "First name must not exceed 64 characters")
+    @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "First name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Имя", example = "Иван")
     private String firstName;
 
     @NotBlank(message = "Second name should not be empty")
+    @Size(max = 64, message = "Second name must not exceed 64 characters")
+    @Pattern(regexp = ValidationPatterns.NAME_REQUIRED, message = "Second name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Фамилия", example = "Иванов")
     private String secondName;
 
+    @Size(max = 64, message = "Middle name must not exceed 64 characters")
+    @Pattern(regexp = ValidationPatterns.NAME_OPTIONAL, message = "Middle name can only contain letters, spaces, hyphens and apostrophes")
     @Schema(description = "Отчество", example = "Иванович")
-    private String lastName;
+    private String middleName;
 
     @NotNull(message = "Gender should not be empty")
     @Schema(description = "Пол (M/F)", example = "M")
@@ -51,13 +60,14 @@ public class RegistrationRequest {
     private String city;
 
     @NotNull(message = "Bond time array must be provided")
-    @Size(min = 1, message = "At least one bond time interval is required")
+    @Size(min = 1, max = 4, message = "Bond time intervals must be between 1 and 4")
+    @ValidBondTimeIntervals
     @Valid
     @Schema(description = "Массив времени для связи")
     private List<BondTime> bondTime;
 
     @NotNull(message = "Contact info array must be provided")
-    @Size(min = 1, message = "At least one contact method is required")
+    @Size(min = 1, max = 10, message = "Contact info must be between 1 and 10")
     @Valid
     @Schema(description = "Массив способов связи")
     private List<ContactInfo> contactInfo;

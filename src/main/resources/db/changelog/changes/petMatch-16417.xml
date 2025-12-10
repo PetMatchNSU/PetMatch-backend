@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Переименование колонки last_name в middle_name (отчество) -->
+    <changeSet id="1" author="wiseConst">
+        <renameColumn tableName="t_users" 
+                      oldColumnName="last_name" 
+                      newColumnName="middle_name" 
+                      columnDataType="VARCHAR(64)"/>
+    </changeSet>
+
+    <!-- Увеличение размера колонок имен с 30 до 64 символов -->
+    <changeSet id="2" author="wiseConst">
+        <comment>Increase name columns size from 30 to 64 characters</comment>
+        <modifyDataType tableName="t_users" columnName="first_name" newDataType="VARCHAR(64)"/>
+    </changeSet>
+
+    <changeSet id="3" author="wiseConst">
+        <modifyDataType tableName="t_users" columnName="second_name" newDataType="VARCHAR(64)"/>
+    </changeSet>
+
+    <changeSet id="4" author="wiseConst">
+        <modifyDataType tableName="t_users" columnName="middle_name" newDataType="VARCHAR(64)"/>
+    </changeSet>
+
+
+</databaseChangeLog>

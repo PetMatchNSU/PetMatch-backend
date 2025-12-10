@@ -26,7 +26,7 @@ public abstract class UserMapper {
 
     @Mapping(target = "firstName", source = "user.firstName")
     @Mapping(target = "secondName", source = "user.secondName")
-    @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "middleName", source = "user.middleName")
     @Mapping(target = "email", source = "user.email")
     @Mapping(target = "gender", source = "user.gender", qualifiedByName = "genderToString")
     @Mapping(target = "region", source = "user.region.region")
@@ -35,7 +35,7 @@ public abstract class UserMapper {
     @Mapping(target = "reviewComment", source = "reviewComment")
     @Mapping(target = "bondTime", source = "user.bondTimes")
     @Mapping(target = "contactInfo", source = "contacts")
-     public abstract UserResponse toUserResponse(User user, String reviewComment, Set<Contact> contacts);
+    public abstract UserResponse toUserResponse(User user, String reviewComment, Set<Contact> contacts);
 
     @Mapping(target = "bondTimeStart", source = "startContactTime", qualifiedByName = "localTimeToOffsetDateTime")
     @Mapping(target = "bondTimeEnd", source = "endContactTime", qualifiedByName = "localTimeToOffsetDateTime")
@@ -66,5 +66,6 @@ public abstract class UserMapper {
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "emailVerified", ignore = true)
     @Mapping(target = "bondTimes", ignore = true)
+    @Mapping(target = "contacts", ignore = true)
     public abstract User toUser(RegistrationRequest request);
 }
