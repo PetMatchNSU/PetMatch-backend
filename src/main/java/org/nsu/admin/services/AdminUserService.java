@@ -9,10 +9,9 @@ import org.nsu.admin.mappers.AdminUserMapper;
 import org.nsu.admin.repositories.StatusCommentRepository;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.core.repositories.StatusRepository;
+import org.nsu.users.core.services.TimezoneService;
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,9 +22,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,9 +39,7 @@ public class AdminUserService extends AdminServiceBase {
     private final RedisLockService redisLockService;
     private final StatusRepository statusRepository;
     private final AdminUserMapper adminUserMapper;
-
-    @Autowired
-    private Environment environment;
+    private final TimezoneService timezoneService;
 
     public AdminUserListResponse getUsersList(AdminUserListRequest request) {
         // Variables
@@ -152,9 +146,7 @@ public class AdminUserService extends AdminServiceBase {
             comment.setStatus(newStatus);
             comment.setUser(user);
             comment.setComment(reason.trim());
-            ZoneId zone = ZoneId.of(environment.getProperty("app.timezone"));
-            LocalDateTime now = LocalDateTime.now(zone);
-            comment.setDate(Timestamp.valueOf(now));
+            comment.setDate(Timestamp.valueOf(timezoneService.now()));
             statusCommentRepository.save(comment);
         }
 

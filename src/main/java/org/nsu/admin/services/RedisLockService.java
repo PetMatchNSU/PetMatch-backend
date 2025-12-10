@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.nsu.admin.dto.AdminModerationDto;
 import org.nsu.admin.dto.LockModel;
 import org.nsu.admin.dto.LockType;
+import org.nsu.users.core.services.TimezoneService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +23,8 @@ public class RedisLockService {
     private final RedisTemplate<String, LockModel> lockModelRedisTemplate;
 
     private final org.springframework.core.env.Environment env;
+
+    private final TimezoneService timezoneService;
 
     private final Map<LockType, String> keyPrefixes = new HashMap<>();
     private final Map<LockType, Integer> ttlMinutes = new HashMap<>();
@@ -48,8 +50,7 @@ public class RedisLockService {
             }
         }
 
-        ZoneId zone = ZoneId.of(env.getProperty("app.timezone"));
-        LocalDateTime now = LocalDateTime.now(zone);
+        LocalDateTime now = timezoneService.now();
         int ttl = ttlMinutes.get(lockType);
         LocalDateTime expiresAt = now.plusMinutes(ttl);
 
