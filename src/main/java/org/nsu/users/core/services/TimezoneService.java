@@ -3,6 +3,7 @@ package org.nsu.users.core.services;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -24,5 +25,9 @@ public class TimezoneService {
 
         ZonedDateTime zdt = ZonedDateTime.now(appTimezoneId).with(localTime);
         return zdt.toOffsetDateTime();
+    }
+
+    public LocalDateTime now() {
+        return LocalDateTime.now(appTimezoneId);
     }
 }
