@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.nsu.users.services.UserAnimalListService;
+import org.nsu.users.dto.responses.UserAnimalListResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
+    private final UserAnimalListService userAnimalListService;
     private final ContactInfoService contactInfoService;
 
     @GetMapping
@@ -50,8 +53,7 @@ public class UserProfileController {
     })
     public void update(
             @AuthenticationPrincipal PersonDetails principal,
-            @Valid @RequestBody UpdateUserRequest dto
-    ) {
+            @Valid @RequestBody UpdateUserRequest dto) {
         userProfileService.updateProfile(principal.getUsername(), dto);
     }
 
@@ -64,4 +66,10 @@ public class UserProfileController {
     public ContactInfoResponse contactInfo(@AuthenticationPrincipal PersonDetails principal) {
         return contactInfoService.getContactInfo(principal.getUserId());
     }
+
+    @GetMapping("/animals/list")
+    public UserAnimalListResponse animalList(@AuthenticationPrincipal PersonDetails principal) {
+        return userAnimalListService.getUserAnimalList(principal.getUserId());
+    }
+
 }
