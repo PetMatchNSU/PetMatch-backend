@@ -7,7 +7,6 @@ import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
 import org.nsu.animal.dto.responses.AnimalCardResponse;
 import org.nsu.animal.service.AnimalCardService;
 import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
-import org.nsu.authorization.core.utils.JWTUtil;
 import org.nsu.testutils.TestDataFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -41,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = AnimalCardController.class, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.nsu.authorization.core.config.*"),
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.nsu.authorization.core.security.*"),
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.nsu.authorization.core.utils.JWTUtil")
 })
 @ContextConfiguration(classes = {AnimalCardController.class, AnimalCardTestSecurityConfig.class,
         org.nsu.animal.exceptions.AnimalCardExceptionHandler.class, GlobalExceptionHandler.class})
@@ -52,9 +50,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration"
 })
 class AnimalCardControllerIntegrationTest {
-
-    @MockBean
-    private JWTUtil jwtUtil;
 
     @MockBean
     private AnimalCardService animalCardService;
