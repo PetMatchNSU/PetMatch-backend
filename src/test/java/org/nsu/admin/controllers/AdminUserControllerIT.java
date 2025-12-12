@@ -8,10 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.testutils.AbstractIntegrityTest;
-import org.nsu.admin.services.RedisLockService;
 import org.nsu.admin.repositories.StatusCommentRepository;
-import org.nsu.admin.dto.LockModel;
-import org.nsu.admin.dto.LockType;
 import org.nsu.users.core.repositories.UserRepository;
 import org.nsu.users.core.repositories.StatusRepository;
 import org.nsu.users.core.repositories.AuthorityRepository;
@@ -20,21 +17,12 @@ import org.nsu.users.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-
-
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
