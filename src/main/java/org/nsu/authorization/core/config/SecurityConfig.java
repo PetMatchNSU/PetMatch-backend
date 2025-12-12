@@ -55,11 +55,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .passwordManagement(password -> passwordEncoder())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 )
+            .cors(AbstractHttpConfigurer::disable)
         ;
 
         return http.build();
@@ -74,20 +74,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
-
-    // временное решение. Потом нужно будет конкретизировать
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*")); // Разрешает ВСЕ адреса
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); // Разрешает куки, авторизацию и т.п.
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
 
 }

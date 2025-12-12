@@ -68,3 +68,10 @@ otel:
 
 app:
   timezone: "Europe/Moscow"
+  lock:
+    user:
+      key-prefix: "moderation:lock:user:"
+      ttl-minutes: 30
+    card:
+      key-prefix: "moderation:lock:card:"
+      ttl-minutes: 30
