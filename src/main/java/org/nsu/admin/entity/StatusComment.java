@@ -15,6 +15,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.nsu.animal.entity.AnimalCard;
+import org.nsu.animal.entity.AnimalCardStatus;
 import org.nsu.users.entity.Status;
 import org.nsu.users.entity.User;
 
@@ -34,12 +36,20 @@ public class StatusComment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_status", nullable = false)
+    @JoinColumn(name = "id_status")
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_user", nullable = false)
+    @JoinColumn(name = "id_animal_card_status")
+    private AnimalCardStatus animalCardStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_user")
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_animal_card")
+    private AnimalCard animalCard;
 
     @Column(name = "comment", length = 1024)
     private String comment;

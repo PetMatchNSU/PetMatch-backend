@@ -26,18 +26,11 @@ public class MinIOStorageServiceImpl implements StorageService {
 
     @Override
     public String upload(MultipartFile file, String bucket, String objectName) {
-        System.out.println("MinIOStorageServiceImpl.upload: Starting upload");
-        System.out.println("MinIOStorageServiceImpl.upload: bucket=" + bucket + ", objectName=" + objectName);
-        System.out.println("MinIOStorageServiceImpl.upload: file.originalFilename=" + file.getOriginalFilename() + ", size=" + file.getSize() + ", contentType=" + file.getContentType());
-
         if (bucket == null || bucket.isEmpty()) {
             bucket = getBucketName();
-            System.out.println("MinIOStorageServiceImpl.upload: Using default bucket=" + bucket);
         }
 
         try (InputStream inputStream = file.getInputStream()) {
-            System.out.println("MinIOStorageServiceImpl.upload: Got input stream, calling putObject");
-
             minioClient.putObject(
                 PutObjectArgs.builder()
                     .bucket(bucket)
@@ -47,12 +40,9 @@ public class MinIOStorageServiceImpl implements StorageService {
                     .build()
             );
 
-            System.out.println("MinIOStorageServiceImpl.upload: Successfully uploaded file");
             return objectName;
 
         } catch (Exception e) {
-            System.err.println("MinIOStorageServiceImpl.upload: Failed to upload file, error: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Failed to upload file", e);
         }
     }

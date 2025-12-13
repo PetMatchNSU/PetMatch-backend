@@ -105,12 +105,6 @@ public class FileService {
     }
 
     private void uploadAndSaveFiles(MultipartFile[] files, List<FileDescriptor> inputDescriptors, List<FileUploadDescriptor> descriptors, Long userId, Long adId) {
-        System.out.println("FileService.uploadAndSaveFiles: Starting upload process");
-        System.out.println("FileService.uploadAndSaveFiles: userId=" + userId + ", adId=" + adId);
-        System.out.println("FileService.uploadAndSaveFiles: files.length=" + files.length);
-        System.out.println("FileService.uploadAndSaveFiles: inputDescriptors.size=" + inputDescriptors.size());
-        System.out.println("FileService.uploadAndSaveFiles: descriptors.size=" + descriptors.size());
-
         List<CompletableFuture<Void>> uploadFutures = new ArrayList<>();
         List<String> uploadedObjectNames = new ArrayList<>();
         List<FileMetadata> fileMetadataList = new ArrayList<>();
@@ -121,11 +115,7 @@ public class FileService {
                 FileDescriptor descriptor = inputDescriptors.get(i);
                 FileUploadDescriptor uploadDescriptor = descriptors.get(i);
 
-                System.out.println("FileService.uploadAndSaveFiles: Processing file " + i + ", status=" + uploadDescriptor.uploadingStatus());
-                System.out.println("FileService.uploadAndSaveFiles: File name=" + file.getOriginalFilename() + ", size=" + file.getSize() + ", contentType=" + file.getContentType());
-
                 if (uploadDescriptor.uploadingStatus() != FileDescriptor.UploadingStatus.OK) {
-                    System.out.println("FileService.uploadAndSaveFiles: Skipping file " + i + " due to status " + uploadDescriptor.uploadingStatus());
                     continue;
                 }
 
@@ -133,9 +123,6 @@ public class FileService {
                 String typeFolder = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? "photos" : "documents";
                 String uuid = UUID.randomUUID().toString();
                 String objectName = String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, uuid, extension);
-
-                System.out.println("FileService.uploadAndSaveFiles: Generated objectName=" + objectName + ", extension=" + extension + ", typeFolder=" + typeFolder);
-                System.out.println("FileService.uploadAndSaveFiles: Bucket name=" + minioProperties.bucketName());
 
                 CompletableFuture<Void> uploadFuture = CompletableFuture.runAsync(() -> {
                     try {
