@@ -17,9 +17,14 @@ import org.springframework.test.context.DynamicPropertySource;
 public abstract class AbstractIntegrityTest {
 
     static {
-        TestContainerManager.postgres.start();
-        TestContainerManager.minio.start();
-        TestContainerManager.redis.start();
+        // Only start containers if Docker is available
+        try {
+            TestContainerManager.postgres.start();
+            TestContainerManager.minio.start();
+            TestContainerManager.redis.start();
+        } catch (Exception e) {
+            System.err.println("Warning: Could not start TestContainers (Docker not available): " + e.getMessage());
+        }
     }
 
     /**
