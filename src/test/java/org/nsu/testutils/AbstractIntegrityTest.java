@@ -45,7 +45,7 @@ public abstract class AbstractIntegrityTest {
 
             // TRUNCATE всех таблиц с CASCADE
             for (String table : tables) {
-                    if (!table.startsWith("pg_") && !table.startsWith("sql_")) {
+                if (!table.startsWith("pg_") && !table.startsWith("sql_")) {
                     statement.execute("TRUNCATE TABLE " + table + " CASCADE");
                 }
             }
