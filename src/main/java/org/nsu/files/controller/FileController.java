@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.nsu.files.dto.*;
+import org.nsu.files.dto.DeleteResponse;
 import org.nsu.files.service.FileService;
 
 import org.springframework.http.MediaType;
@@ -35,7 +36,7 @@ public class FileController {
 
     @Operation(summary = "Delete files", description = "Delete files by IDs or animal card IDs")
     @DeleteMapping
-    public MetadataDTO deleteFiles(@RequestBody DeleteRequest deleteRequest) {
+    public DeleteResponse deleteFiles(@RequestBody DeleteRequest deleteRequest) {
         return fileService.deleteFiles(deleteRequest);
     }
 }

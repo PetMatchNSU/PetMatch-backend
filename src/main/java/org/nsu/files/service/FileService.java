@@ -5,6 +5,8 @@ import org.nsu.files.dto.FileDescriptor;
 import org.nsu.files.dto.MetadataDTO;
 import org.nsu.files.dto.FilterDTO;
 import org.nsu.files.dto.DeleteRequest;
+import org.nsu.files.dto.DeleteResponse;
+import org.nsu.files.dto.DeleteDescriptor;
 import org.nsu.files.dto.FileUploadResponse;
 import org.nsu.files.dto.FileUploadDescriptor;
 import org.nsu.files.repository.FileRepository;
@@ -101,14 +103,11 @@ public class FileService {
     }
 
     private void uploadAndSaveFiles(MultipartFile[] files, List<FileDescriptor> inputDescriptors, List<FileUploadDescriptor> descriptors, Long userId, Long adId) {
-        // Ensure bucket exists before uploading
-        String bucketName = minioProperties.bucketName();
-        try {
-            storageService.createBucket(bucketName);
-        } catch (Exception e) {
-            // Bucket might already exist or creation failed - log and continue
-            System.err.println("Warning: Could not create bucket (might already exist): " + e.getMessage());
-        }
+        System.out.println("FileService.uploadAndSaveFiles: Starting upload process");
+        System.out.println("FileService.uploadAndSaveFiles: userId=" + userId + ", adId=" + adId);
+        System.out.println("FileService.uploadAndSaveFiles: files.length=" + files.length);
+        System.out.println("FileService.uploadAndSaveFiles: inputDescriptors.size=" + inputDescriptors.size());
+        System.out.println("FileService.uploadAndSaveFiles: descriptors.size=" + descriptors.size());
 
         List<CompletableFuture<Void>> uploadFutures = new ArrayList<>();
         List<String> uploadedObjectNames = new ArrayList<>();
@@ -120,13 +119,21 @@ public class FileService {
                 FileDescriptor descriptor = inputDescriptors.get(i);
                 FileUploadDescriptor uploadDescriptor = descriptors.get(i);
 
+                System.out.println("FileService.uploadAndSaveFiles: Processing file " + i + ", status=" + uploadDescriptor.uploadingStatus());
+                System.out.println("FileService.uploadAndSaveFiles: File name=" + file.getOriginalFilename() + ", size=" + file.getSize() + ", contentType=" + file.getContentType());
+
                 if (uploadDescriptor.uploadingStatus() != FileDescriptor.UploadingStatus.OK) {
+                    System.out.println("FileService.uploadAndSaveFiles: Skipping file " + i + " due to status " + uploadDescriptor.uploadingStatus());
                     continue;
                 }
 
                 String extension = FileUtils.getFileExtension(file.getOriginalFilename());
                 String typeFolder = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? "photos" : "documents";
-                String objectName = String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, UUID.randomUUID(), extension);
+                String uuid = UUID.randomUUID().toString();
+                String objectName = String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, uuid, extension);
+
+                System.out.println("FileService.uploadAndSaveFiles: Generated objectName=" + objectName + ", extension=" + extension + ", typeFolder=" + typeFolder);
+                System.out.println("FileService.uploadAndSaveFiles: Bucket name=" + minioProperties.bucketName());
 
                 CompletableFuture<Void> uploadFuture = CompletableFuture.runAsync(() -> {
                     try {
@@ -137,7 +144,7 @@ public class FileService {
                 });
                 uploadFutures.add(uploadFuture);
                 uploadedObjectNames.add(objectName);
-                fileMetadataList.add(new FileMetadata(descriptor, objectName, i));
+                fileMetadataList.add(new FileMetadata(descriptor, objectName, uuid, extension, typeFolder, userId, adId, i));
             }
 
             CompletableFuture.allOf(uploadFutures.toArray(new CompletableFuture[0])).join();
@@ -154,7 +161,7 @@ public class FileService {
         } catch (Exception e) {
             for (String objectName : uploadedObjectNames) {
                 try {
-                    storageService.delete(objectName, minioProperties.bucketName());
+                    storageService.delete(minioProperties.bucketName(), objectName);
                 } catch (Exception deleteEx) {
                     // Ignore
                 }
@@ -169,7 +176,7 @@ public class FileService {
 
         for (FileMetadata fileMetadata : fileMetadataList) {
             FileDescriptor descriptor = fileMetadata.descriptor;
-            String objectName = fileMetadata.objectName;
+            String uuid = fileMetadata.uuid;
 
             FileType fileType = fileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
             if (fileType == null) {
@@ -177,7 +184,7 @@ public class FileService {
             }
             File fileEntity = new File();
             fileEntity.setName(descriptor.originalFilename());
-            fileEntity.setLink(objectName);
+            fileEntity.setLink(uuid);
             fileEntity.setType(fileType);
             File savedFile = fileRepository.save(fileEntity);
             fileIds.add(savedFile.getId());
@@ -198,11 +205,21 @@ public class FileService {
     private static class FileMetadata {
         final FileDescriptor descriptor;
         final String objectName;
+        final String uuid;
+        final String extension;
+        final String typeFolder;
+        final Long userId;
+        final Long adId;
         final int index;
 
-        FileMetadata(FileDescriptor descriptor, String objectName, int index) {
+        FileMetadata(FileDescriptor descriptor, String objectName, String uuid, String extension, String typeFolder, Long userId, Long adId, int index) {
             this.descriptor = descriptor;
             this.objectName = objectName;
+            this.uuid = uuid;
+            this.extension = extension;
+            this.typeFolder = typeFolder;
+            this.userId = userId;
+            this.adId = adId;
             this.index = index;
         }
     }
@@ -215,6 +232,15 @@ public class FileService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse query", e);
         }
+    }
+
+    private String constructObjectName(AnimalCardFile acf) {
+        Long userId = acf.getAnimalCard().getCardAuthor().getId();
+        Long adId = acf.getAnimalCard().getId();
+        String typeFolder = acf.getFileType().getName().equals("photo") ? "photos" : "documents";
+        String extension = FileUtils.getFileExtension(acf.getFile().getName());
+        String uuid = acf.getFile().getLink();
+        return String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, uuid, extension);
     }
 
     private MetadataDTO getFiles(FilterDTO filter) {
@@ -245,7 +271,8 @@ public class FileService {
 
         List<FileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
             try {
-                InputStream inputStream = storageService.get(null, acf.getFile().getLink());
+                String objectName = constructObjectName(acf);
+                InputStream inputStream = storageService.get(null, objectName);
                 String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
                 return FileDescriptor.builder()
                     .originalFilename(acf.getFile().getName())
@@ -269,41 +296,29 @@ public class FileService {
         return new MetadataDTO(descriptors);
     }
 
-    public MetadataDTO deleteFiles(DeleteRequest deleteRequest) {
+    public DeleteResponse deleteFiles(DeleteRequest deleteRequest) {
         List<Long> fileIds = deleteRequest.fileIds() != null ? deleteRequest.fileIds() : List.of();
         List<Long> cardIds = deleteRequest.cardIds() != null ? deleteRequest.cardIds() : List.of();
 
-        List<AnimalCardFile> animalCardFiles = animalCardFileRepository.findByFileIdIn(fileIds);
+        Set<AnimalCardFile> animalCardFiles = new HashSet<>();
+        animalCardFiles.addAll(animalCardFileRepository.findByFileIdIn(fileIds));
         for (Long cardId : cardIds) {
             animalCardFiles.addAll(animalCardFileRepository.findByAnimalCardId(cardId));
         }
 
-        List<FileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
+        List<DeleteDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
             try {
-                storageService.delete(null, acf.getFile().getLink());
+                String objectName = constructObjectName(acf);
+                storageService.delete(null, objectName);
                 animalCardFileRepository.delete(acf);
                 fileRepository.delete(acf.getFile());
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .deletingStatus(FileDescriptor.DeletingStatus.DELETED)
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .build();
+                return new DeleteDescriptor(acf.getFile().getId(), "deleted");
             } catch (Exception e) {
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .deletingStatus(FileDescriptor.DeletingStatus.INTERNAL_ERROR)
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .build();
+                return new DeleteDescriptor(acf.getFile().getId(), "internal_error");
             }
         }).collect(Collectors.toList());
 
-        return new MetadataDTO(descriptors);
+        return new DeleteResponse(descriptors);
     }
 
 }
