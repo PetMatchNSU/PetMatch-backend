@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class AnimalListResponse {
     @Schema(description = "массив с информацией о питомцах")
-    private List<AnimalCardDto> animalList;
+    private List<AnimalCardDto> animalsList;
 
     @Schema(description = "Информация о страницах?")
     private Pagination pagination;
