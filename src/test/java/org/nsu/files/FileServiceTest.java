@@ -2,7 +2,7 @@ package org.nsu.files;
 
 import org.junit.jupiter.api.Test;
 import org.nsu.authorization.core.services.JWTService;
-import org.nsu.files.dto.MetadataDTO;
+import org.nsu.files.dto.GetResponse;
 import org.nsu.files.service.FileService;
 import org.nsu.testutils.AbstractIntegrityTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,28 +26,28 @@ public class FileServiceTest extends AbstractIntegrityTest {
     @Test
     public void testGetFilesWithNullFilter() {
         String query = Base64.getEncoder().encodeToString("{}".getBytes());
-        MetadataDTO result = fileService.getFiles(query);
+        GetResponse result = fileService.getFiles(query);
         assertNotNull(result);
     }
 
     @Test
     public void testGetFilesWithFileIds() {
         String query = Base64.getEncoder().encodeToString("{\"fileIds\":[1,2]}".getBytes());
-        MetadataDTO result = fileService.getFiles(query);
+        GetResponse result = fileService.getFiles(query);
         assertNotNull(result);
     }
 
     @Test
     public void testGetFilesWithCardIds() {
         String query = Base64.getEncoder().encodeToString("{\"cardIds\":[1]}".getBytes());
-        MetadataDTO result = fileService.getFiles(query);
+        GetResponse result = fileService.getFiles(query);
         assertNotNull(result);
     }
 
     @Test
     public void testGetFilesWithFileTypes() {
         String query = Base64.getEncoder().encodeToString("{\"fileTypes\":[\"PHOTO\"]}".getBytes());
-        MetadataDTO result = fileService.getFiles(query);
+        GetResponse result = fileService.getFiles(query);
         assertNotNull(result);
     }
 }
