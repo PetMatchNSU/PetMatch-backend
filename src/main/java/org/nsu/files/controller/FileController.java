@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.nsu.files.dto.*;
 import org.nsu.files.dto.DeleteResponse;
+import org.nsu.files.dto.GetResponse;
 import org.nsu.files.service.FileService;
 
 import org.springframework.http.MediaType;
@@ -30,7 +31,7 @@ public class FileController {
 
     @Operation(summary = "Get files", description = "Get files based on query filter")
     @GetMapping
-    public MetadataDTO getFiles(@RequestParam("query") String query) {
+    public GetResponse getFiles(@RequestParam("query") String query) {
         return fileService.getFiles(query);
     }
 

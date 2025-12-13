@@ -7,6 +7,8 @@ import org.nsu.files.dto.FilterDTO;
 import org.nsu.files.dto.DeleteRequest;
 import org.nsu.files.dto.DeleteResponse;
 import org.nsu.files.dto.DeleteDescriptor;
+import org.nsu.files.dto.GetResponse;
+import org.nsu.files.dto.GetFileDescriptor;
 import org.nsu.files.dto.FileUploadResponse;
 import org.nsu.files.dto.FileUploadDescriptor;
 import org.nsu.files.repository.FileRepository;
@@ -224,7 +226,7 @@ public class FileService {
         }
     }
 
-    public MetadataDTO getFiles(String query) {
+    public GetResponse getFiles(String query) {
         try {
             String decodedQuery = new String(Base64.getDecoder().decode(query), StandardCharsets.UTF_8);
             FilterDTO filter = objectMapper.readValue(decodedQuery, FilterDTO.class);
@@ -243,7 +245,7 @@ public class FileService {
         return String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, uuid, extension);
     }
 
-    private MetadataDTO getFiles(FilterDTO filter) {
+    private GetResponse getFiles(FilterDTO filter) {
         Set<AnimalCardFile> animalCardFilesSet = new HashSet<>();
 
         if (filter.fileIds() != null && !filter.fileIds().isEmpty()) {
@@ -269,31 +271,32 @@ public class FileService {
                 .collect(Collectors.toList());
         }
 
-        List<FileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
+        List<GetFileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
             try {
                 String objectName = constructObjectName(acf);
                 InputStream inputStream = storageService.get(null, objectName);
                 String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .content(content)
-                    .build();
+                return new GetFileDescriptor(
+                    acf.getFile().getId().toString(),
+                    acf.getFileType().getName().toLowerCase(),
+                    acf.getFileType().getName().equals("photo"),
+                    acf.getFile().getName(),
+                    acf.getAnimalCard().getId().toString(),
+                    content
+                );
             } catch (Exception e) {
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .build();
+                return new GetFileDescriptor(
+                    acf.getFile().getId().toString(),
+                    acf.getFileType().getName().toLowerCase(),
+                    acf.getFileType().getName().equals("photo"),
+                    acf.getFile().getName(),
+                    acf.getAnimalCard().getId().toString(),
+                    null
+                );
             }
         }).collect(Collectors.toList());
 
-        return new MetadataDTO(descriptors);
+        return new GetResponse(descriptors);
     }
 
     public DeleteResponse deleteFiles(DeleteRequest deleteRequest) {
