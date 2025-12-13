@@ -65,15 +65,27 @@ public abstract class AbstractIntegrityTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", TestContainerManager.postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", TestContainerManager.postgres::getUsername);
-        registry.add("spring.datasource.password", TestContainerManager.postgres::getPassword);
-        registry.add("minio.endpoint", TestContainerManager.minio::getS3URL);
-        registry.add("minio.access-key", TestContainerManager.minio::getUserName);
-        registry.add("minio.secret-key", TestContainerManager.minio::getPassword);
-        registry.add("minio.bucket-name", () -> "test-bucket");
-        registry.add("spring.data.redis.host", TestContainerManager.redis::getHost);
-        registry.add("spring.data.redis.port", () -> TestContainerManager.redis.getMappedPort(6379));
+        // Only configure container properties if containers are running
+        try {
+            if (TestContainerManager.postgres.isRunning()) {
+                registry.add("spring.datasource.url", TestContainerManager.postgres::getJdbcUrl);
+                registry.add("spring.datasource.username", TestContainerManager.postgres::getUsername);
+                registry.add("spring.datasource.password", TestContainerManager.postgres::getPassword);
+            }
+            if (TestContainerManager.minio.isRunning()) {
+                registry.add("minio.endpoint", TestContainerManager.minio::getS3URL);
+                registry.add("minio.access-key", TestContainerManager.minio::getUserName);
+                registry.add("minio.secret-key", TestContainerManager.minio::getPassword);
+                registry.add("minio.bucket-name", () -> "test-bucket");
+            }
+            if (TestContainerManager.redis.isRunning()) {
+                registry.add("spring.data.redis.host", TestContainerManager.redis::getHost);
+                registry.add("spring.data.redis.port", () -> TestContainerManager.redis.getMappedPort(6379));
+            }
+        } catch (Exception e) {
+            // Containers not available, use default test properties from application-test.yaml
+            System.err.println("Warning: TestContainers not available, using default test configuration");
+        }
 
         // Set JWT secrets as Spring properties for tests (matching what JwtServiceTestImpl expects)
         registry.add("jwt.secret-access", () -> "f0210f36555fdbe73b701458876f657b14b09870b5fb2608ea21a6f4ef44e004");
