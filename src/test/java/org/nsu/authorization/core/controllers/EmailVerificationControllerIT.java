@@ -3,7 +3,6 @@ package org.nsu.authorization.core.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.nsu.authorization.core.dto.requests.EmailVerificationRequest;

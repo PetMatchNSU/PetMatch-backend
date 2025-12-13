@@ -82,7 +82,6 @@ public abstract class AbstractIntegrityTest {
             field.setAccessible(true);
             ((java.util.Map<String, String>) field.get(env)).put(key, value);
         } catch (Exception e) {
-            // Fallback: set as system property and modify JWTUtil if needed
             System.setProperty(key, value);
         }
     }
