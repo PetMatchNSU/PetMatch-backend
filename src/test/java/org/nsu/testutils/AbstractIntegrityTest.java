@@ -70,19 +70,8 @@ public abstract class AbstractIntegrityTest {
         registry.add("spring.data.redis.host", TestContainerManager.redis::getHost);
         registry.add("spring.data.redis.port", () -> TestContainerManager.redis.getMappedPort(6379));
 
-        // Set JWT secrets as environment variables for tests
-        setEnvironmentVariable("JWT_SECRET_ACCESS", "dGVzdHNlY3JldA==");
-        setEnvironmentVariable("JWT_SECRET_REFRESH", "dGVzdHJlZnJlc2hzZWNyZXQ=");
-    }
-
-    private static void setEnvironmentVariable(String key, String value) {
-        try {
-            java.util.Map<String, String> env = System.getenv();
-            java.lang.reflect.Field field = env.getClass().getDeclaredField("m");
-            field.setAccessible(true);
-            ((java.util.Map<String, String>) field.get(env)).put(key, value);
-        } catch (Exception e) {
-            System.setProperty(key, value);
-        }
+        // Set JWT secrets as Spring properties for tests (matching what JwtServiceTestImpl expects)
+        registry.add("jwt.secret-access", () -> "f0210f36555fdbe73b701458876f657b14b09870b5fb2608ea21a6f4ef44e004");
+        registry.add("jwt.secret-refresh", () -> "ToSDlXMK0jFRrllnZEJ9qEw7gT0K5mdyKdCF3gvOMK4=");
     }
 }
