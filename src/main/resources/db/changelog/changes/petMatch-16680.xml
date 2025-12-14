@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- 1. Очистка и заполнение таблицы t_animals -->
+    <changeSet id="1" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals"/>
+        </preConditions>
+
+        <!-- Очистка таблицы перед вставкой -->
+        <delete tableName="t_animals"/>
+
+        <insert tableName="t_animals">
+            <column name="name" value="кошка"/>
+        </insert>
+        <insert tableName="t_animals">
+            <column name="name" value="собака"/>
+        </insert>
+        <insert tableName="t_animals">
+            <column name="name" value="грызун"/>
+        </insert>
+        <insert tableName="t_animals">
+            <column name="name" value="ящерица"/>
+        </insert>
+        <insert tableName="t_animals">
+            <column name="name" value="птица"/>
+        </insert>
+        <insert tableName="t_animals">
+            <column name="name" value="другое"/>
+        </insert>
+    </changeSet>
+
+    <!-- 2. Очистка и заполнение таблицы t_placement_goals -->
+    <changeSet id="2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_placement_goals"/>
+        </preConditions>
+
+        <!-- Очистка таблицы перед вставкой -->
+        <delete tableName="t_placement_goals"/>
+
+        <insert tableName="t_placement_goals">
+            <column name="goal" value="SELL"/>
+        </insert>
+        <insert tableName="t_placement_goals">
+            <column name="goal" value="PAIRING"/>
+        </insert>
+        <insert tableName="t_placement_goals">
+            <column name="goal" value="FREE"/>
+        </insert>
+    </changeSet>
+
+    <!-- 3. Очистка и заполнение таблицы t_statuses -->
+    <changeSet id="3" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_statuses"/>
+        </preConditions>
+
+        <!-- Очистка таблицы перед вставкой -->
+        <delete tableName="t_statuses"/>
+
+        <insert tableName="t_statuses">
+            <column name="name" value="ON_CHECKING"/>
+        </insert>
+        <insert tableName="t_statuses">
+            <column name="name" value="PUBLISHED"/>
+        </insert>
+        <insert tableName="t_statuses">
+            <column name="name" value="BLOCKED"/>
+        </insert>
+    </changeSet>
+
+    <!-- 4. Очистка и заполнение таблицы t_animals_cards_status -->
+    <changeSet id="4" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_cards_status"/>
+        </preConditions>
+
+        <!-- Очистка таблицы перед вставкой -->
+        <delete tableName="t_animals_cards_status"/>
+
+        <insert tableName="t_animals_cards_status">
+            <column name="name" value="ON_CHECKING"/>
+        </insert>
+        <insert tableName="t_animals_cards_status">
+            <column name="name" value="PUBLISHED"/>
+        </insert>
+        <insert tableName="t_animals_cards_status">
+            <column name="name" value="BLOCKED"/>
+        </insert>
+    </changeSet>
+
+    <!-- 5. Очистка и заполнение таблицы t_files_types -->
+    <changeSet id="5" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_files_types"/>
+        </preConditions>
+
+        <delete tableName="t_files_types"/>
+
+        <insert tableName="t_files_types">
+            <column name="name" value="doc"/>
+        </insert>
+        <insert tableName="t_files_types">
+            <column name="name" value="photo"/>
+        </insert>
+    </changeSet>
+
+    <!-- 6. Очистка и заполнение таблицы t_animals_requests_status -->
+    <changeSet id="6" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_requests_status"/>
+        </preConditions>
+
+        <delete tableName="t_animals_requests_status"/>
+
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="NEW"/>
+        </insert>
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="IN_PROCESS"/>
+        </insert>
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="REJECTED"/>
+        </insert>
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="COMPLETED"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
