@@ -1,13 +1,5 @@
 package org.nsu.testutils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,14 +7,24 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) // или NONE, если не нужен web
 public abstract class AbstractIntegrityTest {
 
     static {
-        TestContainerManager.postgres.start();
-        TestContainerManager.minio.start();
-        TestContainerManager.redis.start();
+        // Only start containers if Docker is available
+        try {
+            TestContainerManager.postgres.start();
+            TestContainerManager.minio.start();
+            TestContainerManager.redis.start();
+        } catch (Exception e) {
+            System.err.println("Warning: Could not start TestContainers (Docker not available): " + e.getMessage());
+        }
     }
 
     /**
@@ -48,7 +50,7 @@ public abstract class AbstractIntegrityTest {
 
             // TRUNCATE всех таблиц с CASCADE
             for (String table : tables) {
-                    if (!table.startsWith("pg_") && !table.startsWith("sql_")) {
+                if (!table.startsWith("pg_") && !table.startsWith("sql_")) {
                     statement.execute("TRUNCATE TABLE " + table + " CASCADE");
                 }
             }
@@ -63,14 +65,30 @@ public abstract class AbstractIntegrityTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", TestContainerManager.postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", TestContainerManager.postgres::getUsername);
-        registry.add("spring.datasource.password", TestContainerManager.postgres::getPassword);
-        registry.add("minio.endpoint", TestContainerManager.minio::getS3URL);
-        registry.add("minio.access-key", TestContainerManager.minio::getUserName);
-        registry.add("minio.secret-key", TestContainerManager.minio::getPassword);
-        registry.add("minio.bucket-name", () -> "test-bucket");
-        registry.add("spring.data.redis.host", TestContainerManager.redis::getHost);
-        registry.add("spring.data.redis.port", () -> TestContainerManager.redis.getMappedPort(6379));
+        // Only configure container properties if containers are running
+        try {
+            if (TestContainerManager.postgres.isRunning()) {
+                registry.add("spring.datasource.url", TestContainerManager.postgres::getJdbcUrl);
+                registry.add("spring.datasource.username", TestContainerManager.postgres::getUsername);
+                registry.add("spring.datasource.password", TestContainerManager.postgres::getPassword);
+            }
+            if (TestContainerManager.minio.isRunning()) {
+                registry.add("minio.endpoint", TestContainerManager.minio::getS3URL);
+                registry.add("minio.access-key", TestContainerManager.minio::getUserName);
+                registry.add("minio.secret-key", TestContainerManager.minio::getPassword);
+                registry.add("minio.bucket-name", () -> "test-bucket");
+            }
+            if (TestContainerManager.redis.isRunning()) {
+                registry.add("spring.data.redis.host", TestContainerManager.redis::getHost);
+                registry.add("spring.data.redis.port", () -> TestContainerManager.redis.getMappedPort(6379));
+            }
+        } catch (Exception e) {
+            // Containers not available, use default test properties from application-test.yaml
+            System.err.println("Warning: TestContainers not available, using default test configuration");
+        }
+
+        // Set JWT secrets as Spring properties for tests (matching what JwtServiceTestImpl expects)
+        registry.add("jwt.secret-access", () -> "f0210f36555fdbe73b701458876f657b14b09870b5fb2608ea21a6f4ef44e004");
+        registry.add("jwt.secret-refresh", () -> "ToSDlXMK0jFRrllnZEJ9qEw7gT0K5mdyKdCF3gvOMK4=");
     }
 }

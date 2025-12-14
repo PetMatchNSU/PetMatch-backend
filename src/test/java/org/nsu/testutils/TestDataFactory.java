@@ -1,11 +1,17 @@
 package org.nsu.testutils;
 
 import org.nsu.admin.entity.StatusComment;
+import org.nsu.animal.dto.enums.Gender;
+import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
+import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
+import org.nsu.animal.entity.*;
 import org.nsu.authorization.core.dto.responses.positive.LoginResponse;
 import org.nsu.users.core.dto.responses.positive.UserResponse;
 import org.nsu.users.entity.*;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -77,7 +83,7 @@ public class TestDataFactory {
         user.setSecondName("Petrov");
         user.setMiddleName("Sidorovich");
         user.setStatus(status);
-        user.setGender(Gender.M);
+        user.setGender(org.nsu.users.entity.Gender.M);
         user.setRegion(region);
         user.setEmailVerified(true);
         
@@ -104,7 +110,7 @@ public class TestDataFactory {
         user.setSecondName("Petrov");
         user.setMiddleName("Sidorovich");
         user.setStatus(status);
-        user.setGender(Gender.M);
+        user.setGender(org.nsu.users.entity.Gender.M);
         user.setRegion(region);
         user.setEmailVerified(true);
         user.setBondTimes(new ArrayList<>());
@@ -183,5 +189,120 @@ public class TestDataFactory {
         Set<Contact> contacts = new HashSet<>();
         contacts.add(createTestContact(user, contactType));
         return contacts;
+    }
+
+
+    public static Animal createTestAnimal() {
+        Animal animal = new Animal();
+        animal.setId(1L);
+        animal.setName("кошка");
+        return animal;
+    }
+
+    public static PlacementGoal createTestPlacementGoal() {
+        PlacementGoal goal = new PlacementGoal();
+        goal.setId(1L);
+        goal.setGoal("продажа");
+        return goal;
+    }
+
+    public static AnimalCardStatus createTestAnimalCardStatus() {
+        AnimalCardStatus status = new AnimalCardStatus();
+        status.setId(1L);
+        status.setName("ON_CHECKING");
+        return status;
+    }
+
+    public static AnimalCard createTestAnimalCard(User user) {
+        Animal animal = createTestAnimal();
+        PlacementGoal goal = createTestPlacementGoal();
+        AnimalCardStatus status = createTestAnimalCardStatus();
+
+        AnimalCard animalCard = new AnimalCard();
+        animalCard.setId(1L);
+        animalCard.setCardAuthor(user);
+        animalCard.setName("Барсик");
+        animalCard.setAnimal(animal);
+        animalCard.setBreed("Британская короткошерстная");
+        animalCard.setGender(AnimalGender.M);
+        animalCard.setBirthdate(LocalDate.of(2023, 5, 15));
+        animalCard.setWeight(new BigDecimal("4.5"));
+        animalCard.setColor("Серый с белыми пятнами");
+        animalCard.setGeneticDiseases("Наследственных заболеваний не выявлено");
+        animalCard.setDescription("Очень дружелюбный и игривый кот");
+        animalCard.setGoal(goal);
+        animalCard.setCost(new BigDecimal("15000"));
+        animalCard.setCreated(LocalDateTime.now());
+        animalCard.setUpdated(LocalDateTime.now());
+        animalCard.setStatus(status);
+        return animalCard;
+    }
+
+    public static CreateAnimalCardRequest createValidAnimalCardRequest() {
+        CreateAnimalCardRequest request = new CreateAnimalCardRequest();
+        request.setName("Барсик");
+        request.setSpeciesId(1L);
+        request.setGoal("SELL");
+        request.setCost(new BigDecimal("15000"));
+        request.setBreed("Британская короткошерстная");
+        request.setGender(org.nsu.animal.dto.enums.Gender.M);
+        request.setBirthday(LocalDate.of(2023, 5, 15));
+        request.setWeight(new BigDecimal("4.5"));
+        request.setColor("Серый с белыми пятнами");
+        request.setGeneticDiseases("Наследственных заболеваний не выявлено");
+        request.setDescription("Очень дружелюбный и игривый кот");
+        return request;
+    }
+
+    public static CreateAnimalCardRequest createInvalidAnimalCardRequest() {
+        CreateAnimalCardRequest request = new CreateAnimalCardRequest();
+        request.setName(""); // Невалидное имя
+        request.setSpeciesId(1L);
+        request.setGoal("SELL");
+        request.setGender(org.nsu.animal.dto.enums.Gender.M);
+        request.setBirthday(LocalDate.of(2023, 5, 15));
+        request.setColor("Серый");
+        request.setGeneticDiseases("Нет заболеваний");
+        return request;
+    }
+
+    public static CreateAnimalCardRequest createAnimalCardRequestWithoutBreed() {
+        CreateAnimalCardRequest request = new CreateAnimalCardRequest();
+        request.setName("Мурка");
+        request.setSpeciesId(1L);
+        request.setGoal("GIVE_AWAY");
+        request.setGender(org.nsu.animal.dto.enums.Gender.F);
+        request.setBirthday(LocalDate.of(2022, 3, 10));
+        request.setColor("Рыжий");
+        request.setGeneticDiseases("Здорова");
+        request.setDescription("Ласковая кошечка");
+        return request;
+    }
+
+    public static UpdateAnimalCardRequest createValidUpdateAnimalCardRequest() {
+        UpdateAnimalCardRequest request = new UpdateAnimalCardRequest();
+        request.setName("Барсик Обновленный");
+        request.setSpeciesId(1L);
+        request.setGoal("BREEDING");
+        request.setBreed("Шотландская вислоухая");
+        request.setGender(org.nsu.animal.dto.enums.Gender.M);
+        request.setBirthday(LocalDate.of(2023, 8, 20));
+        request.setWeight(new BigDecimal("6.2"));
+        request.setColor("Черный с белыми пятнами");
+        request.setGeneticDiseases("Наследственных заболеваний не выявлено");
+        request.setDescription("Обновленное описание кота");
+        return request;
+    }
+
+    public static UpdateAnimalCardRequest createInvalidUpdateAnimalCardRequest() {
+        UpdateAnimalCardRequest request = new UpdateAnimalCardRequest();
+        request.setName("");
+        request.setSpeciesId(1L);
+        request.setGoal("SELL");
+        request.setGender(org.nsu.animal.dto.enums.Gender.M);
+        request.setBirthday(LocalDate.of(2023, 5, 15));
+        request.setColor("Серый");
+        request.setGeneticDiseases("Нет заболеваний");
+        return request;
     }
 }

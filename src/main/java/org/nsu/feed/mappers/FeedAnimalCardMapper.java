@@ -7,7 +7,7 @@ import org.nsu.feed.dto.util.Location;
 import org.nsu.feed.dto.responses.animalList.AnimalCardDto;
 
 @Mapper(componentModel = "spring")
-public interface AnimalCardMapper {
+public interface FeedAnimalCardMapper {
 
     @Mapping(target = "animalId", source = "id")
     @Mapping(target = "speciesName", source = "animal.name")

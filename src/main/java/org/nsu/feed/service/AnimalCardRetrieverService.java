@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AnimalCardRetrieverService {
     private final AnimalCardRepository animalCardRepository;
-    private final org.nsu.feed.mappers.AnimalCardMapper animalCardMapper;
+    private final org.nsu.feed.mappers.FeedAnimalCardMapper animalCardMapper;
 
     public Page<org.nsu.feed.dto.responses.animalList.AnimalCardDto> getList(long page, long pageLimit) {
         int p = (int) Math.max(1, page) - 1;
