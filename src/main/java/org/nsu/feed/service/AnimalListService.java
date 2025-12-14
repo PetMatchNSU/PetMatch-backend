@@ -24,7 +24,7 @@ public class AnimalListService {
                 .orElse(20L);
 
         var pageResult = animalCardRetrieverService.getList(page, pageLimit);
-        response.setAnimalList(pageResult.getContent());
+        response.setAnimalsList(pageResult.getContent());
 
         AnimalListResponse.Pagination pagination = new AnimalListResponse.Pagination();
         pagination.setCurrentPage(page);
