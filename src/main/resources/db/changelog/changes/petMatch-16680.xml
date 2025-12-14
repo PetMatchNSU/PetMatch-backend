@@ -44,13 +44,13 @@
         <delete tableName="t_placement_goals"/>
 
         <insert tableName="t_placement_goals">
-            <column name="name" value="SELL"/>
+            <column name="goal" value="SELL"/>
         </insert>
         <insert tableName="t_placement_goals">
-            <column name="name" value="PAIRING"/>
+            <column name="goal" value="PAIRING"/>
         </insert>
         <insert tableName="t_placement_goals">
-            <column name="name" value="FREE"/>
+            <column name="goal" value="FREE"/>
         </insert>
     </changeSet>
 
@@ -91,6 +91,44 @@
         </insert>
         <insert tableName="t_animals_cards_status">
             <column name="name" value="BLOCKED"/>
+        </insert>
+    </changeSet>
+
+    <!-- 5. Очистка и заполнение таблицы t_files_types -->
+    <changeSet id="5" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_files_types"/>
+        </preConditions>
+
+        <delete tableName="t_files_types"/>
+
+        <insert tableName="t_files_types">
+            <column name="name" value="doc"/>
+        </insert>
+        <insert tableName="t_files_types">
+            <column name="name" value="photo"/>
+        </insert>
+    </changeSet>
+
+    <!-- 6. Очистка и заполнение таблицы t_animals_requests_status -->
+    <changeSet id="6" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_requests_status"/>
+        </preConditions>
+
+        <delete tableName="t_animals_requests_status"/>
+
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="NEW"/>
+        </insert>
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="IN_PROCESS"/>
+        </insert>
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="REJECTED"/>
+        </insert>
+        <insert tableName="t_animals_requests_status">
+            <column name="status" value="COMPLETED"/>
         </insert>
     </changeSet>
 
