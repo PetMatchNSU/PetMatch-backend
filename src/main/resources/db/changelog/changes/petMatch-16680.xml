@@ -5,128 +5,259 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
-    <!-- 1. Очистка и заполнение таблицы t_animals -->
-    <changeSet id="1" author="kurdyukovda">
+    <!-- 1. Заполнение таблицы t_animals -->
+    <changeSet id="1-1" author="kurdyukovda">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="t_animals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals WHERE name = 'кошка'
+            </sqlCheck>
         </preConditions>
-
-        <!-- Очистка таблицы перед вставкой -->
-        <delete tableName="t_animals"/>
-
         <insert tableName="t_animals">
             <column name="name" value="кошка"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="1-2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals WHERE name = 'собака'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals">
             <column name="name" value="собака"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="1-3" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals WHERE name = 'грызун'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals">
             <column name="name" value="грызун"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="1-4" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals WHERE name = 'ящерица'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals">
             <column name="name" value="ящерица"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="1-5" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals WHERE name = 'птица'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals">
             <column name="name" value="птица"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="1-6" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals WHERE name = 'другое'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals">
             <column name="name" value="другое"/>
         </insert>
     </changeSet>
 
-    <!-- 2. Очистка и заполнение таблицы t_placement_goals -->
-    <changeSet id="2" author="kurdyukovda">
+    <!-- 2. Заполнение таблицы t_placement_goals -->
+    <changeSet id="2-1" author="kurdyukovda">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="t_placement_goals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_placement_goals WHERE goal = 'SELL'
+            </sqlCheck>
         </preConditions>
-
-        <!-- Очистка таблицы перед вставкой -->
-        <delete tableName="t_placement_goals"/>
-
         <insert tableName="t_placement_goals">
             <column name="goal" value="SELL"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="2-2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_placement_goals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_placement_goals WHERE goal = 'PAIRING'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_placement_goals">
             <column name="goal" value="PAIRING"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="2-3" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_placement_goals"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_placement_goals WHERE goal = 'FREE'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_placement_goals">
             <column name="goal" value="FREE"/>
         </insert>
     </changeSet>
 
-    <!-- 3. Очистка и заполнение таблицы t_statuses -->
-    <changeSet id="3" author="kurdyukovda">
+    <!-- 3. Заполнение таблицы t_statuses -->
+    <changeSet id="3-1" author="kurdyukovda">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="t_statuses"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_statuses WHERE name = 'ON_CHECKING'
+            </sqlCheck>
         </preConditions>
-
-        <!-- Очистка таблицы перед вставкой -->
-        <delete tableName="t_statuses"/>
-
         <insert tableName="t_statuses">
             <column name="name" value="ON_CHECKING"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="3-2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_statuses"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_statuses WHERE name = 'PUBLISHED'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_statuses">
             <column name="name" value="PUBLISHED"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="3-3" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_statuses"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_statuses WHERE name = 'BLOCKED'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_statuses">
             <column name="name" value="BLOCKED"/>
         </insert>
     </changeSet>
 
-    <!-- 4. Очистка и заполнение таблицы t_animals_cards_status -->
-    <changeSet id="4" author="kurdyukovda">
+    <!-- 4. Заполнение таблицы t_animals_cards_status -->
+    <changeSet id="4-1" author="kurdyukovda">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="t_animals_cards_status"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals_cards_status WHERE name = 'ON_CHECKING'
+            </sqlCheck>
         </preConditions>
-
-        <!-- Очистка таблицы перед вставкой -->
-        <delete tableName="t_animals_cards_status"/>
-
         <insert tableName="t_animals_cards_status">
             <column name="name" value="ON_CHECKING"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="4-2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_cards_status"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals_cards_status WHERE name = 'PUBLISHED'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals_cards_status">
             <column name="name" value="PUBLISHED"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="4-3" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_cards_status"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals_cards_status WHERE name = 'BLOCKED'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals_cards_status">
             <column name="name" value="BLOCKED"/>
         </insert>
     </changeSet>
 
-    <!-- 5. Очистка и заполнение таблицы t_files_types -->
-    <changeSet id="5" author="kurdyukovda">
+    <!-- 5. Заполнение таблицы t_files_types -->
+    <changeSet id="5-1" author="kurdyukovda">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="t_files_types"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_files_types WHERE name = 'doc'
+            </sqlCheck>
         </preConditions>
-
-        <delete tableName="t_files_types"/>
-
         <insert tableName="t_files_types">
             <column name="name" value="doc"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="5-2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_files_types"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_files_types WHERE name = 'photo'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_files_types">
             <column name="name" value="photo"/>
         </insert>
     </changeSet>
 
-    <!-- 6. Очистка и заполнение таблицы t_animals_requests_status -->
-    <changeSet id="6" author="kurdyukovda">
+    <!-- 6. Заполнение таблицы t_animals_requests_status -->
+    <changeSet id="6-1" author="kurdyukovda">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="t_animals_requests_status"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals_requests_status WHERE status = 'NEW'
+            </sqlCheck>
         </preConditions>
-
-        <delete tableName="t_animals_requests_status"/>
-
         <insert tableName="t_animals_requests_status">
             <column name="status" value="NEW"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="6-2" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_requests_status"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals_requests_status WHERE status = 'IN_PROCESS'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals_requests_status">
             <column name="status" value="IN_PROCESS"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="6-3" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_requests_status"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals_requests_status WHERE status = 'REJECTED'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals_requests_status">
             <column name="status" value="REJECTED"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="6-4" author="kurdyukovda">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_requests_status"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM t_animals_requests_status WHERE status = 'COMPLETED'
+            </sqlCheck>
+        </preConditions>
         <insert tableName="t_animals_requests_status">
             <column name="status" value="COMPLETED"/>
         </insert>
