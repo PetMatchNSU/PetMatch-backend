@@ -205,18 +205,12 @@ public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
         MetadataDTO metadata = new MetadataDTO(List.of(descriptor));
         String metadataJson = objectMapper.writeValueAsString(metadata);
 
-        MockPart metadataPart = new MockPart("metadata", metadataJson.getBytes(StandardCharsets.UTF_8));
-        metadataPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-        MockPart adIdPart = new MockPart("adId", String.valueOf(testAnimalCard.getId()).getBytes(StandardCharsets.UTF_8));
-        adIdPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
         PersonDetails personDetails = new PersonDetails(testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/files/upload")
                 .file(mockFile)
-                .part(metadataPart)
-                .part(adIdPart)
+                .param("metadata", metadataJson)
+                .param("adId", String.valueOf(testAnimalCard.getId()))
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .with(SecurityMockMvcRequestPostProcessors.user(personDetails)))
             .andExpect(MockMvcResultMatchers.status().isOk());

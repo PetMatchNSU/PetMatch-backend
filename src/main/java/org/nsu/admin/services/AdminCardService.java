@@ -5,11 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.nsu.admin.dto.*;
+import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.mappers.AdminCardMapper;
+import org.nsu.admin.repositories.StatusCommentRepository;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardStatus;
 import org.nsu.animal.repository.AnimalCardRepository;
 import org.nsu.animal.repository.AnimalCardStatusRepository;
+import org.nsu.users.core.repositories.UserRepository;
+import org.nsu.users.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +37,8 @@ public class AdminCardService extends AdminServiceBase {
 
     private final AnimalCardRepository animalCardRepository;
     private final AnimalCardStatusRepository animalCardStatusRepository;
+    private final StatusCommentRepository statusCommentRepository;
+    private final UserRepository userRepository;
     private final RedisLockService redisLockService;
     private final AdminCardMapper adminCardMapper;
 
@@ -128,7 +135,16 @@ public class AdminCardService extends AdminServiceBase {
         card.setStatus(newCardStatus);
         animalCardRepository.save(card);
 
-        // Conflict: StatusComment содержит поле типа Status, но такой вариант подходит для пользователя, а животные имеют поле AnimalCardStatus
+        // Create status comment
+        User moderator = userRepository.findById(moderatorId)
+            .orElseThrow(() -> new RuntimeException("Moderator not found: " + moderatorId));
+
+        StatusComment statusComment = new StatusComment();
+        statusComment.setAnimalCardStatus(newCardStatus);
+        statusComment.setAnimalCard(card);
+        statusComment.setComment(reason);
+        statusComment.setDate(new Timestamp(System.currentTimeMillis()));
+        statusCommentRepository.save(statusComment);
 
         // Release lock after status change
         redisLockService.releaseLock(cardId, LockType.CARD);

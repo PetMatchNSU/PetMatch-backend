@@ -29,6 +29,7 @@ public class MinIOStorageServiceImpl implements StorageService {
         if (bucket == null || bucket.isEmpty()) {
             bucket = getBucketName();
         }
+
         try (InputStream inputStream = file.getInputStream()) {
             minioClient.putObject(
                 PutObjectArgs.builder()
@@ -38,7 +39,9 @@ public class MinIOStorageServiceImpl implements StorageService {
                     .contentType(file.getContentType())
                     .build()
             );
+
             return objectName;
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload file", e);
         }

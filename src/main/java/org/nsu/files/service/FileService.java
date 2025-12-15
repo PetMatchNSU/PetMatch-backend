@@ -5,13 +5,26 @@ import org.nsu.files.dto.FileDescriptor;
 import org.nsu.files.dto.MetadataDTO;
 import org.nsu.files.dto.FilterDTO;
 import org.nsu.files.dto.DeleteRequest;
-import org.nsu.files.event.FileUploadEvent;
+import org.nsu.files.dto.DeleteResponse;
+import org.nsu.files.dto.DeleteDescriptor;
+import org.nsu.files.dto.GetResponse;
+import org.nsu.files.dto.GetFileDescriptor;
+import org.nsu.files.dto.FileUploadResponse;
+import org.nsu.files.dto.FileUploadDescriptor;
 import org.nsu.files.repository.FileRepository;
+import org.nsu.files.repository.FileTypeRepository;
 import org.nsu.animal.repository.AnimalCardFileRepository;
+import org.nsu.animal.repository.AnimalCardRepository;
+import org.nsu.animal.repository.AnimalCardFileTypeRepository;
 import org.nsu.files.storage.StorageService;
 import org.nsu.files.util.FileUtils;
+import org.nsu.files.entity.File;
+import org.nsu.files.entity.FileType;
+import org.nsu.animal.entity.AnimalCard;
+import org.nsu.animal.entity.AnimalCardFile;
+import org.nsu.animal.entity.AnimalCardFileType;
+import org.nsu.files.config.MinIOConfigProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
@@ -29,19 +42,26 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
 import org.nsu.animal.entity.AnimalCardFile;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Service
 public class FileService {
 
+    private static final String UPLOAD_PATH_TEMPLATE = "uploads/users/%d/ads/%d/%s/%s.%s";
+
     private final FileValidationProperties validationProperties;
-    private final ApplicationEventPublisher eventPublisher;
     private final FileRepository fileRepository;
+    private final FileTypeRepository fileTypeRepository;
     private final AnimalCardFileRepository animalCardFileRepository;
+    private final AnimalCardRepository animalCardRepository;
+    private final AnimalCardFileTypeRepository animalCardFileTypeRepository;
     private final StorageService storageService;
+    private final MinIOConfigProperties minioProperties;
     private final ObjectMapper objectMapper;
 
-    public MetadataDTO uploadFiles(MultipartFile[] files, String metadataJson, Long adId) throws JsonProcessingException {
+    public FileUploadResponse uploadFiles(MultipartFile[] files, String metadataJson, Long adId) throws JsonProcessingException {
         MetadataDTO metadata = objectMapper.readValue(metadataJson, MetadataDTO.class);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
@@ -49,40 +69,151 @@ public class FileService {
         if (files.length != metadata.descriptors().size()) {
             throw new IllegalArgumentException("Number of files does not match number of descriptors");
         }
-        List<FileDescriptor> descriptors = validateFiles(List.of(files), metadata.descriptors());
-        eventPublisher.publishEvent(new FileUploadEvent(this, List.of(files), metadata, userId, adId));
-        return new MetadataDTO(descriptors);
+        List<FileUploadDescriptor> descriptors = validateFiles(List.of(files), metadata.descriptors(), adId);
+        uploadAndSaveFiles(files, metadata.descriptors(), descriptors, userId, adId);
+        return new FileUploadResponse(descriptors);
     }
 
-    private List<FileDescriptor> validateFiles(List<MultipartFile> files, List<FileDescriptor> descriptors) {
+    private List<FileUploadDescriptor> validateFiles(List<MultipartFile> files, List<FileDescriptor> inputDescriptors, Long adId) {
+        List<FileUploadDescriptor> result = new ArrayList<>();
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
-            FileDescriptor descriptor = descriptors.get(i);
+            FileDescriptor descriptor = inputDescriptors.get(i);
+            FileDescriptor.UploadingStatus status;
 
             if (file.getSize() > validationProperties.maxSizeBytes()) {
-                descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
-                continue;
-            }
-
-            try {
-                String mimeType = FileUtils.detectMimeType(file.getBytes());
-                String extension = FileUtils.getFileExtensionFromMimeType(mimeType);
-                List<String> allowedFormats = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? validationProperties.photoFormats() : validationProperties.docFormats();
-                if (!allowedFormats.contains(extension.toUpperCase())) {
-                    descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
-                    continue;
+                status = FileDescriptor.UploadingStatus.NOT_VALID;
+            } else {
+                try {
+                    String mimeType = FileUtils.detectMimeType(file.getBytes());
+                    String extension = FileUtils.getFileExtensionFromMimeType(mimeType);
+                    List<String> allowedFormats = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? validationProperties.photoFormats() : validationProperties.docFormats();
+                    if (!allowedFormats.contains(extension.toUpperCase())) {
+                        status = FileDescriptor.UploadingStatus.NOT_VALID;
+                    } else {
+                        status = FileDescriptor.UploadingStatus.OK;
+                    }
+                } catch (Exception e) {
+                    status = FileDescriptor.UploadingStatus.INTERNAL_ERROR;
                 }
-            } catch (Exception e) {
-                descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.NOT_VALID, null, null, null, null));
-                continue;
             }
 
-            descriptors.set(i, new FileDescriptor(descriptor.originalFilename(), descriptor.isMain(), descriptor.fileType(), FileDescriptor.UploadingStatus.OK, null, null, null, null));
+            String filename = descriptor.originalFilename() != null ? descriptor.originalFilename() : file.getOriginalFilename();
+            result.add(new FileUploadDescriptor(filename, status, null, String.valueOf(adId)));
         }
-        return descriptors;
+        return result;
     }
 
-    public MetadataDTO getFiles(String query) {
+    private void uploadAndSaveFiles(MultipartFile[] files, List<FileDescriptor> inputDescriptors, List<FileUploadDescriptor> descriptors, Long userId, Long adId) {
+        List<CompletableFuture<Void>> uploadFutures = new ArrayList<>();
+        List<String> uploadedObjectNames = new ArrayList<>();
+        List<FileMetadata> fileMetadataList = new ArrayList<>();
+
+        try {
+            for (int i = 0; i < files.length; i++) {
+                MultipartFile file = files[i];
+                FileDescriptor descriptor = inputDescriptors.get(i);
+                FileUploadDescriptor uploadDescriptor = descriptors.get(i);
+
+                if (uploadDescriptor.uploadingStatus() != FileDescriptor.UploadingStatus.OK) {
+                    continue;
+                }
+
+                String extension = FileUtils.getFileExtension(file.getOriginalFilename());
+                String typeFolder = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? "photos" : "documents";
+                String uuid = UUID.randomUUID().toString();
+                String objectName = String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, uuid, extension);
+
+                CompletableFuture<Void> uploadFuture = CompletableFuture.runAsync(() -> {
+                    try {
+                        storageService.upload(file, minioProperties.bucketName(), objectName);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to upload file to storage: " + objectName, e);
+                    }
+                });
+                uploadFutures.add(uploadFuture);
+                uploadedObjectNames.add(objectName);
+                fileMetadataList.add(new FileMetadata(descriptor, objectName, uuid, extension, typeFolder, userId, adId, i));
+            }
+
+            CompletableFuture.allOf(uploadFutures.toArray(new CompletableFuture[0])).join();
+
+            // After successful upload, save metadata in a separate transactional method
+            List<Long> fileIds = saveFileMetadata(adId, fileMetadataList);
+
+            // Update descriptors with fileIds
+            for (int j = 0; j < fileMetadataList.size(); j++) {
+                FileMetadata fm = fileMetadataList.get(j);
+                descriptors.set(fm.index, new FileUploadDescriptor(descriptors.get(fm.index).originalFilename(), descriptors.get(fm.index).uploadingStatus(), String.valueOf(fileIds.get(j)), descriptors.get(fm.index).cardId()));
+            }
+
+        } catch (Exception e) {
+            for (String objectName : uploadedObjectNames) {
+                try {
+                    storageService.delete(minioProperties.bucketName(), objectName);
+                } catch (Exception deleteEx) {
+                    // Ignore
+                }
+            }
+            throw new RuntimeException("File upload failed: " + e.getMessage(), e);
+        }
+    }
+
+    private List<Long> saveFileMetadata(Long adId, List<FileMetadata> fileMetadataList) {
+        AnimalCard animalCard = animalCardRepository.findById(adId).orElseThrow(() -> new RuntimeException("AnimalCard not found"));
+        List<Long> fileIds = new ArrayList<>();
+
+        for (FileMetadata fileMetadata : fileMetadataList) {
+            FileDescriptor descriptor = fileMetadata.descriptor;
+            String uuid = fileMetadata.uuid;
+
+            FileType fileType = fileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
+            if (fileType == null) {
+                throw new RuntimeException("FileType not found: " + descriptor.fileType().name().toLowerCase());
+            }
+            File fileEntity = new File();
+            fileEntity.setName(descriptor.originalFilename());
+            fileEntity.setLink(uuid);
+            fileEntity.setType(fileType);
+            File savedFile = fileRepository.save(fileEntity);
+            fileIds.add(savedFile.getId());
+
+            AnimalCardFileType cardFileType = animalCardFileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
+            if (cardFileType == null) {
+                throw new RuntimeException("AnimalCardFileType not found: " + descriptor.fileType().name().toLowerCase());
+            }
+            AnimalCardFile cardFile = new AnimalCardFile();
+            cardFile.setAnimalCard(animalCard);
+            cardFile.setFile(savedFile);
+            cardFile.setFileType(cardFileType);
+            animalCardFileRepository.save(cardFile);
+        }
+        return fileIds;
+    }
+
+    private static class FileMetadata {
+        final FileDescriptor descriptor;
+        final String objectName;
+        final String uuid;
+        final String extension;
+        final String typeFolder;
+        final Long userId;
+        final Long adId;
+        final int index;
+
+        FileMetadata(FileDescriptor descriptor, String objectName, String uuid, String extension, String typeFolder, Long userId, Long adId, int index) {
+            this.descriptor = descriptor;
+            this.objectName = objectName;
+            this.uuid = uuid;
+            this.extension = extension;
+            this.typeFolder = typeFolder;
+            this.userId = userId;
+            this.adId = adId;
+            this.index = index;
+        }
+    }
+
+    public GetResponse getFiles(String query) {
         try {
             String decodedQuery = new String(Base64.getDecoder().decode(query), StandardCharsets.UTF_8);
             FilterDTO filter = objectMapper.readValue(decodedQuery, FilterDTO.class);
@@ -92,7 +223,16 @@ public class FileService {
         }
     }
 
-    private MetadataDTO getFiles(FilterDTO filter) {
+    private String constructObjectName(AnimalCardFile acf) {
+        Long userId = acf.getAnimalCard().getCardAuthor().getId();
+        Long adId = acf.getAnimalCard().getId();
+        String typeFolder = acf.getFileType().getName().equals("photo") ? "photos" : "documents";
+        String extension = FileUtils.getFileExtension(acf.getFile().getName());
+        String uuid = acf.getFile().getLink();
+        return String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, uuid, extension);
+    }
+
+    private GetResponse getFiles(FilterDTO filter) {
         Set<AnimalCardFile> animalCardFilesSet = new HashSet<>();
 
         if (filter.fileIds() != null && !filter.fileIds().isEmpty()) {
@@ -118,67 +258,57 @@ public class FileService {
                 .collect(Collectors.toList());
         }
 
-        List<FileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
+        List<GetFileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
             try {
-                InputStream inputStream = storageService.get(null, acf.getFile().getLink());
+                String objectName = constructObjectName(acf);
+                InputStream inputStream = storageService.get(null, objectName);
                 String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .content(content)
-                    .build();
+                return new GetFileDescriptor(
+                    acf.getFile().getId().toString(),
+                    acf.getFileType().getName().toLowerCase(),
+                    acf.getFileType().getName().equals("photo"),
+                    acf.getFile().getName(),
+                    acf.getAnimalCard().getId().toString(),
+                    content
+                );
             } catch (Exception e) {
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .build();
+                return new GetFileDescriptor(
+                    acf.getFile().getId().toString(),
+                    acf.getFileType().getName().toLowerCase(),
+                    acf.getFileType().getName().equals("photo"),
+                    acf.getFile().getName(),
+                    acf.getAnimalCard().getId().toString(),
+                    null
+                );
             }
         }).collect(Collectors.toList());
 
-        return new MetadataDTO(descriptors);
+        return new GetResponse(descriptors);
     }
 
-    public MetadataDTO deleteFiles(DeleteRequest deleteRequest) {
+    public DeleteResponse deleteFiles(DeleteRequest deleteRequest) {
         List<Long> fileIds = deleteRequest.fileIds() != null ? deleteRequest.fileIds() : List.of();
         List<Long> cardIds = deleteRequest.cardIds() != null ? deleteRequest.cardIds() : List.of();
 
-        List<AnimalCardFile> animalCardFiles = animalCardFileRepository.findByFileIdIn(fileIds);
+        Set<AnimalCardFile> animalCardFiles = new HashSet<>();
+        animalCardFiles.addAll(animalCardFileRepository.findByFileIdIn(fileIds));
         for (Long cardId : cardIds) {
             animalCardFiles.addAll(animalCardFileRepository.findByAnimalCardId(cardId));
         }
 
-        List<FileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
+        List<DeleteDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
             try {
-                storageService.delete(null, acf.getFile().getLink());
+                String objectName = constructObjectName(acf);
+                storageService.delete(null, objectName);
                 animalCardFileRepository.delete(acf);
                 fileRepository.delete(acf.getFile());
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .deletingStatus(FileDescriptor.DeletingStatus.DELETED)
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .build();
+                return new DeleteDescriptor(acf.getFile().getId(), "deleted");
             } catch (Exception e) {
-                return FileDescriptor.builder()
-                    .originalFilename(acf.getFile().getName())
-                    .isMain(acf.getFileType().getName().equals("photo"))
-                    .fileType(FileDescriptor.FileType.valueOf(acf.getFileType().getName().toUpperCase()))
-                    .deletingStatus(FileDescriptor.DeletingStatus.INTERNAL_ERROR)
-                    .fileId(acf.getFile().getId())
-                    .cardId(acf.getAnimalCard().getId())
-                    .build();
+                return new DeleteDescriptor(acf.getFile().getId(), "internal_error");
             }
         }).collect(Collectors.toList());
 
-        return new MetadataDTO(descriptors);
+        return new DeleteResponse(descriptors);
     }
 
 }

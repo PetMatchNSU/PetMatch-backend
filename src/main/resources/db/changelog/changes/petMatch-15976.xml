@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Modify t_status_comments to support animal cards -->
+    <changeSet id="1" author="undy11203">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_status_comments"/>
+            <tableExists tableName="t_animals_cards"/>
+            <tableExists tableName="t_animals_cards_status"/>
+        </preConditions>
+        <!-- Make id_user nullable -->
+        <dropNotNullConstraint tableName="t_status_comments" columnName="id_user" columnDataType="BIGINT"/>
+    </changeSet>
+
+    <changeSet id="2" author="undy11203">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="t_status_comments" columnName="id_animal_card"/>
+            </not>
+        </preConditions>
+        <!-- Add id_animal_card column -->
+        <addColumn tableName="t_status_comments">
+            <column name="id_animal_card" type="BIGINT" remarks="Ссылка на карточку животного"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="3" author="undy11203">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="t_status_comments" columnName="id_animal_card_status"/>
+            </not>
+        </preConditions>
+        <!-- Add id_animal_card_status column -->
+        <addColumn tableName="t_status_comments">
+            <column name="id_animal_card_status" type="BIGINT" remarks="Ссылка на статус карточки животного"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="4" author="undy11203">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_status_comments" foreignKeyName="fk_t_status_comments_id_animal_card"/>
+            </not>
+        </preConditions>
+        <!-- Add foreign key to t_animals_cards -->
+        <addForeignKeyConstraint baseTableName="t_status_comments"
+                                 baseColumnNames="id_animal_card"
+                                 constraintName="fk_t_status_comments_id_animal_card"
+                                 referencedTableName="t_animals_cards"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="5" author="undy11203">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="t_status_comments" foreignKeyName="fk_t_status_comments_id_animal_card_status"/>
+            </not>
+        </preConditions>
+        <!-- Add foreign key to t_animals_cards_status -->
+        <addForeignKeyConstraint baseTableName="t_status_comments"
+                                 baseColumnNames="id_animal_card_status"
+                                 constraintName="fk_t_status_comments_id_animal_card_status"
+                                 referencedTableName="t_animals_cards_status"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="6" author="undy11203">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_status_comments_id_animal_card_idx" tableName="t_status_comments"/>
+            </not>
+        </preConditions>
+        <!-- Add index for id_animal_card -->
+        <createIndex indexName="t_status_comments_id_animal_card_idx" tableName="t_status_comments">
+            <column name="id_animal_card"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="7" author="undy11203">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_status_comments_id_animal_card_status_idx" tableName="t_status_comments"/>
+            </not>
+        </preConditions>
+        <!-- Add index for id_animal_card_status -->
+        <createIndex indexName="t_status_comments_id_animal_card_status_idx" tableName="t_status_comments">
+            <column name="id_animal_card_status"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
