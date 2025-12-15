@@ -1,12 +1,16 @@
 package org.nsu.animal.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
+import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
 import org.nsu.animal.entity.Animal;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardStatus;
@@ -27,7 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -122,5 +126,89 @@ class AnimalCardServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             animalCardService.createAnimalCard(request);
         });
+    }
+
+    @Nested
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    class GetOwnerContactsTests {
+
+        @Test
+        void getOwnerContacts_WithValidAnimalId_ShouldReturnOwnerContacts() {
+            Long animalId = 1L;
+            User owner = TestDataFactory.createTestUser();
+            owner.setBondTimes(TestDataFactory.createTestBondTimes(owner));
+            owner.setContacts(TestDataFactory.createTestContactsList(owner));
+
+            AnimalCard animalCard = TestDataFactory.createTestAnimalCard(owner);
+
+            when(animalCardRepository.findById(animalId)).thenReturn(Optional.of(animalCard));
+
+            AnimalOwnerContactsResponse response = animalCardService.getOwnerContacts(animalId);
+
+            assertNotNull(response);
+            assertEquals(owner.getFirstName(), response.getFirstName());
+            assertEquals(owner.getSecondName(), response.getSecondName());
+            assertEquals(owner.getMiddleName(), response.getMiddleName());
+            assertNotNull(response.getBondTime());
+            assertNotNull(response.getContactInfo());
+        }
+
+        @Test
+        void getOwnerContacts_WithInvalidAnimalId_ShouldThrowException() {
+            Long invalidId = 999L;
+
+            when(animalCardRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> animalCardService.getOwnerContacts(invalidId)
+            );
+
+            assertEquals("Карточка животного не найдена", exception.getMessage());
+        }
+
+        @Test
+        void getOwnerContacts_ShouldReturnOnlyVisibleContacts() {
+            Long animalId = 1L;
+            User owner = TestDataFactory.createTestUser();
+            owner.setBondTimes(TestDataFactory.createTestBondTimes(owner));
+            owner.setContacts(TestDataFactory.createTestContactsList(owner));
+
+            AnimalCard animalCard = TestDataFactory.createTestAnimalCard(owner);
+
+            when(animalCardRepository.findById(animalId)).thenReturn(Optional.of(animalCard));
+
+            AnimalOwnerContactsResponse response = animalCardService.getOwnerContacts(animalId);
+
+            assertTrue(response.getContactInfo().stream()
+                    .allMatch(c -> owner.getContacts().stream()
+                            .filter(oc -> oc.getType().getName().equals(c.getType()))
+                            .findFirst()
+                            .map(oc -> oc.getIsVisible())
+                            .orElse(false)));
+        }
+
+        @Test
+        void getOwnerContacts_ShouldReturnSortedBondTimes() {
+            Long animalId = 1L;
+            User owner = TestDataFactory.createTestUser();
+            owner.setBondTimes(TestDataFactory.createTestBondTimes(owner));
+            owner.setContacts(TestDataFactory.createTestContactsList(owner));
+
+            AnimalCard animalCard = TestDataFactory.createTestAnimalCard(owner);
+
+            when(animalCardRepository.findById(animalId)).thenReturn(Optional.of(animalCard));
+
+            AnimalOwnerContactsResponse response = animalCardService.getOwnerContacts(animalId);
+
+            if (response.getBondTime().size() > 1) {
+                for (int i = 0; i < response.getBondTime().size() - 1; i++) {
+                    assertTrue(response.getBondTime().get(i).getBondTimeStart()
+                            .isBefore(response.getBondTime().get(i + 1).getBondTimeStart()) ||
+                            response.getBondTime().get(i).getBondTimeStart()
+                                    .equals(response.getBondTime().get(i + 1).getBondTimeStart()));
+                }
+            }
+        }
     }
 }

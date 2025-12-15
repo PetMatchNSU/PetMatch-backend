@@ -3,6 +3,7 @@ package org.nsu.animal.controller;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
 import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
 import org.nsu.animal.dto.responses.AnimalCardResponse;
+import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
 import org.nsu.animal.service.AnimalCardService;
 import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
 import org.nsu.testutils.TestDataFactory;
@@ -246,6 +248,59 @@ class AnimalCardControllerIntegrationTest {
         Long animalId = 1L;
 
         mockMvc.perform(delete("/api/v1/animals/{animalId}", animalId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "test@example.com", authorities = {"USER"})
+    void getOwnerContacts_WithValidId_ShouldReturnContacts() throws Exception {
+        Long animalId = 1L;
+
+        AnimalOwnerContactsResponse mockResponse = new AnimalOwnerContactsResponse(
+                "Иван",
+                "Иванов",
+                "Владимирович",
+                List.of(
+                        new AnimalOwnerContactsResponse.BondTimeDto(LocalTime.of(10, 0), LocalTime.of(12, 0)),
+                        new AnimalOwnerContactsResponse.BondTimeDto(LocalTime.of(16, 0), LocalTime.of(18, 0))
+                ),
+                List.of(
+                        new AnimalOwnerContactsResponse.ContactInfoDto("VK", "https://vk.com/t.test")
+                )
+        );
+
+        when(animalCardService.getOwnerContacts(animalId)).thenReturn(mockResponse);
+
+        mockMvc.perform(get("/api/v1/animals/show/{animalId}/contacts", animalId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Иван"))
+                .andExpect(jsonPath("$.secondName").value("Иванов"))
+                .andExpect(jsonPath("$.middleName").value("Владимирович"))
+                .andExpect(jsonPath("$.bondTime").isArray())
+                .andExpect(jsonPath("$.bondTime[0].bondTimeStart").value("10:00:00"))
+                .andExpect(jsonPath("$.bondTime[0].bondTimeEnd").value("12:00:00"))
+                .andExpect(jsonPath("$.contactInfo").isArray())
+                .andExpect(jsonPath("$.contactInfo[0].type").value("VK"))
+                .andExpect(jsonPath("$.contactInfo[0].contact").value("https://vk.com/t.test"));
+    }
+
+    @Test
+    @WithMockUser(username = "test@example.com", authorities = {"USER"})
+    void getOwnerContacts_WithInvalidId_ShouldReturnBadRequest() throws Exception {
+        Long invalidId = 999L;
+
+        when(animalCardService.getOwnerContacts(invalidId))
+                .thenThrow(new IllegalArgumentException("Карточка животного не найдена"));
+
+        mockMvc.perform(get("/api/v1/animals/show/{animalId}/contacts", invalidId))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getOwnerContacts_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+        Long animalId = 1L;
+
+        mockMvc.perform(get("/api/v1/animals/show/{animalId}/contacts", animalId))
                 .andExpect(status().isForbidden());
     }
 }
