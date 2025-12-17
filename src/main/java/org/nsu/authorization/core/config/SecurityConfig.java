@@ -22,8 +22,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import io.opentelemetry.instrumentation.spring.autoconfigure.internal.properties.OtelSpringProperties.Instrumentation.Http;
-
 import org.springframework.http.HttpMethod;
 
 import java.util.List;
