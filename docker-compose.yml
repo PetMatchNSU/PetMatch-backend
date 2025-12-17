@@ -161,7 +161,7 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: false
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: false
       MINIO_ENDPOINT: http://petmatch-minio:9000
-      MINIO_ACCESS_KEY: miniosecret
+      MINIO_ACCESS_KEY: admin
       MINIO_SECRET_KEY: miniosecret
       MINIO_BUCKET_NAME: petmatch-uploads
     depends_on:
