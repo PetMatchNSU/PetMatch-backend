@@ -32,8 +32,6 @@ public class LoginService {
             throw new PersonNotFoundException(INVALID_CREDENTIALS_MESSAGE);
         }
 
-        if (!personDetails.getIsVerifiedEmail()) throw new PersonHasNotVerifiedEmailException("Email is not verified");
-
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(personDetails.getUsername(), dto.getPassword());
 
