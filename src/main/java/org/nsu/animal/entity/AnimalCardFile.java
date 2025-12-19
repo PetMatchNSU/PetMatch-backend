@@ -37,6 +37,6 @@ public class AnimalCardFile {
     private File file;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_type", nullable = false)
+    @JoinColumn(name = "id_type")
     private AnimalCardFileType fileType;
 }
