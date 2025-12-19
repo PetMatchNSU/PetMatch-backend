@@ -21,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import org.springframework.http.HttpMethod;
 
 import java.util.List;
@@ -47,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/login").permitAll()
                         .requestMatchers("/api/v1/user/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/city", "/api/v1/city/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/animals/list").permitAll()
                         .requestMatchers("/api/v1/user/register").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
