@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.dto.requests.LoginRequest;
 import org.nsu.authorization.core.dto.responses.positive.LoginResponse;
-import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.springframework.security.authentication.AuthenticationManager;
