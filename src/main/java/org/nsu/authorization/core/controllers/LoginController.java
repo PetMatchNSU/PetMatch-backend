@@ -38,14 +38,6 @@ public class LoginController {
                     )
             ),
             @ApiResponse(
-                    responseCode = "403",
-                    description = "Email не подтвержден",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = PersonErrorResponse.class)
-                    )
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "Неверный email или пароль",
                     content = @Content(

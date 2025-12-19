@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.nsu.authorization.core.dto.requests.LoginRequest;
 import org.nsu.authorization.core.dto.responses.positive.LoginResponse;
-import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,8 +30,6 @@ public class LoginService {
         } catch (PersonNotFoundException | UsernameNotFoundException e) {
             throw new PersonNotFoundException(INVALID_CREDENTIALS_MESSAGE);
         }
-
-        if (!personDetails.getIsVerifiedEmail()) throw new PersonHasNotVerifiedEmailException("Email is not verified");
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(personDetails.getUsername(), dto.getPassword());

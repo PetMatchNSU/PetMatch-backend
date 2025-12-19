@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nsu.common.dto.responses.ApiErrorResponse;
 import org.nsu.authorization.core.exceptions.authorization.JWTIsExpiredException;
-import org.nsu.authorization.core.exceptions.authorization.PersonHasNotVerifiedEmailException;
 import org.nsu.authorization.core.exceptions.authorization.PersonNotFoundException;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.Ordered;
@@ -33,11 +32,6 @@ public class AuthorizationExceptionHandler {
     private ResponseEntity<ApiErrorResponse> createErrorResponse(HttpStatus httpStatus, String message) {
         ApiErrorResponse errorResponse = ApiErrorResponse.create(message, tracer);
         return ResponseEntity.status(httpStatus).body(errorResponse);
-    }
-
-    @ExceptionHandler(PersonHasNotVerifiedEmailException.class)
-    public ResponseEntity<ApiErrorResponse> handlePersonHasNotVerifiedEmailException(PersonHasNotVerifiedEmailException e) {
-        return createErrorResponse(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
     @ExceptionHandler(PersonNotFoundException.class)
