@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
 import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
 import org.nsu.animal.dto.responses.AnimalCardResponse;
+import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
 import org.nsu.animal.dto.responses.negative.AnimalErrorResponse;
 import org.nsu.animal.service.AnimalCardService;
 import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
@@ -99,6 +100,39 @@ public class AnimalCardController {
     })
     public AnimalCardResponse getAnimalCard(@PathVariable Long animalId) {
         return animalCardService.getAnimalCard(animalId);
+    }
+
+    @GetMapping("/show/{animalId}/contacts")
+    @Operation(summary = "Получение контактов владельца питомца", 
+               description = "Отображение видимых контактов и временных интервалов владельца питомца")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Контактная информация владельца успешно получена",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AnimalOwnerContactsResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Пользователь не авторизован",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PersonErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Владелец питомца не найден",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AnimalErrorResponse.class)
+                    )
+            )
+    })
+    public AnimalOwnerContactsResponse getOwnerContacts(@PathVariable Long animalId) {
+        return animalCardService.getOwnerContacts(animalId);
     }
 
     @PutMapping("/update")

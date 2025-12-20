@@ -191,6 +191,55 @@ public class TestDataFactory {
         return contacts;
     }
 
+    public static List<BondTime> createTestBondTimes(User user) {
+        List<BondTime> bondTimes = new ArrayList<>();
+        
+        BondTime bondTime1 = new BondTime();
+        bondTime1.setId(1L);
+        bondTime1.setStartContactTime(LocalTime.of(10, 0));
+        bondTime1.setEndContactTime(LocalTime.of(12, 0));
+        bondTime1.setUser(user);
+        bondTimes.add(bondTime1);
+        
+        BondTime bondTime2 = new BondTime();
+        bondTime2.setId(2L);
+        bondTime2.setStartContactTime(LocalTime.of(16, 0));
+        bondTime2.setEndContactTime(LocalTime.of(18, 0));
+        bondTime2.setUser(user);
+        bondTimes.add(bondTime2);
+        
+        return bondTimes;
+    }
+
+    public static List<Contact> createTestContactsList(User user) {
+        List<Contact> contacts = new ArrayList<>();
+        
+        ContactType vkType = new ContactType();
+        vkType.setId(1L);
+        vkType.setName("VK");
+        
+        Contact visibleContact = new Contact();
+        visibleContact.setId(1L);
+        visibleContact.setLink("https://vk.com/t.test");
+        visibleContact.setIsVisible(true);
+        visibleContact.setType(vkType);
+        visibleContact.setUser(user);
+        contacts.add(visibleContact);
+        
+        ContactType phoneType = new ContactType();
+        phoneType.setId(2L);
+        phoneType.setName("PHONE");
+        
+        Contact hiddenContact = new Contact();
+        hiddenContact.setId(2L);
+        hiddenContact.setLink("+79001234567");
+        hiddenContact.setIsVisible(false);
+        hiddenContact.setType(phoneType);
+        hiddenContact.setUser(user);
+        contacts.add(hiddenContact);
+        
+        return contacts;
+    }
 
     public static Animal createTestAnimal() {
         Animal animal = new Animal();

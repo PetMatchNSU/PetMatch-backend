@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
 import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
 import org.nsu.animal.dto.responses.AnimalCardResponse;
+import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
 import org.nsu.animal.entity.Animal;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardFile;
@@ -17,6 +18,8 @@ import org.nsu.animal.repository.AnimalRepository;
 import org.nsu.animal.repository.PlacementGoalRepository;
 import org.nsu.authorization.core.security.PersonDetails;
 import org.nsu.users.core.repositories.UserRepository;
+import org.nsu.users.entity.BondTime;
+import org.nsu.users.entity.Contact;
 import org.nsu.users.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,8 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -216,6 +221,39 @@ public class AnimalCardService {
         if (request.getBirthday().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Дата рождения не может быть в будущем");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public AnimalOwnerContactsResponse getOwnerContacts(Long animalId) {
+        AnimalCard animalCard = animalCardRepository.findById(animalId)
+                .orElseThrow(() -> new IllegalArgumentException("Карточка животного не найдена"));
+
+        User owner = animalCard.getCardAuthor();
+        if (owner == null) {
+            throw new IllegalArgumentException("Владелец питомца не найден");
+        }
+
+        List<AnimalOwnerContactsResponse.BondTimeDto> bondTimeDtos = owner.getBondTimes().stream()
+                .sorted(Comparator.comparing(BondTime::getStartContactTime))
+                .map(bt -> new AnimalOwnerContactsResponse.BondTimeDto(
+                        bt.getStartContactTime(),
+                        bt.getEndContactTime()))
+                .collect(Collectors.toList());
+
+        List<AnimalOwnerContactsResponse.ContactInfoDto> contactDtos = owner.getContacts().stream()
+                .filter(Contact::getIsVisible)
+                .map(c -> new AnimalOwnerContactsResponse.ContactInfoDto(
+                        c.getType().getName(),
+                        c.getLink()))
+                .collect(Collectors.toList());
+
+        return new AnimalOwnerContactsResponse(
+                owner.getFirstName(),
+                owner.getSecondName(),
+                owner.getMiddleName(),
+                bondTimeDtos,
+                contactDtos
+        );
     }
 
 }
