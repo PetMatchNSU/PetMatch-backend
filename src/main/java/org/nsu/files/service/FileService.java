@@ -179,13 +179,10 @@ public class FileService {
             fileIds.add(savedFile.getId());
 
             AnimalCardFileType cardFileType = animalCardFileTypeRepository.findByName(descriptor.fileType().name().toLowerCase());
-            if (cardFileType == null) {
-                throw new RuntimeException("AnimalCardFileType not found: " + descriptor.fileType().name().toLowerCase());
-            }
             AnimalCardFile cardFile = new AnimalCardFile();
             cardFile.setAnimalCard(animalCard);
             cardFile.setFile(savedFile);
-            cardFile.setFileType(cardFileType);
+            cardFile.setFileType(cardFileType); // null
             animalCardFileRepository.save(cardFile);
         }
         return fileIds;
@@ -226,7 +223,7 @@ public class FileService {
     private String constructObjectName(AnimalCardFile acf) {
         Long userId = acf.getAnimalCard().getCardAuthor().getId();
         Long adId = acf.getAnimalCard().getId();
-        String typeFolder = acf.getFileType().getName().equals("photo") ? "photos" : "documents";
+        String typeFolder = acf.getFile().getType().getName().equals("photo") ? "photos" : "documents";
         String extension = FileUtils.getFileExtension(acf.getFile().getName());
         String uuid = acf.getFile().getLink();
         return String.format(UPLOAD_PATH_TEMPLATE, userId, adId, typeFolder, uuid, extension);
@@ -249,24 +246,26 @@ public class FileService {
 
         if (filter.isMain() != null) {
             animalCardFiles = animalCardFiles.stream()
-                .filter(acf -> (acf.getFileType().getName().equals("photo")) == filter.isMain())
+                .filter(acf -> (acf.getFile().getType().getName().equals("photo")) == filter.isMain())
                 .collect(Collectors.toList());
         }
         if (filter.fileTypes() != null && !filter.fileTypes().isEmpty()) {
             animalCardFiles = animalCardFiles.stream()
-                .filter(acf -> filter.fileTypes().contains(acf.getFileType().getName().toLowerCase()))
+                .filter(acf -> filter.fileTypes().contains(acf.getFile().getType().getName().toLowerCase()))
                 .collect(Collectors.toList());
         }
 
         List<GetFileDescriptor> descriptors = animalCardFiles.stream().map(acf -> {
+            String fileTypeName = acf.getFile().getType().getName().toLowerCase();
+            boolean isPhoto = acf.getFile().getType().getName().equals("photo");
             try {
                 String objectName = constructObjectName(acf);
                 InputStream inputStream = storageService.get(null, objectName);
                 String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
                 return new GetFileDescriptor(
                     acf.getFile().getId().toString(),
-                    acf.getFileType().getName().toLowerCase(),
-                    acf.getFileType().getName().equals("photo"),
+                    fileTypeName,
+                    isPhoto,
                     acf.getFile().getName(),
                     acf.getAnimalCard().getId().toString(),
                     content
@@ -274,8 +273,8 @@ public class FileService {
             } catch (Exception e) {
                 return new GetFileDescriptor(
                     acf.getFile().getId().toString(),
-                    acf.getFileType().getName().toLowerCase(),
-                    acf.getFileType().getName().equals("photo"),
+                    fileTypeName,
+                    isPhoto,
                     acf.getFile().getName(),
                     acf.getAnimalCard().getId().toString(),
                     null
