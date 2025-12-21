@@ -28,6 +28,7 @@ public abstract class AnimalCardMapper {
     @Mapping(target = "species", source = "animalCard.animal", qualifiedByName = "mapSpecies")
     @Mapping(target = "goal", source = "animalCard.goal.goal")
     @Mapping(target = "gender", expression = "java(org.nsu.animal.dto.enums.Gender.valueOf(animalCard.getGender().name()))")
+    @Mapping(target = "birthday", source = "animalCard.birthdate")
     @Mapping(target = "reviewStatus", source = "animalCard.status.name")
     @Mapping(target = "photos", ignore = true)
     @Mapping(target = "documents", ignore = true)
