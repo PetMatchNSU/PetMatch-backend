@@ -3,7 +3,7 @@ package org.nsu.admin.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.commons.collections4.CollectionUtils;
+
 import org.nsu.admin.dto.*;
 import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.mappers.AdminCardMapper;
@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -55,19 +56,13 @@ public class AdminCardService extends AdminServiceBase {
         List<AdminCardDto> cardDtos;
         AdminCardListResponse response;
 
-        // Set defaults if pagination is null
-        if (request.getPagination() != null) {
-            offset = Optional.ofNullable(request.getPagination().getOffset()).orElse(DEFAULT_OFFSET);
-            limit = Optional.ofNullable(request.getPagination().getLimit()).orElse(DEFAULT_LIMIT);
-        }
-
         // Prevent division by zero
         if (limit <= 0) {
             limit = DEFAULT_LIMIT;
         }
 
         pageable = PageRequest.of(
-            offset / limit,
+            offset,
             limit,
             Sort.by(Sort.Direction.ASC, AnimalCard.Fields.created)
         );
@@ -83,8 +78,8 @@ public class AdminCardService extends AdminServiceBase {
         } else {
             statuses = filters.getStatuses();
             goals = filters.getGoals();
-            createdAt = filters.getCreatedAt();
-            updatedAt = filters.getUpdatedAt();
+            createdAt = filters.getCreatedAt().atStartOfDay();
+            updatedAt = filters.getUpdatedAt().atStartOfDay();
 
             cardPage = animalCardRepository.findByFilters(statuses, goals, createdAt, updatedAt, pageable);
         }
@@ -93,7 +88,7 @@ public class AdminCardService extends AdminServiceBase {
             .map(this::convertToAdminCardDto)
             .collect(Collectors.toList());
 
-        response = new AdminCardListResponse(cardPage.getTotalElements(), cardDtos);
+        response = new AdminCardListResponse(((long)cardDtos.size()), cardDtos);
         return response;
     }
 

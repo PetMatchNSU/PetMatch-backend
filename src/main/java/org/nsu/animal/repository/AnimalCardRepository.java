@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -20,8 +21,8 @@ public interface AnimalCardRepository extends JpaRepository<AnimalCard, Long>, J
     @Query("SELECT ac FROM AnimalCard ac WHERE " +
             "(:statuses IS NULL OR ac.status.name IN :statuses) AND " +
             "(:goals IS NULL OR ac.goal.goal IN :goals) AND " +
-            "(:createdAt IS NULL OR ac.created >= :createdAt) AND " +
-            "(:updatedAt IS NULL OR ac.updated >= :updatedAt) ")
+            "ac.created >= COALESCE(:createdAt, ac.created) AND " +
+        	"ac.updated >= COALESCE(:updatedAt, ac.updated)")
     Page<AnimalCard> findByFilters(@Param("statuses") java.util.List<String> statuses,
             @Param("goals") java.util.List<String> goals,
             @Param("createdAt") LocalDateTime createdAt,

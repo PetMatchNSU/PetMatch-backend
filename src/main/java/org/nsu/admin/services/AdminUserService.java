@@ -64,7 +64,7 @@ public class AdminUserService extends AdminServiceBase {
         }
 
         pageable = PageRequest.of(
-            offset / limit,
+            offset,
             limit,
             Sort.by(Sort.Direction.DESC, User.Fields.id)
         );
@@ -97,7 +97,7 @@ public class AdminUserService extends AdminServiceBase {
             .map(this::convertToAdminUserDto)
             .collect(Collectors.toList());
 
-        response = new AdminUserListResponse(userPage.getTotalElements(), userDtos);
+        response = new AdminUserListResponse(((long)userDtos.size()), userDtos);
         return response;
     }
 

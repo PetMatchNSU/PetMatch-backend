@@ -29,7 +29,7 @@ public class AdminCardController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Cards list retrieved successfully")
     })
-    public AdminCardListResponse getCardsList(@Valid AdminCardListRequest request) {
+    public AdminCardListResponse getCardsList(@Valid @RequestBody AdminCardListRequest request) {
         return adminCardService.getCardsList(request);
     }
 
