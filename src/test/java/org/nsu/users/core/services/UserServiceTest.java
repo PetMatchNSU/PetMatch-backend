@@ -78,7 +78,7 @@ class UserServiceTest {
                 "M",
                 "Moscow Region",
                 "Moscow",
-                "ACTIVE",
+                "OK",
                 null,
                 List.of(new UserResponse.BondTimeDto(
                         OffsetDateTime.now().with(LocalTime.of(9, 0)),
