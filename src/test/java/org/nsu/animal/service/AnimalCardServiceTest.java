@@ -90,11 +90,14 @@ class AnimalCardServiceTest {
         PlacementGoal goal = TestDataFactory.createTestPlacementGoal();
         AnimalCardStatus status = TestDataFactory.createTestAnimalCardStatus();
 
+        AnimalCard savedAnimalCard = new AnimalCard();
+        savedAnimalCard.setId(1L);
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(animalRepository.findById(anyLong())).thenReturn(Optional.of(animal));
         when(placementGoalRepository.findByGoal(anyString())).thenReturn(Optional.of(goal));
         when(animalCardStatusRepository.findByName("ON_CHECKING")).thenReturn(Optional.of(status));
-        when(animalCardRepository.save(any(AnimalCard.class))).thenReturn(new AnimalCard());
+        when(animalCardRepository.save(any(AnimalCard.class))).thenReturn(savedAnimalCard);
 
         animalCardService.createAnimalCard(request);
 

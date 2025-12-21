@@ -5,6 +5,7 @@ import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
 import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
 import org.nsu.animal.dto.responses.AnimalCardResponse;
 import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
+import org.nsu.animal.dto.responses.CreateAnimalCardResponse;
 import org.nsu.animal.entity.Animal;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardFile;
@@ -45,7 +46,7 @@ public class AnimalCardService {
     private final AnimalCardMapper animalCardMapper;
     private final AnimalCardFileRepository animalCardFileRepository;
 
-    public void createAnimalCard(CreateAnimalCardRequest request) {
+    public CreateAnimalCardResponse createAnimalCard(CreateAnimalCardRequest request) {
         User currentUser = getCurrentUser();
         validateRequest(request);
         
@@ -55,7 +56,9 @@ public class AnimalCardService {
         
         AnimalCard animalCard = buildAnimalCard(request, currentUser, animal, goal, status);
         
-        saveAnimalCard(animalCard);
+        AnimalCard savedAnimalCard = saveAnimalCard(animalCard);
+        
+        return new CreateAnimalCardResponse(savedAnimalCard.getId());
     }
     
     private Animal getAnimalById(Long speciesId) {
@@ -105,8 +108,8 @@ public class AnimalCardService {
     }
     
     @Transactional
-    private void saveAnimalCard(AnimalCard animalCard) {
-        animalCardRepository.save(animalCard);
+    private AnimalCard saveAnimalCard(AnimalCard animalCard) {
+        return animalCardRepository.save(animalCard);
     }
     
     private User getCurrentUser() {

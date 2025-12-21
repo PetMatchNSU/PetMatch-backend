@@ -12,6 +12,7 @@ import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
 import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
 import org.nsu.animal.dto.responses.AnimalCardResponse;
 import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
+import org.nsu.animal.dto.responses.CreateAnimalCardResponse;
 import org.nsu.animal.service.AnimalCardService;
 import org.nsu.authorization.core.exceptions.handlers.GlobalExceptionHandler;
 import org.nsu.testutils.TestDataFactory;
@@ -66,12 +67,14 @@ class AnimalCardControllerIntegrationTest {
     void createAnimalCard_WithValidData_ShouldReturnOk() throws Exception {
         CreateAnimalCardRequest request = TestDataFactory.createValidAnimalCardRequest();
         
-        doNothing().when(animalCardService).createAnimalCard(any(CreateAnimalCardRequest.class));
+        CreateAnimalCardResponse expectedResponse = new CreateAnimalCardResponse(1L);
+        when(animalCardService.createAnimalCard(any(CreateAnimalCardRequest.class))).thenReturn(expectedResponse);
 
         mockMvc.perform(post("/api/v1/animals/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.animalId").value(1));
     }
 
     @Test
@@ -90,12 +93,14 @@ class AnimalCardControllerIntegrationTest {
     void createAnimalCard_WithoutBreed_ShouldReturnOk() throws Exception {
         CreateAnimalCardRequest request = TestDataFactory.createAnimalCardRequestWithoutBreed();
         
-        doNothing().when(animalCardService).createAnimalCard(any(CreateAnimalCardRequest.class));
+        CreateAnimalCardResponse expectedResponse = new CreateAnimalCardResponse(2L);
+        when(animalCardService.createAnimalCard(any(CreateAnimalCardRequest.class))).thenReturn(expectedResponse);
 
         mockMvc.perform(post("/api/v1/animals/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.animalId").value(2));
     }
 
     @Test
