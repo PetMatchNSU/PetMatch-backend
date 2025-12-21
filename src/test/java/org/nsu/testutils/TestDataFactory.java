@@ -319,7 +319,7 @@ public class TestDataFactory {
         CreateAnimalCardRequest request = new CreateAnimalCardRequest();
         request.setName("Мурка");
         request.setSpeciesId(1L);
-        request.setGoal("GIVE_AWAY");
+        request.setGoal("PAIRING");
         request.setGender(org.nsu.animal.dto.enums.Gender.F);
         request.setBirthday(LocalDate.of(2022, 3, 10));
         request.setColor("Рыжий");
