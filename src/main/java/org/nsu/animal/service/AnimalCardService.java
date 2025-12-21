@@ -56,9 +56,9 @@ public class AnimalCardService {
         
         AnimalCard animalCard = buildAnimalCard(request, currentUser, animal, goal, status);
         
-        saveAnimalCard(animalCard);
+        AnimalCard savedAnimalCard = saveAnimalCard(animalCard);
         
-        return new CreateAnimalCardResponse(animalCard.getId());
+        return new CreateAnimalCardResponse(savedAnimalCard.getId());
     }
     
     private Animal getAnimalById(Long speciesId) {
@@ -108,8 +108,8 @@ public class AnimalCardService {
     }
     
     @Transactional
-    private void saveAnimalCard(AnimalCard animalCard) {
-        animalCardRepository.save(animalCard);
+    private AnimalCard saveAnimalCard(AnimalCard animalCard) {
+        return animalCardRepository.save(animalCard);
     }
     
     private User getCurrentUser() {
