@@ -97,7 +97,7 @@ public class AdminUserService extends AdminServiceBase {
             .map(this::convertToAdminUserDto)
             .collect(Collectors.toList());
 
-        response = new AdminUserListResponse(((long)userDtos.size()), userDtos);
+        response = new AdminUserListResponse(userDtos.size(), userDtos);
         return response;
     }
 

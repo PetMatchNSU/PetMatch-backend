@@ -1,5 +1,6 @@
 package org.nsu.admin.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -17,8 +18,10 @@ public class AdminCardFilters {
     private List<String> goals;
 
     @Schema(description = "Filter by creation date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdAt;
 
     @Schema(description = "Filter by last update date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate updatedAt;
 }

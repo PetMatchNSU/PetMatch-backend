@@ -94,7 +94,7 @@ public class AdminCardService extends AdminServiceBase {
             .map(this::convertToAdminCardDto)
             .collect(Collectors.toList());
 
-        response = new AdminCardListResponse(((long)cardDtos.size()), cardDtos);
+        response = new AdminCardListResponse(cardDtos.size(), cardDtos);
         return response;
     }
 
