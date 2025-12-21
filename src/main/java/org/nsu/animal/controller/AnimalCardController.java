@@ -12,6 +12,7 @@ import org.nsu.animal.dto.requests.CreateAnimalCardRequest;
 import org.nsu.animal.dto.requests.UpdateAnimalCardRequest;
 import org.nsu.animal.dto.responses.AnimalCardResponse;
 import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
+import org.nsu.animal.dto.responses.CreateAnimalCardResponse;
 import org.nsu.animal.dto.responses.negative.AnimalErrorResponse;
 import org.nsu.animal.service.AnimalCardService;
 import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
@@ -38,7 +39,11 @@ public class AnimalCardController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Карточка животного успешно создана"
+                    description = "Карточка животного успешно создана",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CreateAnimalCardResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -65,8 +70,8 @@ public class AnimalCardController {
                     )
             )
     })
-    public void createAnimalCard(@Valid @RequestBody CreateAnimalCardRequest request) {
-        animalCardService.createAnimalCard(request);
+    public CreateAnimalCardResponse createAnimalCard(@Valid @RequestBody CreateAnimalCardRequest request) {
+        return animalCardService.createAnimalCard(request);
     }
 
     @GetMapping("/show/{animalId}")
