@@ -25,6 +25,7 @@ import org.nsu.animal.entity.AnimalCardFile;
 import org.nsu.animal.entity.AnimalCardFileType;
 import org.nsu.files.config.MinIOConfigProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
@@ -47,6 +48,7 @@ import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class FileService {
 
     private static final String UPLOAD_PATH_TEMPLATE = "uploads/users/%d/ads/%d/%s/%s.%s";
@@ -266,7 +268,8 @@ public class FileService {
             boolean isPhoto = acf.getFile().getType().getName().equals("photo");
             try {
                 String objectName = constructObjectName(acf);
-                InputStream inputStream = storageService.get(null, objectName);
+                log.info("file {}", objectName);
+                InputStream inputStream = storageService.get(minioProperties.bucketName(), objectName);
                 String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
                 return new GetFileDescriptor(
                     acf.getFile().getId().toString(),
@@ -277,6 +280,7 @@ public class FileService {
                     content
                 );
             } catch (Exception e) {
+                log.warn("Failed to retrieve content for file {} from storage: {}", acf.getFile().getId(), e.getMessage());
                 return new GetFileDescriptor(
                     acf.getFile().getId().toString(),
                     fileTypeName,
