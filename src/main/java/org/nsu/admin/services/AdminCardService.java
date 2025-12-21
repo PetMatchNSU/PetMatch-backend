@@ -56,6 +56,12 @@ public class AdminCardService extends AdminServiceBase {
         List<AdminCardDto> cardDtos;
         AdminCardListResponse response;
 
+        // Set defaults if pagination is null
+        if (request.getPagination() != null) {
+            offset = Optional.ofNullable(request.getPagination().getOffset()).orElse(DEFAULT_OFFSET);
+            limit = Optional.ofNullable(request.getPagination().getLimit()).orElse(DEFAULT_LIMIT);
+        }
+
         // Prevent division by zero
         if (limit <= 0) {
             limit = DEFAULT_LIMIT;

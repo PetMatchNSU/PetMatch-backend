@@ -12,4 +12,7 @@ import java.util.List;
 public class AdminCardListRequest {
     @Schema(description = "Filters for animal card list")
     private AdminCardFilters filters;
+
+    @Schema(description = "Pagination settings")
+    private AdminCardPagination pagination;
 }
