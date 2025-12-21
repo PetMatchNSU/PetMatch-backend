@@ -53,8 +53,8 @@ public class AnimalCard {
     @Column(name = "breed", length = 64)
     private String breed;
 
-    @Column(name = "has_breed", nullable = false)
-    private Boolean hasBreed;
+    @Column(name = "has_breed", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean hasBreed = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false, length = 1, columnDefinition = "VARCHAR(1)")
