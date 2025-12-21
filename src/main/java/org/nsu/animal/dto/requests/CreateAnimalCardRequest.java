@@ -35,8 +35,8 @@ public class CreateAnimalCardRequest {
     private Long speciesId;
 
     @NotNull(message = "Цель размещения обязательна для заполнения")
-    @Pattern(regexp = "^(SELL|BREEDING|GIVE_AWAY)$", message = "Цель размещения должна быть одной из: SELL, BREEDING, GIVE_AWAY")
-    @Schema(description = "Цель размещения объявления", example = "SELL", allowableValues = {"SELL", "BREEDING", "GIVE_AWAY"}, required = true)
+    @Pattern(regexp = "^(SELL|PAIRING|FREE)$", message = "Цель размещения должна быть одной из: SELL, PAIRING, FREE")
+    @Schema(description = "Цель размещения объявления", example = "SELL", allowableValues = {"SELL", "PAIRING", "FREE"}, required = true)
     private String goal;
 
     @DecimalMin(value = "0", message = "Стоимость не может быть отрицательной")
