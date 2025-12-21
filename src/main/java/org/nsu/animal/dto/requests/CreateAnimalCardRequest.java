@@ -44,6 +44,10 @@ public class CreateAnimalCardRequest {
     @Schema(description = "Стоимость продажи (обязательно если цель - продажа)", example = "15000")
     private BigDecimal cost;
 
+    @NotNull(message = "Признак породистого животного обязателен для заполнения")
+    @Schema(description = "Признак породистого животного", example = "true", requiredMode = RequiredMode.REQUIRED)
+    private Boolean hasBreed;
+
     @Length(min = 3, max = 64, message = "Порода должна содержать от 3 до 64 символов")
     @Pattern(regexp = "^[а-яА-ЯёЁa-zA-Z\\s\\-/]+$", message = "Порода может содержать только русские и английские буквы, пробелы, символы '-' и '/'")
     @Schema(description = "Название породы (если животное породистое)", example = "Британская короткошерстная", requiredMode = RequiredMode.NOT_REQUIRED)
