@@ -170,6 +170,7 @@ public class AdminCardControllerIT extends AbstractIntegrityTest {
         card.setCardAuthor(regularUser);
         card.setName("Test Card");
         card.setAnimal(savedAnimal);
+        card.setHasBreed(true);
         card.setBreed("Test Breed");
         card.setGender(AnimalGender.M);
         card.setBirthdate(LocalDate.now().minusYears(5));

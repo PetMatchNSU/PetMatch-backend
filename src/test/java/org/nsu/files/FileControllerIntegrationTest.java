@@ -150,6 +150,7 @@ public class FileControllerIntegrationTest  extends AbstractIntegrityTest {
         animalCard.setCardAuthor(user);
         animalCard.setAnimal(animal);
         animalCard.setName("Test Animal Card");
+        animalCard.setHasBreed(true);
         animalCard.setBreed("Test Breed");
         animalCard.setGender(AnimalGender.M);
         animalCard.setBirthdate(LocalDate.now().minusYears(2));
