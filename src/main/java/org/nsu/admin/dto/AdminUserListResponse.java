@@ -14,7 +14,7 @@ import java.util.List;
 public class AdminUserListResponse {
 
     @Schema(description = "Total number of records")
-    private Long total;
+    private Integer total;
 
     @Schema(description = "List of users")
     private List<AdminUserDto> users;

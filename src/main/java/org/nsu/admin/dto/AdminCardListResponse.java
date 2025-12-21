@@ -11,7 +11,7 @@ import java.util.List;
 @Schema(description = "Response containing animal cards list with pagination info")
 public class AdminCardListResponse {
     @Schema(description = "Total number of records")
-    private Long total;
+    private Integer total;
 
     @Schema(description = "List of animal cards")
     private List<AdminCardDto> cards;
