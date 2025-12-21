@@ -15,7 +15,6 @@ import org.nsu.animal.dto.responses.AnimalOwnerContactsResponse;
 import org.nsu.animal.dto.responses.negative.AnimalErrorResponse;
 import org.nsu.animal.service.AnimalCardService;
 import common.dto.responses.negative.jwtPerson.PersonErrorResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
