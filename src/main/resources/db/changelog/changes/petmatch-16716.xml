@@ -13,7 +13,7 @@
             </not>
         </preConditions>
         <addColumn tableName="t_animals_cards">
-            <column name="has_breed" type="BOOLEAN" remarks="Признак породистого животного">
+            <column name="has_breed" type="BOOLEAN" remarks="Признак породистого животного" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
