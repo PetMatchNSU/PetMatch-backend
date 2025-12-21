@@ -134,6 +134,20 @@ public class AnimalCardService {
         if (request.getBirthday().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Дата рождения не может быть в будущем");
         }
+        
+        validateBreedConsistency(request.getHasBreed(), request.getBreed());
+    }
+    
+    private void validateBreedConsistency(Boolean hasBreed, String breed) {
+        boolean breedProvided = breed != null && !breed.trim().isEmpty();
+        
+        if (Boolean.FALSE.equals(hasBreed) && breedProvided) {
+            throw new IllegalArgumentException("Порода не может быть указана, если hasBreed = false");
+        }
+        
+        if (Boolean.TRUE.equals(hasBreed) && !breedProvided) {
+            throw new IllegalArgumentException("Порода должна быть указана, если hasBreed = true");
+        }
     }
     
     private PlacementGoal findGoalByName(String goalName) {
@@ -224,6 +238,8 @@ public class AnimalCardService {
         if (request.getBirthday().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Дата рождения не может быть в будущем");
         }
+        
+        validateBreedConsistency(request.getHasBreed(), request.getBreed());
     }
 
     @Transactional(readOnly = true)

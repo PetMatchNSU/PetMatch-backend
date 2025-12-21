@@ -272,6 +272,7 @@ public class TestDataFactory {
         animalCard.setCardAuthor(user);
         animalCard.setName("Барсик");
         animalCard.setAnimal(animal);
+        animalCard.setHasBreed(true);
         animalCard.setBreed("Британская короткошерстная");
         animalCard.setGender(AnimalGender.M);
         animalCard.setBirthdate(LocalDate.of(2023, 5, 15));
@@ -293,6 +294,7 @@ public class TestDataFactory {
         request.setSpeciesId(1L);
         request.setGoal("SELL");
         request.setCost(new BigDecimal("15000"));
+        request.setHasBreed(true);
         request.setBreed("Британская короткошерстная");
         request.setGender(org.nsu.animal.dto.enums.Gender.M);
         request.setBirthday(LocalDate.of(2023, 5, 15));
@@ -308,6 +310,7 @@ public class TestDataFactory {
         request.setName(""); // Невалидное имя
         request.setSpeciesId(1L);
         request.setGoal("SELL");
+        request.setHasBreed(false);
         request.setGender(org.nsu.animal.dto.enums.Gender.M);
         request.setBirthday(LocalDate.of(2023, 5, 15));
         request.setColor("Серый");
@@ -319,7 +322,8 @@ public class TestDataFactory {
         CreateAnimalCardRequest request = new CreateAnimalCardRequest();
         request.setName("Мурка");
         request.setSpeciesId(1L);
-        request.setGoal("PAIRING");
+        request.setGoal("SELL");
+        request.setHasBreed(false);
         request.setGender(org.nsu.animal.dto.enums.Gender.F);
         request.setBirthday(LocalDate.of(2022, 3, 10));
         request.setColor("Рыжий");
@@ -333,6 +337,7 @@ public class TestDataFactory {
         request.setName("Барсик Обновленный");
         request.setSpeciesId(1L);
         request.setGoal("BREEDING");
+        request.setHasBreed(true);
         request.setBreed("Шотландская вислоухая");
         request.setGender(org.nsu.animal.dto.enums.Gender.M);
         request.setBirthday(LocalDate.of(2023, 8, 20));
@@ -348,6 +353,7 @@ public class TestDataFactory {
         request.setName("");
         request.setSpeciesId(1L);
         request.setGoal("SELL");
+        request.setHasBreed(false);
         request.setGender(org.nsu.animal.dto.enums.Gender.M);
         request.setBirthday(LocalDate.of(2023, 5, 15));
         request.setColor("Серый");

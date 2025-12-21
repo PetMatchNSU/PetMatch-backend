@@ -27,6 +27,7 @@ public abstract class AnimalCardMapper {
     @Mapping(target = "canEdit", source = "animalCard", qualifiedByName = "mapCanEdit")
     @Mapping(target = "species", source = "animalCard.animal", qualifiedByName = "mapSpecies")
     @Mapping(target = "goal", source = "animalCard.goal.goal")
+    @Mapping(target = "hasBreed", source = "animalCard.hasBreed")
     @Mapping(target = "gender", expression = "java(org.nsu.animal.dto.enums.Gender.valueOf(animalCard.getGender().name()))")
     @Mapping(target = "birthday", source = "animalCard.birthdate")
     @Mapping(target = "reviewStatus", source = "animalCard.status.name")
@@ -88,6 +89,7 @@ public abstract class AnimalCardMapper {
                 .orElse(null);
     }
 
+    @Mapping(target = "hasBreed", source = "hasBreed")
     @Mapping(target = "gender", source = "gender", qualifiedByName = "mapGenderToAnimalGender")
     @Mapping(target = "birthdate", source = "birthday")
     @Mapping(target = "id", ignore = true)
@@ -99,6 +101,7 @@ public abstract class AnimalCardMapper {
     @Mapping(target = "status", ignore = true)
     public abstract void updateAnimalCardFromRequest(CreateAnimalCardRequest request, @MappingTarget AnimalCard animalCard);
 
+    @Mapping(target = "hasBreed", source = "hasBreed")
     @Mapping(target = "gender", source = "gender", qualifiedByName = "mapGenderToAnimalGender")
     @Mapping(target = "birthdate", source = "birthday")
     @Mapping(target = "id", ignore = true)

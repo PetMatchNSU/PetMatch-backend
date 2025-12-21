@@ -40,6 +40,10 @@ public class AnimalCardResponse {
     @Schema(description = "Стоимость продажи", example = "15000")
     private BigDecimal cost;
 
+    @Nonnull
+    @Schema(description = "Признак породистого животного", example = "true")
+    private Boolean hasBreed;
+
     @Nullable
     @Schema(description = "Название породы", example = "Британская короткошерстная")
     private String breed;

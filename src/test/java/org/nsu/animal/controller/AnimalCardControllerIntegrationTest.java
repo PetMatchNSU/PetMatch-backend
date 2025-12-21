@@ -128,6 +128,7 @@ class AnimalCardControllerIntegrationTest {
                 speciesDto, // species
                 "SELL", // goal
                 BigDecimal.valueOf(1000), // cost
+                true,
                 "Test Breed", // breed
                 org.nsu.animal.dto.enums.Gender.M, // gender
                 LocalDate.now().minusYears(1), // birthday

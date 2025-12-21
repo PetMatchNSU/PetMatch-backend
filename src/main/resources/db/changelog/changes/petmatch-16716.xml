@@ -1,0 +1,34 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Add has_breed column to t_animals_cards -->
+    <changeSet id="1" author="bel9sh">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_animals_cards"/>
+            <not>
+                <columnExists tableName="t_animals_cards" columnName="has_breed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="t_animals_cards">
+            <column name="has_breed" type="BOOLEAN" remarks="Признак породистого животного">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Create index on has_breed column -->
+    <changeSet id="2" author="bel9sh">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="t_animals_cards_has_breed_idx" tableName="t_animals_cards"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="t_animals_cards_has_breed_idx" tableName="t_animals_cards">
+            <column name="has_breed"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
