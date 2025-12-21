@@ -86,12 +86,18 @@ public class FileService {
             } else {
                 try {
                     String mimeType = FileUtils.detectMimeType(file.getBytes());
-                    String extension = FileUtils.getFileExtensionFromMimeType(mimeType);
+                    String detectedExtension = FileUtils.getFileExtensionFromMimeType(mimeType);
                     List<String> allowedFormats = descriptor.fileType() == FileDescriptor.FileType.PHOTO ? validationProperties.photoFormats() : validationProperties.docFormats();
-                    if (!allowedFormats.contains(extension.toUpperCase())) {
+                    if (!allowedFormats.contains(detectedExtension.toUpperCase())) {
                         status = FileDescriptor.UploadingStatus.NOT_VALID;
                     } else {
-                        status = FileDescriptor.UploadingStatus.OK;
+                        // Check if descriptor filename extension matches detected extension
+                        String descriptorExtension = FileUtils.getFileExtension(descriptor.originalFilename());
+                        if (!descriptorExtension.isEmpty() && !detectedExtension.equalsIgnoreCase(descriptorExtension)) {
+                            status = FileDescriptor.UploadingStatus.NOT_VALID;
+                        } else {
+                            status = FileDescriptor.UploadingStatus.OK;
+                        }
                     }
                 } catch (Exception e) {
                     status = FileDescriptor.UploadingStatus.INTERNAL_ERROR;
