@@ -1,6 +1,5 @@
 package org.nsu.animal.mapper;
 
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -31,17 +30,11 @@ public abstract class AnimalCardMapper {
     @Mapping(target = "gender", expression = "java(org.nsu.animal.dto.enums.Gender.valueOf(animalCard.getGender().name()))")
     @Mapping(target = "birthday", source = "animalCard.birthdate")
     @Mapping(target = "reviewStatus", source = "animalCard.status.name")
-    @Mapping(target = "photos", ignore = true)
-    @Mapping(target = "documents", ignore = true)
+    @Mapping(target = "photos", expression = "java(mapPhotos(files != null ? files : new java.util.ArrayList<>()))")
+    @Mapping(target = "documents", expression = "java(mapDocuments(files != null ? files : new java.util.ArrayList<>()))")
     @Mapping(target = "createdAt", source = "animalCard.created")
     @Mapping(target = "updatedAt", source = "animalCard.updated")
     public abstract AnimalCardResponse toResponse(AnimalCard animalCard, @Context User currentUser, @Context List<AnimalCardFile> files);
-
-    @AfterMapping
-    protected void mapFilesData(@MappingTarget AnimalCardResponse response, AnimalCard animalCard, @Context List<AnimalCardFile> files) {
-        response.setPhotos(mapPhotos(files));
-        response.setDocuments(mapDocuments(files));
-    }
 
     @Named("mapCanEdit")
     protected Boolean mapCanEdit(AnimalCard animalCard, @Context User currentUser) {
@@ -53,24 +46,32 @@ public abstract class AnimalCardMapper {
         return new AnimalCardResponse.SpeciesDto(animal.getId(), animal.getName());
     }
 
-
-
     protected AnimalCardResponse.PhotosDto mapPhotos(List<AnimalCardFile> files) {
+        if (files == null) {
+            files = new ArrayList<>();
+        }
+        
         Long mainPhotoId = files.stream()
-                .filter(file -> PhotoType.MAIN_PHOTO.name().equals(file.getFileType().getName()))
+                .filter(file -> file != null && file.getFileType() != null && PhotoType.MAIN_PHOTO.name().equals(file.getFileType().getName()))
+                .filter(file -> file.getFile() != null)
                 .findFirst()
                 .map(file -> file.getFile().getId())
                 .orElse(null);
         
         List<Long> additionalIds = files.stream()
-                .filter(file -> PhotoType.ADDITIONAL_PHOTO.name().equals(file.getFileType().getName()))
+                .filter(file -> file != null && file.getFileType() != null && PhotoType.ADDITIONAL_PHOTO.name().equals(file.getFileType().getName()))
+                .filter(file -> file.getFile() != null)
                 .map(file -> file.getFile().getId())
                 .collect(Collectors.toList());
         
-        return new AnimalCardResponse.PhotosDto(mainPhotoId, additionalIds);
+        return new AnimalCardResponse.PhotosDto(mainPhotoId, additionalIds != null ? additionalIds : new ArrayList<>());
     }
 
     protected AnimalCardResponse.DocumentsDto mapDocuments(List<AnimalCardFile> files) {
+        if (files == null) {
+            files = new ArrayList<>();
+        }
+        
         Long vetPassportId = findFileIdByType(files, PhotoType.VET_PASSPORT);
         Long pedigreeId = findFileIdByType(files, PhotoType.PEDIGREE);
         Long vetCertificatesId = findFileIdByType(files, PhotoType.VET_CERTIFICATE);
@@ -82,8 +83,13 @@ public abstract class AnimalCardMapper {
     }
     
     private Long findFileIdByType(List<AnimalCardFile> files, PhotoType fileType) {
+        if (files == null) {
+            return null;
+        }
+        
         return files.stream()
-                .filter(file -> fileType.name().equals(file.getFileType().getName()))
+                .filter(file -> file != null && file.getFileType() != null && fileType.name().equals(file.getFileType().getName()))
+                .filter(file -> file.getFile() != null)
                 .findFirst()
                 .map(file -> file.getFile().getId())
                 .orElse(null);
