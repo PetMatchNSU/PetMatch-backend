@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Update user statuses -->
+    <changeSet id="1" author="undy11203">
+        <update tableName="t_statuses">
+            <column name="name" value="OK"/>
+            <where>name = 'ACTIVE'</where>
+        </update>
+    </changeSet>
+
+    <!-- Update users with PUBLISHED status to OK -->
+    <changeSet id="2" author="undy11203">
+        <update tableName="t_users">
+            <column name="id_status"> (SELECT id FROM t_statuses WHERE name = 'OK') </column>
+            <where>id_status = (SELECT id FROM t_statuses WHERE name = 'PUBLISHED')</where>
+        </update>
+    </changeSet>
+
+    <!-- Remove PUBLISHED from user statuses -->
+    <changeSet id="3" author="undy11203">
+        <delete tableName="t_statuses">
+            <where>name = 'PUBLISHED'</where>
+        </delete>
+    </changeSet>
+
+    <!-- Card statuses are already ON_CHECKING, PUBLISHED, BLOCKED -->
+
+</databaseChangeLog>

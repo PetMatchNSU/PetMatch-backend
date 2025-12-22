@@ -25,7 +25,7 @@ public class TestDataFactory {
     public static Status createTestStatus() {
         Status status = new Status();
         status.setId(1L);
-        status.setName("ACTIVE");
+        status.setName("OK");
         return status;
     }
 
