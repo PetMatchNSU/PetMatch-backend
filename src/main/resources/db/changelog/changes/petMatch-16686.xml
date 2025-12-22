@@ -15,9 +15,10 @@
 
     <!-- Update users with PUBLISHED status to OK -->
     <changeSet id="2" author="undy11203">
+        <!-- Исправленный синтаксис -->
         <update tableName="t_users">
-            <column name="id_status"> (SELECT id FROM t_statuses WHERE name = 'OK') </column>
-            <where>id_status = (SELECT id FROM t_statuses WHERE name = 'PUBLISHED')</where>
+            <column name="id_status" valueComputed="(SELECT id FROM t_statuses WHERE name = 'OK')"/>
+            <where>id_status IN (SELECT id FROM t_statuses WHERE name = 'PUBLISHED')</where>
         </update>
     </changeSet>
 
