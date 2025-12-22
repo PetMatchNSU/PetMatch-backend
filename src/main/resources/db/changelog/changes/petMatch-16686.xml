@@ -13,8 +13,16 @@
         </update>
     </changeSet>
 
-    <!-- Remove PUBLISHED from user statuses -->
+    <!-- Update users with PUBLISHED status to OK -->
     <changeSet id="2" author="undy11203">
+        <update tableName="t_users">
+            <column name="id_status"> (SELECT id FROM t_statuses WHERE name = 'OK') </column>
+            <where>id_status = (SELECT id FROM t_statuses WHERE name = 'PUBLISHED')</where>
+        </update>
+    </changeSet>
+
+    <!-- Remove PUBLISHED from user statuses -->
+    <changeSet id="3" author="undy11203">
         <delete tableName="t_statuses">
             <where>name = 'PUBLISHED'</where>
         </delete>
