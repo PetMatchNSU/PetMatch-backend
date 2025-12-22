@@ -336,7 +336,7 @@ public class TestDataFactory {
         UpdateAnimalCardRequest request = new UpdateAnimalCardRequest();
         request.setName("Барсик Обновленный");
         request.setSpeciesId(1L);
-        request.setGoal("BREEDING");
+        request.setGoal("SELL");
         request.setHasBreed(true);
         request.setBreed("Шотландская вислоухая");
         request.setGender(org.nsu.animal.dto.enums.Gender.M);
