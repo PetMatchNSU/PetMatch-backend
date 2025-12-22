@@ -19,7 +19,7 @@ public class FileUtils {
         }
         switch (mimeType) {
             case "image/jpeg":
-                return "JPEG";
+                return "JPG";
             case "image/png":
                 return "PNG";
             case "application/pdf":

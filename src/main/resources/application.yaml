@@ -2,6 +2,10 @@ server:
   port: 8091
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
     enabled: true
@@ -37,7 +41,7 @@ minio:
   secret-key: ${MINIO_SECRET_KEY}
   bucket-name: ${MINIO_BUCKET_NAME}
 file-validation:
-  photo-formats: [JPEG, PNG]
+  photo-formats: [JPG, PNG]
   doc-formats: [PDF]
   max-size-bytes: 5242880
 management:
