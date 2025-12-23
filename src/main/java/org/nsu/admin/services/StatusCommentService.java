@@ -32,7 +32,7 @@ public class StatusCommentService {
         return comments.stream()
                 .collect(Collectors.toMap(
                         sc -> sc.getAnimalCard().getId(),
-                        StatusComment::getComment,
+                        sc -> sc.getComment() != null ? sc.getComment() : "",
                         (first, second) -> first));
     }
 
