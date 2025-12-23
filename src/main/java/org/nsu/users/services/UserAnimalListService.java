@@ -1,6 +1,9 @@
 package org.nsu.users.services;
 
 import lombok.RequiredArgsConstructor;
+import org.nsu.admin.entity.StatusComment;
+import org.nsu.admin.services.StatusCommentService;
+import org.nsu.animal.dto.enums.PhotoType;
 import org.nsu.animal.entity.AnimalCard;
 import org.nsu.animal.entity.AnimalCardFile;
 import org.nsu.animal.repository.AnimalCardFileRepository;
@@ -17,10 +20,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserAnimalListService {
 
-    private static final String PHOTO_FILE_TYPE = "photo";
+    private static final String PHOTO_FILE_TYPE = PhotoType.MAIN_PHOTO.name();
 
     private final AnimalCardRepository animalCardRepository;
     private final AnimalCardFileRepository animalCardFileRepository;
+    private final StatusCommentService statusCommentService;
 
     public UserAnimalListResponse getUserAnimalList(Long userId) {
 
@@ -39,6 +43,14 @@ public class UserAnimalListService {
         Map<Long, List<AnimalCardFile>> filesMap = allFiles.stream()
                 .collect(Collectors.groupingBy(file -> file.getAnimalCard().getId()));
 
+        Map<Long, String> reviewComments = cards.stream()
+                .collect(Collectors.toMap(
+                        AnimalCard::getId,
+                        card -> statusCommentService.getLatestCommentByAnimalCard(card)
+                                .map(StatusComment::getComment)
+                                .orElse(null)
+                ));
+
         List<UserAnimalListResponse.Animal> animals = cards.stream().map(card -> {
             List<AnimalCardFile> files = filesMap.getOrDefault(card.getId(), Collections.emptyList());
 
@@ -53,6 +65,7 @@ public class UserAnimalListService {
             String speciesName = card.getAnimal() != null ? card.getAnimal().getName() : null;
             String goal = card.getGoal() != null ? card.getGoal().getGoal() : null;
             String reviewStatus = card.getStatus() != null ? card.getStatus().getName() : null;
+            String reviewComment = reviewComments.get(card.getId());
 
             return new UserAnimalListResponse.Animal(
                     card.getId(),
@@ -64,7 +77,7 @@ public class UserAnimalListService {
                     card.getBirthdate(),
                     mainPhotoId,
                     reviewStatus,
-                    null);
+                    reviewComment);
         }).collect(Collectors.toList());
 
         return new UserAnimalListResponse(animals);
