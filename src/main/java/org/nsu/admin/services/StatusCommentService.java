@@ -3,6 +3,7 @@ package org.nsu.admin.services;
 import lombok.RequiredArgsConstructor;
 import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.repositories.StatusCommentRepository;
+import org.nsu.animal.entity.AnimalCard;
 import org.nsu.users.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -16,5 +17,9 @@ public class StatusCommentService {
 
     public Optional<StatusComment> getLatestCommentByUser(User user) {
         return statusCommentRepository.findTopByUserOrderByDateDesc(user);
+    }
+
+    public Optional<StatusComment> getLatestCommentByAnimalCard(AnimalCard animalCard) {
+        return statusCommentRepository.findTopByAnimalCardOrderByDateDesc(animalCard);
     }
 }
