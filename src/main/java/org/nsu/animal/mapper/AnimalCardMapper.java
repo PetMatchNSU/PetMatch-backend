@@ -30,7 +30,7 @@ public abstract class AnimalCardMapper {
     @Mapping(target = "gender", expression = "java(org.nsu.animal.dto.enums.Gender.valueOf(animalCard.getGender().name()))")
     @Mapping(target = "birthday", source = "animalCard.birthdate")
     @Mapping(target = "reviewStatus", source = "animalCard.status.name")
-    @Mapping(target = "photos", expression = "java(mapPhotos(files != null ? files : new java.util.ArrayList<>()))")
+    @Mapping(target = "photos", expression = "java(mapPhotos(animalCard, files != null ? files : new java.util.ArrayList<>()))")
     @Mapping(target = "documents", expression = "java(mapDocuments(files != null ? files : new java.util.ArrayList<>()))")
     @Mapping(target = "createdAt", source = "animalCard.created")
     @Mapping(target = "updatedAt", source = "animalCard.updated")
@@ -46,24 +46,20 @@ public abstract class AnimalCardMapper {
         return new AnimalCardResponse.SpeciesDto(animal.getId(), animal.getName());
     }
 
-    protected AnimalCardResponse.PhotosDto mapPhotos(List<AnimalCardFile> files) {
+    protected AnimalCardResponse.PhotosDto mapPhotos(AnimalCard animalCard, List<AnimalCardFile> files) {
         if (files == null) {
             files = new ArrayList<>();
         }
-        
-        Long mainPhotoId = files.stream()
-                .filter(file -> file != null && file.getFileType() != null && PhotoType.MAIN_PHOTO.name().equals(file.getFileType().getName()))
-                .filter(file -> file.getFile() != null)
-                .findFirst()
-                .map(file -> file.getFile().getId())
-                .orElse(null);
-        
+
+        // Use mainPhotoId from the animal card entity
+        Long mainPhotoId = animalCard.getMainPhotoId();
+
         List<Long> additionalIds = files.stream()
                 .filter(file -> file != null && file.getFileType() != null && PhotoType.ADDITIONAL_PHOTO.name().equals(file.getFileType().getName()))
                 .filter(file -> file.getFile() != null)
                 .map(file -> file.getFile().getId())
                 .collect(Collectors.toList());
-        
+
         return new AnimalCardResponse.PhotosDto(mainPhotoId, additionalIds != null ? additionalIds : new ArrayList<>());
     }
 

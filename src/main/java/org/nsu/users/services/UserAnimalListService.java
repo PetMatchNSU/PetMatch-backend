@@ -47,13 +47,7 @@ public class UserAnimalListService {
         List<UserAnimalListResponse.Animal> animals = cards.stream().map(card -> {
             List<AnimalCardFile> files = filesMap.getOrDefault(card.getId(), Collections.emptyList());
 
-            Long mainPhotoId = files.stream()
-                    .filter(acf -> acf.getFileType() != null
-                            && PHOTO_FILE_TYPE.equalsIgnoreCase(acf.getFileType().getName())
-                            && acf.getFile() != null)
-                    .map(acf -> acf.getFile().getId())
-                    .findFirst()
-                    .orElse(null);
+            Long mainPhotoId = card.getMainPhotoId();
 
             String speciesName = card.getAnimal() != null ? card.getAnimal().getName() : null;
             String goal = card.getGoal() != null ? card.getGoal().getGoal() : null;
