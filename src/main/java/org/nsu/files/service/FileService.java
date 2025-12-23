@@ -192,6 +192,11 @@ public class FileService {
             cardFile.setFile(savedFile);
             cardFile.setFileType(cardFileType); // null
             animalCardFileRepository.save(cardFile);
+
+            if (descriptor.isMain() && descriptor.fileType() == FileDescriptor.FileType.PHOTO) {
+                animalCard.setMainPhotoId(savedFile.getId());
+                animalCardRepository.save(animalCard);
+            }
         }
         return fileIds;
     }
@@ -310,6 +315,11 @@ public class FileService {
                 String objectName = constructObjectName(acf);
                 storageService.delete(null, objectName);
                 animalCardFileRepository.delete(acf);
+                // Check if this file is the main photo
+                if (acf.getAnimalCard().getMainPhotoId() != null && acf.getAnimalCard().getMainPhotoId().equals(acf.getFile().getId())) {
+                    acf.getAnimalCard().setMainPhotoId(null);
+                    animalCardRepository.save(acf.getAnimalCard());
+                }
                 fileRepository.delete(acf.getFile());
                 return new DeleteDescriptor(acf.getFile().getId(), "deleted");
             } catch (Exception e) {

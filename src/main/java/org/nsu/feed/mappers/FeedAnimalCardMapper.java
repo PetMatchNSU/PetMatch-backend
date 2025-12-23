@@ -16,7 +16,7 @@ public interface FeedAnimalCardMapper {
     @Mapping(target = "birthday", source = "birthdate")
     @Mapping(target = "location", expression = "java(mapLocation(ac))")
     @Mapping(target = "createdAt", source = "created")
-    @Mapping(target = "mainPhotoId", ignore = true)
+    @Mapping(target = "mainPhotoId", source = "mainPhotoId")
     AnimalCardDto toDto(AnimalCard ac);
 
     default Location mapLocation(AnimalCard ac) {
