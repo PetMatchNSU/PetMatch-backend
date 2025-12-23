@@ -1,7 +1,6 @@
 package org.nsu.users.services;
 
 import lombok.RequiredArgsConstructor;
-import org.nsu.admin.entity.StatusComment;
 import org.nsu.admin.services.StatusCommentService;
 import org.nsu.animal.dto.enums.PhotoType;
 import org.nsu.animal.entity.AnimalCard;
@@ -43,13 +42,7 @@ public class UserAnimalListService {
         Map<Long, List<AnimalCardFile>> filesMap = allFiles.stream()
                 .collect(Collectors.groupingBy(file -> file.getAnimalCard().getId()));
 
-        Map<Long, String> reviewComments = cards.stream()
-                .collect(Collectors.toMap(
-                        AnimalCard::getId,
-                        card -> statusCommentService.getLatestCommentByAnimalCard(card)
-                                .map(StatusComment::getComment)
-                                .orElse(null)
-                ));
+        Map<Long, String> reviewComments = statusCommentService.getLatestCommentsByCardIds(cardIds);
 
         List<UserAnimalListResponse.Animal> animals = cards.stream().map(card -> {
             List<AnimalCardFile> files = filesMap.getOrDefault(card.getId(), Collections.emptyList());
