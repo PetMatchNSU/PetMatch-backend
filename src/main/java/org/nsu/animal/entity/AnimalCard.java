@@ -93,4 +93,7 @@ public class AnimalCard {
     @JoinColumn(name = "id_status")
     @ToString.Exclude
     private AnimalCardStatus status;
+
+    @Column(name = "main_photo_id")
+    private Long mainPhotoId;
 }
