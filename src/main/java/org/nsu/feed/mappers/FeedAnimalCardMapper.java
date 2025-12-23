@@ -15,7 +15,7 @@ public interface FeedAnimalCardMapper {
     @Mapping(target = "hasBreed", expression = "java(ac.getBreed() != null && !ac.getBreed().isBlank())")
     @Mapping(target = "birthday", source = "birthdate")
     @Mapping(target = "location", expression = "java(mapLocation(ac))")
-    @Mapping(target = "createdAt", expression = "java(ac.getCreated() != null ? ac.getCreated().toLocalDate() : null)")
+    @Mapping(target = "createdAt", source = "created")
     @Mapping(target = "mainPhotoId", ignore = true)
     AnimalCardDto toDto(AnimalCard ac);
 

@@ -2,6 +2,7 @@ package org.nsu.feed.dto.responses.animalList;
 
 import java.time.LocalDate;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -44,5 +45,5 @@ public class AnimalCardDto {
 
     @Schema(description = "дата и время создания карточки", example = "2023-11-15T12:00:00Z", format = "date-time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 }
