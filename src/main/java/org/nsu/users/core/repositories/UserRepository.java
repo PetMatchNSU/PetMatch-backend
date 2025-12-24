@@ -26,8 +26,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByEmailContainingIgnoreCase(String emailPattern, Pageable pageable);
 
     @Query("SELECT u FROM User u WHERE " +
-           "CASE WHEN :statuses IS NOT NULL THEN u.status.name IN :statuses ELSE TRUE END AND " +
-           "(:emailToken IS NULL OR u.email LIKE CONCAT('%', :emailToken, '%'))")
+        "(:statuses IS NULL OR u.status.name IN :statuses) AND " +
+        "(:emailToken IS NULL OR u.email LIKE CONCAT('%', CAST(:emailToken AS string), '%'))")
     Page<User> findByFilters(@Param("statuses") List<String> statuses,
                              @Param("emailToken") String emailToken,
                              Pageable pageable);
