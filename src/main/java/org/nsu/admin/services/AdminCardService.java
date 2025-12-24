@@ -82,10 +82,10 @@ public class AdminCardService extends AdminServiceBase {
             // No filters - get all cards
             cardPage = animalCardRepository.findAll(pageable);
         } else {
-            statuses = filters.getStatuses();
-            goals = filters.getGoals();
-            createdAt = filters.getCreatedAt().atStartOfDay();
-            updatedAt = filters.getUpdatedAt().atStartOfDay();
+            statuses = CollectionUtils.isEmpty(filters.getStatuses()) ? null : filters.getStatuses();
+            goals = CollectionUtils.isEmpty(filters.getGoals()) ? null : filters.getGoals();
+            createdAt = filters.getCreatedAt() != null ? filters.getCreatedAt().atStartOfDay() : null;
+            updatedAt = filters.getUpdatedAt() != null ? filters.getUpdatedAt().atStartOfDay() : null;
 
             cardPage = animalCardRepository.findByFilters(statuses, goals, createdAt, updatedAt, pageable);
         }
